@@ -110,12 +110,6 @@ public final class Constants {
         public static final int kMinTagCount = 1;
 
         /**
-         * Maximum average tag area (0-100% of image) threshold. Poses estimated
-         * from very small tags (far away) are less trustworthy.
-         */
-        public static final double kMaxTagAreaThreshold = 0.0;
-
-        /**
          * Standard deviations for single-tag vision measurements
          * (x meters, y meters, heading radians).
          */
