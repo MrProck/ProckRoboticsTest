@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,12 +24,15 @@ public class AutonomousDriveCommand extends Command {
 
     @Override
     public void execute() {
-        m_driveSubsystem.arcadeDrive(AutoConstants.kAutoDriveSpeed, 0);
+        // robot-relative (fieldRelative = false) — drive straight forward
+        m_driveSubsystem.drive(
+            AutoConstants.kAutoDriveSpeed * SwerveConstants.kMaxDriveSpeedMetersPerSecond,
+            0, 0, false);
     }
 
     @Override
     public void end(boolean interrupted) {
-        m_driveSubsystem.stopDrive();
+        m_driveSubsystem.stopModules();
         m_timer.stop();
     }
 
