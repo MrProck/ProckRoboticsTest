@@ -75,8 +75,10 @@ public final class Constants {
         public static final int     kRollerMotorID          = 15;
         public static final int     kRollerCurrentLimitAmps = 17;
         public static final boolean kRollerMotorInverted    = false;
-        public static final double kRollerForwardSpeed = 1.0;
-        public static final double kRollerReverseSpeed = -0.5;
+        public static final double kRollerForwardSpeed  = 1.0;
+        public static final double kRollerReverseSpeed  = -0.5;
+        // Right trigger activation threshold (0.0-1.0)
+        public static final double kTriggerThreshold    = 0.1;
         // AndyMark am-5636 CAN color sensors (RIO CAN bus)
         public static final int kEntrySensorID  = 16;
         public static final int kMiddleSensorID = 17;
