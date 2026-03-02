@@ -1,40 +1,46 @@
 package frc.robot.commands;
 
-import frc.robot.subsystems.DriveSubsystem;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.SwerveConstants;
+import frc.robot.subsystems.DriveSubsystem;
+
 import java.util.function.DoubleSupplier;
 
 public class TeleopDriveCommand extends Command {
 
     private final DriveSubsystem m_driveSubsystem;
-    private final DoubleSupplier m_forwardSupplier;
-    private final DoubleSupplier m_rotationSupplier;
+    private final DoubleSupplier m_xSpeed;
+    private final DoubleSupplier m_ySpeed;
+    private final DoubleSupplier m_rotation;
 
     public TeleopDriveCommand(
         DriveSubsystem driveSubsystem,
-        DoubleSupplier forwardSupplier,
-        DoubleSupplier rotationSupplier
+        DoubleSupplier xSpeed,
+        DoubleSupplier ySpeed,
+        DoubleSupplier rotation
     ) {
         m_driveSubsystem = driveSubsystem;
-        m_forwardSupplier = forwardSupplier;
-        m_rotationSupplier = rotationSupplier;
+        m_xSpeed   = xSpeed;
+        m_ySpeed   = ySpeed;
+        m_rotation = rotation;
         addRequirements(driveSubsystem);
     }
 
     @Override
-    public void initialize() {}
-
-    @Override
     public void execute() {
-        m_driveSubsystem.arcadeDrive(
-            m_forwardSupplier.getAsDouble(),
-            m_rotationSupplier.getAsDouble()
-        );
+        double xSpeedMPS = MathUtil.applyDeadband(m_xSpeed.getAsDouble(), SwerveConstants.kDeadband)
+            * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed;
+        double ySpeedMPS = MathUtil.applyDeadband(m_ySpeed.getAsDouble(), SwerveConstants.kDeadband)
+            * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed;
+        double rotRadPerSec = MathUtil.applyDeadband(m_rotation.getAsDouble(), SwerveConstants.kDeadband)
+            * SwerveConstants.kMaxAngularVelocityRadiansPerSecond * SwerveConstants.kTeleopMaxAngularSpeed;
+        m_driveSubsystem.drive(xSpeedMPS, ySpeedMPS, rotRadPerSec, true);
     }
 
     @Override
     public void end(boolean interrupted) {
-        m_driveSubsystem.stopDrive();
+        m_driveSubsystem.stopModules();
     }
 
     @Override
