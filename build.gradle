@@ -13,7 +13,7 @@ def ROBOT_MAIN_CLASS = "frc.robot.Main"
 deploy {
     targets {
         roborio(getTargetTypeClass('RoboRIO')) {
-            team = frc.getTeamOrDefault(9999)
+            team = frc.getTeamOrDefault(8825)
             debug = frc.getDebugOrDefault(false)
             artifacts {
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
