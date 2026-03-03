@@ -13,15 +13,18 @@ import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AutonomousDriveCommand;
 import frc.robot.commands.TeleopDriveCommand;
+import frc.robot.commands.ShootCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
 
-    private final DriveSubsystem  m_driveSubsystem  = new DriveSubsystem();
-    private final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
-    private final VisionSubsystem m_visionSubsystem = new VisionSubsystem(m_driveSubsystem);
+    private final DriveSubsystem   m_driveSubsystem   = new DriveSubsystem();
+    private final IntakeSubsystem  m_intakeSubsystem  = new IntakeSubsystem();
+    private final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
+    private final VisionSubsystem  m_visionSubsystem  = new VisionSubsystem(m_driveSubsystem);
 
     private final CommandXboxController m_driverController =
         new CommandXboxController(OIConstants.kDriverControllerPort);
@@ -110,6 +113,17 @@ public class RobotContainer {
         m_operatorController.back().onTrue(
             new InstantCommand(m_intakeSubsystem::clearLockout, m_intakeSubsystem)
         );
+
+        // Left Trigger (held) — run full shoot sequence (spin up, then feed when at speed)
+        m_operatorController.leftTrigger(IntakeConstants.kTriggerThreshold)
+            .whileTrue(new ShootCommand(m_shooterSubsystem));
+
+        // Left Bumper (held) — manual reverse all shooter stages to clear jams
+        m_operatorController.leftBumper()
+            .whileTrue(new RunCommand(() -> {
+                m_shooterSubsystem.reverseAll();
+            }, m_shooterSubsystem))
+            .onFalse(new InstantCommand(m_shooterSubsystem::stopAll, m_shooterSubsystem));
     }
 
     public Command getAutonomousCommand() {
