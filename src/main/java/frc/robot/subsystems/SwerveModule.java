@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -72,7 +73,7 @@ public class SwerveModule {
         CANcoderConfiguration config = new CANcoderConfiguration();
         config.MagnetSensor.MagnetOffset    = m_CANcoderOffset;
         config.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        m_CANcoder.getConfigurator().apply(config);
+        applyWithRetry(() -> m_CANcoder.getConfigurator().apply(config), 5);
     }
 
     private void configureDriveMotor(boolean inverted) {
@@ -99,7 +100,7 @@ public class SwerveModule {
         // Gear ratio so encoder reports in wheel rotations
         config.Feedback.SensorToMechanismRatio = SwerveConstants.kDriveGearRatio;
 
-        m_driveMotor.getConfigurator().apply(config);
+        applyWithRetry(() -> m_driveMotor.getConfigurator().apply(config), 5);
     }
 
     private void configureSteerMotor(boolean inverted) {
@@ -132,7 +133,7 @@ public class SwerveModule {
         // Continuous wrap — always take shortest path to target angle
         config.ClosedLoopGeneral.ContinuousWrap = true;
 
-        m_steerMotor.getConfigurator().apply(config);
+        applyWithRetry(() -> m_steerMotor.getConfigurator().apply(config), 5);
     }
 
     // -------------------------------------------------------------------------
@@ -167,6 +168,12 @@ public class SwerveModule {
      * @param desiredState The desired SwerveModuleState
      */
     public void setDesiredState(SwerveModuleState desiredState) {
+        // Suppress small movements to prevent wheel jittering when stationary
+        if (Math.abs(desiredState.speedMetersPerSecond) < 0.01) {
+            m_driveMotor.stopMotor();
+            return;
+        }
+
         SwerveModuleState optimized = SwerveModuleState.optimize(
             desiredState,
             Rotation2d.fromRotations(m_CANcoder.getAbsolutePosition().getValueAsDouble())
@@ -186,5 +193,23 @@ public class SwerveModule {
     public void stop() {
         m_driveMotor.stopMotor();
         m_steerMotor.stopMotor();
+    }
+
+    /**
+     * Applies a device configuration with retry logic.
+     * Retries up to {@code maxRetries} times if the apply does not return OK.
+     */
+    private static StatusCode applyWithRetry(
+            java.util.function.Supplier<StatusCode> applyCall, int maxRetries) {
+        StatusCode status = StatusCode.StatusCodeNotInitialized;
+        for (int i = 0; i < maxRetries; i++) {
+            status = applyCall.get();
+            if (status == StatusCode.OK) {
+                return status;
+            }
+            System.err.println("[SwerveModule] Config apply failed (attempt " + (i + 1) + "): " + status);
+        }
+        System.err.println("[SwerveModule] Config apply failed after " + maxRetries + " attempts: " + status);
+        return status;
     }
 }

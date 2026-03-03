@@ -106,6 +106,12 @@ public class IntakeSubsystem extends SubsystemBase {
             IntakeConstants.kExtensionRetractedPosition, ControlType.kPosition);
     }
 
+    /** Holds the extension arm at its current position. */
+    public void holdPosition() {
+        m_extensionPID.setReference(
+            m_extensionMotor.getEncoder().getPosition(), ControlType.kPosition);
+    }
+
     /** Returns the current extension position in rotations. */
     public double getExtensionPosition() {
         return m_extensionMotor.getEncoder().getPosition();
