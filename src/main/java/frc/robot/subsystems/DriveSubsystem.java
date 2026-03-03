@@ -17,6 +17,10 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -55,10 +59,44 @@ public class DriveSubsystem extends SubsystemBase {
 
     private final Field2d m_field = new Field2d();
 
+    // Data log entries for telemetry
+    private final DoubleLogEntry m_logGyroHeading;
+    private final DoubleLogEntry m_logRobotX;
+    private final DoubleLogEntry m_logRobotY;
+    private final DoubleLogEntry m_logFLSpeed;
+    private final DoubleLogEntry m_logFLAngle;
+    private final DoubleLogEntry m_logFRSpeed;
+    private final DoubleLogEntry m_logFRAngle;
+    private final DoubleLogEntry m_logBLSpeed;
+    private final DoubleLogEntry m_logBLAngle;
+    private final DoubleLogEntry m_logBRSpeed;
+    private final DoubleLogEntry m_logBRAngle;
+    private final DoubleLogEntry m_logChassisVx;
+    private final DoubleLogEntry m_logChassisVy;
+    private final DoubleLogEntry m_logChassisOmega;
+    private final DoubleArrayLogEntry m_logSwerveModuleStates;
+
     public DriveSubsystem() {
         SmartDashboard.putData("Field", m_field);
         zeroHeading();
         configureAutoBuilder();
+
+        DataLog log = DataLogManager.getLog();
+        m_logGyroHeading         = new DoubleLogEntry(log, "/drive/gyroHeading");
+        m_logRobotX              = new DoubleLogEntry(log, "/drive/robotX");
+        m_logRobotY              = new DoubleLogEntry(log, "/drive/robotY");
+        m_logFLSpeed             = new DoubleLogEntry(log, "/drive/flSpeed");
+        m_logFLAngle             = new DoubleLogEntry(log, "/drive/flAngle");
+        m_logFRSpeed             = new DoubleLogEntry(log, "/drive/frSpeed");
+        m_logFRAngle             = new DoubleLogEntry(log, "/drive/frAngle");
+        m_logBLSpeed             = new DoubleLogEntry(log, "/drive/blSpeed");
+        m_logBLAngle             = new DoubleLogEntry(log, "/drive/blAngle");
+        m_logBRSpeed             = new DoubleLogEntry(log, "/drive/brSpeed");
+        m_logBRAngle             = new DoubleLogEntry(log, "/drive/brAngle");
+        m_logChassisVx           = new DoubleLogEntry(log, "/drive/chassisVx");
+        m_logChassisVy           = new DoubleLogEntry(log, "/drive/chassisVy");
+        m_logChassisOmega        = new DoubleLogEntry(log, "/drive/chassisOmega");
+        m_logSwerveModuleStates  = new DoubleArrayLogEntry(log, "/drive/swerveModuleStates");
     }
 
     private void configureAutoBuilder() {
@@ -202,26 +240,26 @@ public class DriveSubsystem extends SubsystemBase {
     public void periodic() {
         m_poseEstimator.update(getHeading(), getModulePositions());
         m_field.setRobotPose(getPose());
-        SmartDashboard.putNumber("Gyro Heading (deg)", getHeading().getDegrees());
-        SmartDashboard.putNumber("Robot X (m)", getPose().getX());
-        SmartDashboard.putNumber("Robot Y (m)", getPose().getY());
+        m_logGyroHeading.append(getHeading().getDegrees());
+        m_logRobotX.append(getPose().getX());
+        m_logRobotY.append(getPose().getY());
 
         SwerveModuleState[] states = getModuleStates();
-        SmartDashboard.putNumber("FL Speed (m/s)", states[0].speedMetersPerSecond);
-        SmartDashboard.putNumber("FL Angle (deg)", states[0].angle.getDegrees());
-        SmartDashboard.putNumber("FR Speed (m/s)", states[1].speedMetersPerSecond);
-        SmartDashboard.putNumber("FR Angle (deg)", states[1].angle.getDegrees());
-        SmartDashboard.putNumber("BL Speed (m/s)", states[2].speedMetersPerSecond);
-        SmartDashboard.putNumber("BL Angle (deg)", states[2].angle.getDegrees());
-        SmartDashboard.putNumber("BR Speed (m/s)", states[3].speedMetersPerSecond);
-        SmartDashboard.putNumber("BR Angle (deg)", states[3].angle.getDegrees());
+        m_logFLSpeed.append(states[0].speedMetersPerSecond);
+        m_logFLAngle.append(states[0].angle.getDegrees());
+        m_logFRSpeed.append(states[1].speedMetersPerSecond);
+        m_logFRAngle.append(states[1].angle.getDegrees());
+        m_logBLSpeed.append(states[2].speedMetersPerSecond);
+        m_logBLAngle.append(states[2].angle.getDegrees());
+        m_logBRSpeed.append(states[3].speedMetersPerSecond);
+        m_logBRAngle.append(states[3].angle.getDegrees());
 
         ChassisSpeeds speeds = SwerveConstants.kSwerveKinematics.toChassisSpeeds(states);
-        SmartDashboard.putNumber("ChassisSpeeds vx (m/s)", speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("ChassisSpeeds vy (m/s)", speeds.vyMetersPerSecond);
-        SmartDashboard.putNumber("ChassisSpeeds omega (rad/s)", speeds.omegaRadiansPerSecond);
+        m_logChassisVx.append(speeds.vxMetersPerSecond);
+        m_logChassisVy.append(speeds.vyMetersPerSecond);
+        m_logChassisOmega.append(speeds.omegaRadiansPerSecond);
 
-        SmartDashboard.putNumberArray("SwerveModuleStates", new double[] {
+        m_logSwerveModuleStates.append(new double[] {
             states[0].speedMetersPerSecond, states[0].angle.getDegrees(),
             states[1].speedMetersPerSecond, states[1].angle.getDegrees(),
             states[2].speedMetersPerSecond, states[2].angle.getDegrees(),

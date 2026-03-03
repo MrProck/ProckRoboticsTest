@@ -9,7 +9,10 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.ShooterConstants;
@@ -36,6 +39,14 @@ public class ShooterSubsystem extends SubsystemBase {
     private final SparkPIDController m_preShooterPID;
     private final SparkPIDController m_shooterPrimaryPID;
     private final SparkPIDController m_shooterSecondaryPID;
+
+    // Data log entries for telemetry
+    private final DoubleLogEntry m_logAgitatorRPM;
+    private final DoubleLogEntry m_logKickerRPM;
+    private final DoubleLogEntry m_logPreShooterRPM;
+    private final DoubleLogEntry m_logShooterPrimaryRPM;
+    private final DoubleLogEntry m_logShooterSecondaryRPM;
+    private final BooleanLogEntry m_logAtSpeed;
 
     public ShooterSubsystem() {
         // --- Agitator Motor (NEO + SparkMax) ---
@@ -97,6 +108,14 @@ public class ShooterSubsystem extends SubsystemBase {
         checkREV("ShooterSecondary PID D", m_shooterSecondaryPID.setD(ShooterConstants.kShooterD));
         checkREV("ShooterSecondary PID FF", m_shooterSecondaryPID.setFF(ShooterConstants.kShooterFF));
         burnFlashWithDelay(m_shooterSecondaryMotor, "ShooterSecondary burnFlash");
+
+        DataLog log = DataLogManager.getLog();
+        m_logAgitatorRPM          = new DoubleLogEntry(log, "/shooter/agitatorRPM");
+        m_logKickerRPM            = new DoubleLogEntry(log, "/shooter/kickerRPM");
+        m_logPreShooterRPM        = new DoubleLogEntry(log, "/shooter/preShooterRPM");
+        m_logShooterPrimaryRPM    = new DoubleLogEntry(log, "/shooter/shooterPrimaryRPM");
+        m_logShooterSecondaryRPM  = new DoubleLogEntry(log, "/shooter/shooterSecondaryRPM");
+        m_logAtSpeed              = new BooleanLogEntry(log, "/shooter/atSpeed");
     }
 
     /**
@@ -226,11 +245,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Shooter/Agitator RPM",          m_agitatorMotor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Shooter/Kicker RPM",            m_kickerMotor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Shooter/PreShooter RPM",        m_preShooterMotor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Shooter/Shooter Primary RPM",   m_shooterPrimaryMotor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Shooter/Shooter Secondary RPM", m_shooterSecondaryMotor.getEncoder().getVelocity());
-        SmartDashboard.putBoolean("Shooter/AtSpeed",              isShooterAtSpeed());
+        m_logAgitatorRPM.append(m_agitatorMotor.getEncoder().getVelocity());
+        m_logKickerRPM.append(m_kickerMotor.getEncoder().getVelocity());
+        m_logPreShooterRPM.append(m_preShooterMotor.getEncoder().getVelocity());
+        m_logShooterPrimaryRPM.append(m_shooterPrimaryMotor.getEncoder().getVelocity());
+        m_logShooterSecondaryRPM.append(m_shooterSecondaryMotor.getEncoder().getVelocity());
+        m_logAtSpeed.append(isShooterAtSpeed());
     }
 }

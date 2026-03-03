@@ -11,7 +11,11 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.IntakeConstants;
@@ -41,6 +45,13 @@ public class IntakeSubsystem extends SubsystemBase {
     // Lockout state — true if a wrong-color game piece was detected
     private boolean m_intakeLocked = false;
 
+    // Data log entries for telemetry
+    private final StringLogEntry m_logSensorEntry;
+    private final StringLogEntry m_logSensorMiddle;
+    private final StringLogEntry m_logSensorExit;
+    private final BooleanLogEntry m_logIntakeLocked;
+    private final DoubleLogEntry m_logExtensionPos;
+
     public IntakeSubsystem() {
         // --- Extension Motor (SparkMax) ---
         checkREV("Extension restoreFactoryDefaults", m_extensionMotor.restoreFactoryDefaults());
@@ -69,6 +80,13 @@ public class IntakeSubsystem extends SubsystemBase {
         checkREV("Roller setSmartCurrentLimit", m_rollerMotor.setSmartCurrentLimit(IntakeConstants.kRollerCurrentLimitAmps));
         m_rollerMotor.setInverted(IntakeConstants.kRollerMotorInverted);
         burnFlashWithDelay(m_rollerMotor, "Roller burnFlash");
+
+        DataLog log = DataLogManager.getLog();
+        m_logSensorEntry   = new StringLogEntry(log, "/intake/sensorEntry");
+        m_logSensorMiddle  = new StringLogEntry(log, "/intake/sensorMiddle");
+        m_logSensorExit    = new StringLogEntry(log, "/intake/sensorExit");
+        m_logIntakeLocked  = new BooleanLogEntry(log, "/intake/intakeLocked");
+        m_logExtensionPos  = new DoubleLogEntry(log, "/intake/extensionPos");
     }
 
     /**
@@ -191,10 +209,10 @@ public class IntakeSubsystem extends SubsystemBase {
         }
 
         // SmartDashboard telemetry
-        SmartDashboard.putString("Sensor Entry",  m_sensorEntry.classifyColor());
-        SmartDashboard.putString("Sensor Middle", m_sensorMiddle.classifyColor());
-        SmartDashboard.putString("Sensor Exit",   m_sensorExit.classifyColor());
-        SmartDashboard.putBoolean("Intake Locked",  m_intakeLocked);
-        SmartDashboard.putNumber("Extension Pos",   getExtensionPosition());
+        m_logSensorEntry.append(m_sensorEntry.classifyColor());
+        m_logSensorMiddle.append(m_sensorMiddle.classifyColor());
+        m_logSensorExit.append(m_sensorExit.classifyColor());
+        m_logIntakeLocked.append(m_intakeLocked);
+        m_logExtensionPos.append(getExtensionPosition());
     }
 }

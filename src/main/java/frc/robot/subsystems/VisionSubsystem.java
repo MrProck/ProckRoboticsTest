@@ -4,7 +4,10 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.LimelightHelpers;
@@ -27,6 +30,10 @@ public class VisionSubsystem extends SubsystemBase {
     private boolean m_hasTarget = false;
     private int m_tagCount = 0;
 
+    // Data log entries for telemetry
+    private final BooleanLogEntry m_logHasTarget;
+    private final DoubleLogEntry m_logTagCount;
+
     /**
      * Creates a new VisionSubsystem.
      *
@@ -40,6 +47,10 @@ public class VisionSubsystem extends SubsystemBase {
 
         // Configure the Limelight pipeline for AprilTag detection
         LimelightHelpers.setPipelineIndex(m_limelightName, 0);
+
+        DataLog log = DataLogManager.getLog();
+        m_logHasTarget = new BooleanLogEntry(log, "/vision/hasTarget");
+        m_logTagCount  = new DoubleLogEntry(log, "/vision/tagCount");
     }
 
     /** Returns true if the Limelight currently sees at least one AprilTag. */
@@ -126,7 +137,7 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     private void publishTelemetry() {
-        SmartDashboard.putBoolean("Vision/HasTarget", m_hasTarget);
-        SmartDashboard.putNumber("Vision/TagCount", m_tagCount);
+        m_logHasTarget.append(m_hasTarget);
+        m_logTagCount.append(m_tagCount);
     }
 }
