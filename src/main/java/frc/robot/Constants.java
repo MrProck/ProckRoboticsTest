@@ -85,6 +85,36 @@ public final class Constants {
         public static final int kExitSensorID   = 18;
     }
 
+    public static final class ShooterConstants {
+        // CAN IDs (RIO CAN bus)
+        public static final int kAgitatorMotorID    = 19;
+        public static final int kKickerMotorID      = 20;
+        public static final int kPreShooterMotorID  = 21;
+        public static final int kShooterMotorID     = 22;
+
+        // Current limits (amps)
+        public static final int kAgitatorCurrentLimitAmps   = 25;
+        public static final int kKickerCurrentLimitAmps     = 25;
+        public static final int kPreShooterCurrentLimitAmps = 40;
+        public static final int kShooterCurrentLimitAmps    = 40;
+
+        // Motor inversion
+        public static final boolean kAgitatorInverted   = false;
+        public static final boolean kKickerInverted     = false;
+        public static final boolean kPreShooterInverted = false;
+        public static final boolean kShooterInverted    = false;
+
+        // Speeds (duty cycle -1.0 to 1.0)
+        public static final double kAgitatorSpeed   = 0.5;
+        public static final double kKickerSpeed     = 0.7;
+        public static final double kPreShooterSpeed = 0.85;
+        public static final double kShooterSpeed    = 1.0;
+
+        // Shooter flywheel speed detection
+        public static final double kShooterTargetRPM         = 4500.0;
+        public static final double kShooterSpeedToleranceRPM = 200.0;
+    }
+
     public static final class VisionConstants {
         /** NetworkTables name of the Limelight 4 camera. */
         public static final String kLimelightName = "limelight";
