@@ -27,6 +27,8 @@ src/main/java/frc/robot/
 ├── RobotContainer.java        # Subsystems, commands & button bindings
 ├── Constants.java             # All hardware ports & tuning constants
 ├── LimelightHelpers.java      # Limelight NetworkTables helper library
+├── util/
+│   └── REVUtil.java           # Shared REV motor controller utilities
 ├── subsystems/
 │   ├── DriveSubsystem.java    # Swerve drive with pose estimation
 │   ├── SwerveModule.java      # Individual swerve module (TalonFX + CANcoder)
@@ -35,8 +37,8 @@ src/main/java/frc/robot/
 │   └── VisionSubsystem.java   # Limelight 4 AprilTag pose estimation
 └── commands/
     ├── TeleopDriveCommand.java        # Field-centric swerve teleop
-    ├── ShootCommand.java              # Shoot sequence (spin up → feed)
-    └── AutonomousDriveCommand.java    # Timed forward autonomous
+    ├── AutonomousDriveCommand.java    # Timed forward autonomous
+    └── ShootCommand.java              # Shooter spin-up & feed sequence
 ```
 
 ## Vision / Pose Estimation (Limelight 4)
@@ -60,6 +62,20 @@ The robot uses a **Limelight 4** camera for AprilTag-based field localization:
   `VisionConstants`
 
 ## Controls (Teleop)
+
+| Input | Action |
+|-------|--------|
+| Left Stick Y (Driver) | Forward / Backward |
+| Left Stick X (Driver) | Strafe Left / Right |
+| Right Stick X (Driver) | Rotate |
+| Right Trigger (Driver) | Progressive brake (slow mode) |
+| Start (Driver) | Zero gyro heading |
+| Left Stick Y (Operator) | Extend / Retract intake |
+| Right Trigger (Operator) | Run intake roller |
+| Right Bumper (Operator) | Eject game piece |
+| Back (Operator) | Clear intake lockout |
+| Left Trigger (Operator) | Shoot (spin-up + feed) |
+| Left Bumper (Operator) | Reverse all shooter stages (clear jams) |
 
 ### Driver Controller (Port 0)
 | Input | Action |
@@ -87,9 +103,7 @@ The intake has 3 AndyMark CAN color sensors (entry, middle, exit). If **any** se
 
 Selectable via SmartDashboard **Auto Chooser**:
 
-| Option | Description |
-|--------|-------------|
-| **Do Nothing** (default) | Stops the drive immediately |
-| **Drive Forward** | Drives forward at 50% speed for 2 seconds |
-| **Just Leave** | PathPlanner auto — drives off the starting zone |
-| **Score And Leave** | PathPlanner auto — scores a game piece, then leaves |
+- **Do Nothing** (default): Stops the drive
+- **Drive Forward**: Drives forward at 50% speed for 2 seconds (timed fallback)
+- **Just Leave**: PathPlanner-based auto to leave the community
+- **Score And Leave**: PathPlanner-based auto to score a game piece and leave

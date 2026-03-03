@@ -7,6 +7,10 @@ public final class Constants {
 
     private Constants() {}
 
+    /**
+     * Constants for the swerve drive system including CAN IDs, gear ratios, kinematics, PID gains,
+     * and speed limits for SDS MK4 L2 modules with Falcon 500 motors on a CANivore bus.
+     */
     public static final class SwerveConstants {
         public static final String kCANivoreName = "CANivore";
         public static final int kFLDriveMotorID = 1;
@@ -49,7 +53,7 @@ public final class Constants {
         public static final double kMaxAngularVelocityRadiansPerSecond = 2.0 * Math.PI;
         public static final double kTeleopMaxDriveSpeed = 1.0;
         public static final double kTeleopMaxAngularSpeed = 0.75;
-        public static final int kDriveCurrentLimitAmps = 100;
+        public static final int kDriveCurrentLimitAmps = 60;
         public static final int kSteerCurrentLimitAmps = 40;
         public static final double kDriveP = 0.1;
         public static final double kDriveI = 0.0;
@@ -62,6 +66,10 @@ public final class Constants {
         public static final double kDeadband = 0.05;
     }
 
+    /**
+     * Constants for the intake subsystem including extension arm and roller motor CAN IDs, PID gains,
+     * positions, current limits, and color sensor CAN IDs.
+     */
     public static final class IntakeConstants {
         public static final int     kExtensionMotorID          = 14;
         public static final int     kExtensionCurrentLimitAmps = 25;
@@ -87,6 +95,10 @@ public final class Constants {
         public static final int kExitSensorID   = 18;
     }
 
+    /**
+     * Constants for the 4-stage shooter pipeline (agitator, kicker, pre-shooter, dual shooter flywheels)
+     * including CAN IDs, current limits, PID gains, RPM targets, and spin-up timeout.
+     */
     public static final class ShooterConstants {
         // CAN IDs (RIO CAN bus)
         public static final int kAgitatorMotorID          = 19;
@@ -99,7 +111,7 @@ public final class Constants {
         public static final int kAgitatorCurrentLimitAmps          = 20;
         public static final int kKickerCurrentLimitAmps            = 40;
         public static final int kPreShooterCurrentLimitAmps        = 40;
-        public static final int kShooterCurrentLimitAmps           = 140;
+        public static final int kShooterCurrentLimitAmps           = 80;
 
         // Motor inversion
         public static final boolean kAgitatorInverted          = false;
@@ -145,9 +157,13 @@ public final class Constants {
         public static final double kShooterSpeedToleranceRPM = 200.0;
 
         /** Maximum time (seconds) to wait for shooter spin-up before feeding anyway. */
-        public static final double kShooterSpinUpTimeoutSeconds = 1.5;
+        public static final double kShooterSpinUpTimeoutSeconds = 3.0;
     }
 
+    /**
+     * Constants for the Limelight 4 AprilTag vision system including outlier rejection thresholds
+     * and measurement standard deviations.
+     */
     public static final class VisionConstants {
         /** NetworkTables name of the Limelight 4 camera. */
         public static final String kLimelightName = "limelight";
@@ -189,6 +205,9 @@ public final class Constants {
         public static final double kMultiTagStdDevTheta = 999.0;
     }
 
+    /**
+     * Operator Interface constants including controller ports, deadband, and trigger thresholds.
+     */
     public static final class OIConstants {
         public static final int    kDriverControllerPort   = 0;
         public static final int    kOperatorControllerPort = 1;
@@ -197,12 +216,18 @@ public final class Constants {
         public static final double kTriggerThreshold       = 0.1;
     }
 
+    /**
+     * Constants for the basic timed autonomous routine.
+     */
     public static final class AutoConstants {
         public static final double kAutoDriveDistanceMeters = 2.0;
         public static final double kAutoDriveSpeed          = 0.5;
         public static final double kAutoDriveTimeSeconds    = 2.0;
     }
 
+    /**
+     * PID constants and geometry for PathPlanner autonomous path following.
+     */
     public static final class PathPlannerConstants {
         public static final double kTranslationP = 5.0;
         public static final double kTranslationI = 0.0;

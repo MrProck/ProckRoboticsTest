@@ -4,7 +4,6 @@ import com.andymark.jni.AM_CAN_Color_Sensor;
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -15,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.util.REVUtil;
 
 /**
  * Intake subsystem with:
@@ -43,55 +43,32 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem() {
         // --- Extension Motor (SparkMax) ---
-        checkREV("Extension restoreFactoryDefaults", m_extensionMotor.restoreFactoryDefaults());
-        checkREV("Extension setIdleMode", m_extensionMotor.setIdleMode(IdleMode.kBrake));
-        checkREV("Extension setSmartCurrentLimit", m_extensionMotor.setSmartCurrentLimit(IntakeConstants.kExtensionCurrentLimitAmps));
+        REVUtil.checkREV("Extension restoreFactoryDefaults", m_extensionMotor.restoreFactoryDefaults());
+        REVUtil.checkREV("Extension setIdleMode", m_extensionMotor.setIdleMode(IdleMode.kBrake));
+        REVUtil.checkREV("Extension setSmartCurrentLimit", m_extensionMotor.setSmartCurrentLimit(IntakeConstants.kExtensionCurrentLimitAmps));
         m_extensionMotor.setInverted(IntakeConstants.kExtensionMotorInverted);
 
         m_extensionPID = m_extensionMotor.getPIDController();
-        checkREV("Extension PID P", m_extensionPID.setP(IntakeConstants.kExtensionP));
-        checkREV("Extension PID I", m_extensionPID.setI(IntakeConstants.kExtensionI));
-        checkREV("Extension PID D", m_extensionPID.setD(IntakeConstants.kExtensionD));
-        checkREV("Extension PID FF", m_extensionPID.setFF(IntakeConstants.kExtensionFF));
+        REVUtil.checkREV("Extension PID P", m_extensionPID.setP(IntakeConstants.kExtensionP));
+        REVUtil.checkREV("Extension PID I", m_extensionPID.setI(IntakeConstants.kExtensionI));
+        REVUtil.checkREV("Extension PID D", m_extensionPID.setD(IntakeConstants.kExtensionD));
+        REVUtil.checkREV("Extension PID FF", m_extensionPID.setFF(IntakeConstants.kExtensionFF));
 
-        checkREV("Extension soft limit forward set", m_extensionMotor.setSoftLimit(SoftLimitDirection.kForward, (float) IntakeConstants.kExtensionExtendedPosition));
-        checkREV("Extension soft limit reverse set", m_extensionMotor.setSoftLimit(SoftLimitDirection.kReverse, (float) IntakeConstants.kExtensionRetractedPosition));
-        checkREV("Extension soft limit forward", m_extensionMotor.enableSoftLimit(SoftLimitDirection.kForward, true));
-        checkREV("Extension soft limit reverse", m_extensionMotor.enableSoftLimit(SoftLimitDirection.kReverse, true));
+        REVUtil.checkREV("Extension soft limit forward set", m_extensionMotor.setSoftLimit(SoftLimitDirection.kForward, (float) IntakeConstants.kExtensionExtendedPosition));
+        REVUtil.checkREV("Extension soft limit reverse set", m_extensionMotor.setSoftLimit(SoftLimitDirection.kReverse, (float) IntakeConstants.kExtensionRetractedPosition));
+        REVUtil.checkREV("Extension soft limit forward", m_extensionMotor.enableSoftLimit(SoftLimitDirection.kForward, true));
+        REVUtil.checkREV("Extension soft limit reverse", m_extensionMotor.enableSoftLimit(SoftLimitDirection.kReverse, true));
 
-        checkREV("Extension setPosition", m_extensionMotor.getEncoder().setPosition(0.0));
-        checkREV("Extension setPositionConversionFactor", m_extensionMotor.getEncoder().setPositionConversionFactor(IntakeConstants.kExtensionPositionConversionFactor));
-        burnFlashWithDelay(m_extensionMotor, "Extension burnFlash");
+        REVUtil.checkREV("Extension setPosition", m_extensionMotor.getEncoder().setPosition(0.0));
+        REVUtil.checkREV("Extension setPositionConversionFactor", m_extensionMotor.getEncoder().setPositionConversionFactor(IntakeConstants.kExtensionPositionConversionFactor));
+        REVUtil.burnFlashWithDelay(m_extensionMotor, "Extension burnFlash");
 
         // --- Roller Motor (SparkFlex) ---
-        checkREV("Roller restoreFactoryDefaults", m_rollerMotor.restoreFactoryDefaults());
-        checkREV("Roller setIdleMode", m_rollerMotor.setIdleMode(IdleMode.kCoast));
-        checkREV("Roller setSmartCurrentLimit", m_rollerMotor.setSmartCurrentLimit(IntakeConstants.kRollerCurrentLimitAmps));
+        REVUtil.checkREV("Roller restoreFactoryDefaults", m_rollerMotor.restoreFactoryDefaults());
+        REVUtil.checkREV("Roller setIdleMode", m_rollerMotor.setIdleMode(IdleMode.kCoast));
+        REVUtil.checkREV("Roller setSmartCurrentLimit", m_rollerMotor.setSmartCurrentLimit(IntakeConstants.kRollerCurrentLimitAmps));
         m_rollerMotor.setInverted(IntakeConstants.kRollerMotorInverted);
-        burnFlashWithDelay(m_rollerMotor, "Roller burnFlash");
-    }
-
-    /**
-     * Checks a REVLibError and logs a warning if it is not OK.
-     *
-     * @param label   A human-readable label for the operation (e.g., "Extension restoreFactoryDefaults")
-     * @param error   The REVLibError returned by the REV API call
-     */
-    private static void checkREV(String label, REVLibError error) {
-        if (error != REVLibError.kOk) {
-            System.err.println("[IntakeSubsystem] " + label + " failed: " + error);
-        }
-    }
-
-    /**
-     * Waits 200 ms (REV-recommended delay) then burns flash, logging any error.
-     *
-     * @param motor  The motor whose flash to burn
-     * @param label  A human-readable label for logging
-     */
-    private static void burnFlashWithDelay(CANSparkBase motor, String label) {
-        try { Thread.sleep(200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-        checkREV(label, motor.burnFlash());
+        REVUtil.burnFlashWithDelay(m_rollerMotor, "Roller burnFlash");
     }
 
     // -------------------------------------------------------------------------

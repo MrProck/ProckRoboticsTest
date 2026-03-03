@@ -39,11 +39,18 @@ public class ShootCommand extends Command {
         m_shooterSubsystem.runPreShooter();
         m_shooterSubsystem.runShooter();
 
-        if (!m_feedingStarted && (m_shooterSubsystem.isShooterAtSpeed()
-                || m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds))) {
-            m_shooterSubsystem.runAgitator();
-            m_shooterSubsystem.runKicker();
-            m_feedingStarted = true;
+        if (!m_feedingStarted) {
+            boolean atSpeed = m_shooterSubsystem.isShooterAtSpeed();
+            boolean timedOut = m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
+
+            if (atSpeed || timedOut) {
+                if (timedOut && !atSpeed) {
+                    System.err.println("[ShootCommand] WARNING: Spin-up timeout elapsed — feeding without reaching target RPM");
+                }
+                m_shooterSubsystem.runAgitator();
+                m_shooterSubsystem.runKicker();
+                m_feedingStarted = true;
+            }
         }
     }
 
