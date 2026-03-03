@@ -137,4 +137,19 @@ public final class Constants {
         public static final double kAutoDriveSpeed          = 0.5;
         public static final double kAutoDriveTimeSeconds    = 2.0;
     }
+
+    public static final class PathPlannerConstants {
+        public static final double kTranslationP = 5.0;
+        public static final double kTranslationI = 0.0;
+        public static final double kTranslationD = 0.0;
+
+        public static final double kRotationP = 5.0;
+        public static final double kRotationI = 0.0;
+        public static final double kRotationD = 0.0;
+
+        /** Distance from robot center to a swerve module (meters). */
+        public static final double kDriveBaseRadius = Math.hypot(
+            SwerveConstants.kWheelBaseMeters / 2.0,
+            SwerveConstants.kTrackWidthMeters / 2.0);
+    }
 }

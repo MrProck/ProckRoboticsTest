@@ -1,10 +1,14 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import com.pathplanner.lib.auto.AutoBuilder;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AutonomousDriveCommand;
@@ -24,8 +28,11 @@ public class RobotContainer {
     private final CommandXboxController m_operatorController =
         new CommandXboxController(OIConstants.kOperatorControllerPort);
 
+    private final SendableChooser<Command> m_autoChooser = new SendableChooser<>();
+
     public RobotContainer() {
         configureBindings();
+        configureAutoChooser();
 
         // Default drive command — field-centric swerve
         m_driveSubsystem.setDefaultCommand(
@@ -49,6 +56,30 @@ public class RobotContainer {
                 }
             }, m_intakeSubsystem)
         );
+    }
+
+    private void configureAutoChooser() {
+        // "Do Nothing" — default option that simply stops the drive
+        m_autoChooser.setDefaultOption("Do Nothing",
+            Commands.runOnce(m_driveSubsystem::stopModules, m_driveSubsystem));
+
+        // Timed drive-forward fallback
+        m_autoChooser.addOption("Drive Forward", new AutonomousDriveCommand(m_driveSubsystem));
+
+        // PathPlanner-based autos (path files are in deploy/pathplanner/autos/)
+        try {
+            m_autoChooser.addOption("Just Leave", AutoBuilder.buildAuto("Just Leave"));
+        } catch (Exception e) {
+            System.err.println("[RobotContainer] Could not load 'Just Leave' auto: " + e.getMessage());
+        }
+
+        try {
+            m_autoChooser.addOption("Score And Leave", AutoBuilder.buildAuto("Score And Leave"));
+        } catch (Exception e) {
+            System.err.println("[RobotContainer] Could not load 'Score And Leave' auto: " + e.getMessage());
+        }
+
+        SmartDashboard.putData("Auto Chooser", m_autoChooser);
     }
 
     private void configureBindings() {
@@ -79,6 +110,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new AutonomousDriveCommand(m_driveSubsystem);
+        return m_autoChooser.getSelected();
     }
 }

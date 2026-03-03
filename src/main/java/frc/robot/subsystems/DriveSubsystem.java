@@ -1,19 +1,28 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.config.PIDConstants;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import frc.robot.Constants.PathPlannerConstants;
 import frc.robot.Constants.SwerveConstants;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -49,6 +58,54 @@ public class DriveSubsystem extends SubsystemBase {
     public DriveSubsystem() {
         SmartDashboard.putData("Field", m_field);
         zeroHeading();
+        configureAutoBuilder();
+    }
+
+    private void configureAutoBuilder() {
+        RobotConfig robotConfig;
+        try {
+            robotConfig = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            // Fall back to a programmatic config derived from known robot constants
+            ModuleConfig moduleConfig = new ModuleConfig(
+                SwerveConstants.kWheelDiameterMeters / 2.0,
+                SwerveConstants.kMaxDriveSpeedMetersPerSecond,
+                1.2,
+                DCMotor.getFalcon500(1).withReduction(SwerveConstants.kDriveGearRatio),
+                SwerveConstants.kDriveCurrentLimitAmps,
+                1);
+            robotConfig = new RobotConfig(
+                60.0,
+                6.0,
+                moduleConfig,
+                new Translation2d( SwerveConstants.kWheelBaseMeters / 2.0,  SwerveConstants.kTrackWidthMeters / 2.0),
+                new Translation2d( SwerveConstants.kWheelBaseMeters / 2.0, -SwerveConstants.kTrackWidthMeters / 2.0),
+                new Translation2d(-SwerveConstants.kWheelBaseMeters / 2.0,  SwerveConstants.kTrackWidthMeters / 2.0),
+                new Translation2d(-SwerveConstants.kWheelBaseMeters / 2.0, -SwerveConstants.kTrackWidthMeters / 2.0));
+        }
+
+        AutoBuilder.configure(
+            this::getPose,
+            this::resetPose,
+            this::getChassisSpeeds,
+            (speeds, feedforwards) -> {
+                SwerveModuleState[] states =
+                    SwerveConstants.kSwerveKinematics.toSwerveModuleStates(speeds);
+                setModuleStates(states);
+            },
+            new PPHolonomicDriveController(
+                new PIDConstants(PathPlannerConstants.kTranslationP,
+                                 PathPlannerConstants.kTranslationI,
+                                 PathPlannerConstants.kTranslationD),
+                new PIDConstants(PathPlannerConstants.kRotationP,
+                                 PathPlannerConstants.kRotationI,
+                                 PathPlannerConstants.kRotationD)),
+            robotConfig,
+            () -> {
+                var alliance = DriverStation.getAlliance();
+                return alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red;
+            },
+            this);
     }
 
     public void drive(double xSpeedMPS, double ySpeedMPS, double rotRadPerSec, boolean fieldRelative) {
@@ -95,6 +152,15 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void resetPose(Pose2d pose) {
         m_poseEstimator.resetPosition(getHeading(), getModulePositions(), pose);
+    }
+
+    /** Returns the current robot-relative chassis speeds derived from module states. */
+    public ChassisSpeeds getChassisSpeeds() {
+        return SwerveConstants.kSwerveKinematics.toChassisSpeeds(
+            m_frontLeft.getState(),
+            m_frontRight.getState(),
+            m_backLeft.getState(),
+            m_backRight.getState());
     }
 
     /**
