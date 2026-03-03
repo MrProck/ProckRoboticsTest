@@ -154,15 +154,6 @@ public class DriveSubsystem extends SubsystemBase {
         m_poseEstimator.resetPosition(getHeading(), getModulePositions(), pose);
     }
 
-    /** Returns the current robot-relative chassis speeds derived from module states. */
-    public ChassisSpeeds getChassisSpeeds() {
-        return SwerveConstants.kSwerveKinematics.toChassisSpeeds(
-            m_frontLeft.getState(),
-            m_frontRight.getState(),
-            m_backLeft.getState(),
-            m_backRight.getState());
-    }
-
     /**
      * Adds a vision measurement to the pose estimator.
      *
@@ -202,6 +193,7 @@ public class DriveSubsystem extends SubsystemBase {
         };
     }
 
+    /** Returns the current robot-relative chassis speeds derived from module states. */
     public ChassisSpeeds getChassisSpeeds() {
         return SwerveConstants.kSwerveKinematics.toChassisSpeeds(getModuleStates());
     }
