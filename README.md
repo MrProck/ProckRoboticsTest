@@ -6,6 +6,7 @@ FRC Robot project using the **WPILib 2026 command-based Java framework**.
 - WPILib 2026 (includes Java 17 and VS Code extension)
 - CTRE Phoenix 6 (Talon FX, CANcoder, Pigeon 2.0)
 - REV Robotics (CANSparkMax, CANSparkFlex)
+- AndyMark am-5636 CAN color sensors
 - Limelight 4 camera (configured for AprilTag pipeline)
 - Xbox controllers on ports 0 and 1
 
@@ -30,9 +31,11 @@ src/main/java/frc/robot/
 │   ├── DriveSubsystem.java    # Swerve drive with pose estimation
 │   ├── SwerveModule.java      # Individual swerve module (TalonFX + CANcoder)
 │   ├── IntakeSubsystem.java   # Game piece intake mechanism
+│   ├── ShooterSubsystem.java  # 4-stage shooter pipeline
 │   └── VisionSubsystem.java   # Limelight 4 AprilTag pose estimation
 └── commands/
     ├── TeleopDriveCommand.java        # Field-centric swerve teleop
+    ├── ShootCommand.java              # Shoot sequence (spin up → feed)
     └── AutonomousDriveCommand.java    # Timed forward autonomous
 ```
 
@@ -57,16 +60,36 @@ The robot uses a **Limelight 4** camera for AprilTag-based field localization:
   `VisionConstants`
 
 ## Controls (Teleop)
+
+### Driver Controller (Port 0)
 | Input | Action |
 |-------|--------|
-| Left Stick Y (Driver) | Forward / Backward |
-| Left Stick X (Driver) | Strafe Left / Right |
-| Right Stick X (Driver) | Rotate |
-| Start (Driver) | Zero gyro heading |
-| Left Stick Y (Operator) | Extend / Retract intake |
-| Right Trigger (Operator) | Run intake roller |
-| Right Bumper (Operator) | Eject game piece |
-| Back (Operator) | Clear intake lockout |
+| Left Stick Y | Forward / Backward |
+| Left Stick X | Strafe Left / Right |
+| Right Stick X | Rotate |
+| Right Trigger | Progressive brake (0 = full speed, fully held = full stop) |
+| Start | Zero gyro heading |
+
+### Operator Controller (Port 1)
+| Input | Action |
+|-------|--------|
+| Left Stick Y | Extend / Retract intake arm (push forward = extend, pull back = retract) |
+| Right Trigger (hold) | Run intake roller forward (blocked if intake is locked out) |
+| Right Bumper (hold) | Eject game piece (roller reverse, always allowed) |
+| Left Trigger (hold) | Shoot sequence — spins up flywheels, then feeds when at speed |
+| Left Bumper (hold) | Reverse all shooter stages (clear jams) |
+| Back | Clear intake lockout (use after ejecting wrong-color game piece) |
+
+### Color Sensor Safety
+The intake has 3 AndyMark CAN color sensors (entry, middle, exit). If **any** sensor detects red or blue (wrong alliance game piece), the intake roller is automatically locked out. Use **Right Bumper** to eject, then **Back** to clear the lockout.
 
 ## Autonomous
-Drives forward at 50% speed for 2 seconds.
+
+Selectable via SmartDashboard **Auto Chooser**:
+
+| Option | Description |
+|--------|-------------|
+| **Do Nothing** (default) | Stops the drive immediately |
+| **Drive Forward** | Drives forward at 50% speed for 2 seconds |
+| **Just Leave** | PathPlanner auto — drives off the starting zone |
+| **Score And Leave** | PathPlanner auto — scores a game piece, then leaves |
