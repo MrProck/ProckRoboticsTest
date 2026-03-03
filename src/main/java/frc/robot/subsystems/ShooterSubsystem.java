@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
@@ -47,7 +48,7 @@ public class ShooterSubsystem extends SubsystemBase {
         checkREV("Agitator PID I", m_agitatorPID.setI(ShooterConstants.kAgitatorI));
         checkREV("Agitator PID D", m_agitatorPID.setD(ShooterConstants.kAgitatorD));
         checkREV("Agitator PID FF", m_agitatorPID.setFF(ShooterConstants.kAgitatorFF));
-        checkREV("Agitator burnFlash", m_agitatorMotor.burnFlash());
+        burnFlashWithDelay(m_agitatorMotor, "Agitator burnFlash");
 
         // --- Kicker Motor (NEO + SparkMax) ---
         checkREV("Kicker restoreFactoryDefaults", m_kickerMotor.restoreFactoryDefaults());
@@ -59,7 +60,7 @@ public class ShooterSubsystem extends SubsystemBase {
         checkREV("Kicker PID I", m_kickerPID.setI(ShooterConstants.kKickerI));
         checkREV("Kicker PID D", m_kickerPID.setD(ShooterConstants.kKickerD));
         checkREV("Kicker PID FF", m_kickerPID.setFF(ShooterConstants.kKickerFF));
-        checkREV("Kicker burnFlash", m_kickerMotor.burnFlash());
+        burnFlashWithDelay(m_kickerMotor, "Kicker burnFlash");
 
         // --- Pre-Shooter Motor (NEO Vortex + SparkFlex) ---
         checkREV("PreShooter restoreFactoryDefaults", m_preShooterMotor.restoreFactoryDefaults());
@@ -71,7 +72,7 @@ public class ShooterSubsystem extends SubsystemBase {
         checkREV("PreShooter PID I", m_preShooterPID.setI(ShooterConstants.kPreShooterI));
         checkREV("PreShooter PID D", m_preShooterPID.setD(ShooterConstants.kPreShooterD));
         checkREV("PreShooter PID FF", m_preShooterPID.setFF(ShooterConstants.kPreShooterFF));
-        checkREV("PreShooter burnFlash", m_preShooterMotor.burnFlash());
+        burnFlashWithDelay(m_preShooterMotor, "PreShooter burnFlash");
 
         // --- Shooter Primary Motor (NEO Vortex + SparkFlex, CAN 22) ---
         checkREV("ShooterPrimary restoreFactoryDefaults", m_shooterPrimaryMotor.restoreFactoryDefaults());
@@ -83,7 +84,7 @@ public class ShooterSubsystem extends SubsystemBase {
         checkREV("ShooterPrimary PID I", m_shooterPrimaryPID.setI(ShooterConstants.kShooterI));
         checkREV("ShooterPrimary PID D", m_shooterPrimaryPID.setD(ShooterConstants.kShooterD));
         checkREV("ShooterPrimary PID FF", m_shooterPrimaryPID.setFF(ShooterConstants.kShooterFF));
-        checkREV("ShooterPrimary burnFlash", m_shooterPrimaryMotor.burnFlash());
+        burnFlashWithDelay(m_shooterPrimaryMotor, "ShooterPrimary burnFlash");
 
         // --- Shooter Secondary Motor (NEO Vortex + SparkFlex, CAN 23) ---
         checkREV("ShooterSecondary restoreFactoryDefaults", m_shooterSecondaryMotor.restoreFactoryDefaults());
@@ -95,7 +96,7 @@ public class ShooterSubsystem extends SubsystemBase {
         checkREV("ShooterSecondary PID I", m_shooterSecondaryPID.setI(ShooterConstants.kShooterI));
         checkREV("ShooterSecondary PID D", m_shooterSecondaryPID.setD(ShooterConstants.kShooterD));
         checkREV("ShooterSecondary PID FF", m_shooterSecondaryPID.setFF(ShooterConstants.kShooterFF));
-        checkREV("ShooterSecondary burnFlash", m_shooterSecondaryMotor.burnFlash());
+        burnFlashWithDelay(m_shooterSecondaryMotor, "ShooterSecondary burnFlash");
     }
 
     /**
@@ -108,6 +109,17 @@ public class ShooterSubsystem extends SubsystemBase {
         if (error != REVLibError.kOk) {
             System.err.println("[ShooterSubsystem] " + label + " failed: " + error);
         }
+    }
+
+    /**
+     * Waits 200 ms (REV-recommended delay) then burns flash, logging any error.
+     *
+     * @param motor  The motor whose flash to burn
+     * @param label  A human-readable label for logging
+     */
+    private static void burnFlashWithDelay(CANSparkBase motor, String label) {
+        try { Thread.sleep(200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        checkREV(label, motor.burnFlash());
     }
 
     // -------------------------------------------------------------------------
@@ -198,12 +210,14 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     /**
-     * Returns true if the primary shooter flywheel is within tolerance of the target RPM.
+     * Returns true if both shooter flywheel motors are within tolerance of the target RPM.
      * Useful for commands that need to wait for spin-up before feeding.
      */
     public boolean isShooterAtSpeed() {
-        double velocity = m_shooterPrimaryMotor.getEncoder().getVelocity();
-        return Math.abs(velocity - ShooterConstants.kShooterTargetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
+        double primaryVelocity = m_shooterPrimaryMotor.getEncoder().getVelocity();
+        double secondaryVelocity = m_shooterSecondaryMotor.getEncoder().getVelocity();
+        return Math.abs(primaryVelocity - ShooterConstants.kShooterTargetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
+            && Math.abs(secondaryVelocity - ShooterConstants.kShooterTargetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
     }
 
     // -------------------------------------------------------------------------

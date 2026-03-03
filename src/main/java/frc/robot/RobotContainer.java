@@ -1,6 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -11,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AutonomousDriveCommand;
+import frc.robot.commands.IntakeExtensionCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.subsystems.DriveSubsystem;
@@ -23,6 +23,8 @@ public class RobotContainer {
     private final DriveSubsystem   m_driveSubsystem   = new DriveSubsystem();
     private final IntakeSubsystem  m_intakeSubsystem  = new IntakeSubsystem();
     private final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
+    // VisionSubsystem runs via its periodic() method — no direct references needed
+    @SuppressWarnings("unused")
     private final VisionSubsystem  m_visionSubsystem  = new VisionSubsystem(m_driveSubsystem);
 
     private final CommandXboxController m_driverController =
@@ -50,16 +52,10 @@ public class RobotContainer {
         // Default intake command — left stick Y controls extension arm
         // Push forward = extend, pull back = retract
         m_intakeSubsystem.setDefaultCommand(
-            new RunCommand(() -> {
-                double stickY = MathUtil.applyDeadband(-m_operatorController.getLeftY(), OIConstants.kDriveDeadband);
-                if (stickY > 0) {
-                    m_intakeSubsystem.extend();
-                } else if (stickY < 0) {
-                    m_intakeSubsystem.retract();
-                } else {
-                    m_intakeSubsystem.holdPosition();
-                }
-            }, m_intakeSubsystem)
+            new IntakeExtensionCommand(
+                m_intakeSubsystem,
+                () -> -m_operatorController.getLeftY()
+            )
         );
     }
 

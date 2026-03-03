@@ -35,6 +35,10 @@ public class ShootCommand extends Command {
 
     @Override
     public void execute() {
+        // Continuously command flywheels to maintain speed
+        m_shooterSubsystem.runPreShooter();
+        m_shooterSubsystem.runShooter();
+
         if (!m_feedingStarted && (m_shooterSubsystem.isShooterAtSpeed()
                 || m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds))) {
             m_shooterSubsystem.runAgitator();

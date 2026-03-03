@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.andymark.jni.AM_CAN_Color_Sensor;
+import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
@@ -59,14 +60,15 @@ public class IntakeSubsystem extends SubsystemBase {
         checkREV("Extension soft limit reverse", m_extensionMotor.enableSoftLimit(SoftLimitDirection.kReverse, true));
 
         checkREV("Extension setPosition", m_extensionMotor.getEncoder().setPosition(0.0));
-        checkREV("Extension burnFlash", m_extensionMotor.burnFlash());
+        checkREV("Extension setPositionConversionFactor", m_extensionMotor.getEncoder().setPositionConversionFactor(IntakeConstants.kExtensionPositionConversionFactor));
+        burnFlashWithDelay(m_extensionMotor, "Extension burnFlash");
 
         // --- Roller Motor (SparkFlex) ---
         checkREV("Roller restoreFactoryDefaults", m_rollerMotor.restoreFactoryDefaults());
         checkREV("Roller setIdleMode", m_rollerMotor.setIdleMode(IdleMode.kCoast));
         checkREV("Roller setSmartCurrentLimit", m_rollerMotor.setSmartCurrentLimit(IntakeConstants.kRollerCurrentLimitAmps));
         m_rollerMotor.setInverted(IntakeConstants.kRollerMotorInverted);
-        checkREV("Roller burnFlash", m_rollerMotor.burnFlash());
+        burnFlashWithDelay(m_rollerMotor, "Roller burnFlash");
     }
 
     /**
@@ -79,6 +81,17 @@ public class IntakeSubsystem extends SubsystemBase {
         if (error != REVLibError.kOk) {
             System.err.println("[IntakeSubsystem] " + label + " failed: " + error);
         }
+    }
+
+    /**
+     * Waits 200 ms (REV-recommended delay) then burns flash, logging any error.
+     *
+     * @param motor  The motor whose flash to burn
+     * @param label  A human-readable label for logging
+     */
+    private static void burnFlashWithDelay(CANSparkBase motor, String label) {
+        try { Thread.sleep(200); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        checkREV(label, motor.burnFlash());
     }
 
     // -------------------------------------------------------------------------
