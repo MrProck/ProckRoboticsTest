@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -93,7 +94,9 @@ public class VisionSubsystem extends SubsystemBase {
         }
 
         double headingDifference = Math.abs(
-            currentPose.getRotation().getDegrees() - visionPose.getRotation().getDegrees());
+            MathUtil.inputModulus(
+                currentPose.getRotation().getDegrees() - visionPose.getRotation().getDegrees(),
+                -180, 180));
         if (headingDifference > VisionConstants.kMaxAcceptableRotationDegrees) {
             publishTelemetry();
             return;

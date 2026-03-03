@@ -53,6 +53,8 @@ public class RobotContainer {
                     m_intakeSubsystem.extend();
                 } else if (stickY < 0) {
                     m_intakeSubsystem.retract();
+                } else {
+                    m_intakeSubsystem.holdPosition();
                 }
             }, m_intakeSubsystem)
         );

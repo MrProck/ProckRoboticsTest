@@ -26,9 +26,9 @@ public final class Constants {
         public static final double kFRCANcoderOffset = 0.0;
         public static final double kBLCANcoderOffset = 0.0;
         public static final double kBRCANcoderOffset = 0.0;
-        public static final boolean kFLDriveInverted = false;
+        public static final boolean kFLDriveInverted = true;
         public static final boolean kFRDriveInverted = false;
-        public static final boolean kBLDriveInverted = false;
+        public static final boolean kBLDriveInverted = true;
         public static final boolean kBRDriveInverted = false;
         public static final boolean kFLSteerInverted = true;
         public static final boolean kFRSteerInverted = true;
@@ -54,7 +54,7 @@ public final class Constants {
         public static final double kDriveP = 0.1;
         public static final double kDriveI = 0.0;
         public static final double kDriveD = 0.0;
-        public static final double kDriveFF = 0.0;
+        public static final double kDriveFF = 1.0 / (kMaxDriveSpeedMetersPerSecond / kWheelCircumferenceMeters);
         public static final double kSteerP = 7.0;
         public static final double kSteerI = 0.0;
         public static final double kSteerD = 0.0;
