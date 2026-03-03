@@ -72,7 +72,7 @@ public final class Constants {
      */
     public static final class IntakeConstants {
         public static final int     kExtensionMotorID          = 14;
-        public static final int     kExtensionCurrentLimitAmps = 25;
+        public static final int     kExtensionCurrentLimitAmps = 17;
         public static final boolean kExtensionMotorInverted    = false;
         public static final double kExtensionP  = 0.1;
         public static final double kExtensionI  = 0.0;
@@ -85,7 +85,7 @@ public final class Constants {
         /** Conversion factor: output rotations per motor rotation. */
         public static final double kExtensionPositionConversionFactor = 1.0 / kExtensionGearRatio;
         public static final int     kRollerMotorID          = 15;
-        public static final int     kRollerCurrentLimitAmps = 17;
+        public static final int     kRollerCurrentLimitAmps = 25;
         public static final boolean kRollerMotorInverted    = false;
         public static final double kRollerForwardSpeed  = 1.0;
         public static final double kRollerReverseSpeed  = -0.5;
