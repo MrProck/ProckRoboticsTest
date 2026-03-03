@@ -87,31 +87,59 @@ public final class Constants {
 
     public static final class ShooterConstants {
         // CAN IDs (RIO CAN bus)
-        public static final int kAgitatorMotorID    = 19;
-        public static final int kKickerMotorID      = 20;
-        public static final int kPreShooterMotorID  = 21;
-        public static final int kShooterMotorID     = 22;
+        public static final int kAgitatorMotorID          = 19;
+        public static final int kKickerMotorID            = 20;
+        public static final int kPreShooterMotorID        = 21;
+        public static final int kShooterPrimaryMotorID    = 22;
+        public static final int kShooterSecondaryMotorID  = 23;
 
         // Current limits (amps)
-        public static final int kAgitatorCurrentLimitAmps   = 25;
-        public static final int kKickerCurrentLimitAmps     = 25;
-        public static final int kPreShooterCurrentLimitAmps = 40;
-        public static final int kShooterCurrentLimitAmps    = 40;
+        public static final int kAgitatorCurrentLimitAmps          = 20;
+        public static final int kKickerCurrentLimitAmps            = 40;
+        public static final int kPreShooterCurrentLimitAmps        = 40;
+        public static final int kShooterCurrentLimitAmps           = 140;
 
         // Motor inversion
-        public static final boolean kAgitatorInverted   = false;
-        public static final boolean kKickerInverted     = false;
-        public static final boolean kPreShooterInverted = false;
-        public static final boolean kShooterInverted    = false;
+        public static final boolean kAgitatorInverted          = false;
+        public static final boolean kKickerInverted            = false;
+        public static final boolean kPreShooterInverted        = false;
+        public static final boolean kShooterPrimaryInverted    = false;
+        public static final boolean kShooterSecondaryInverted  = true;
 
-        // Speeds (duty cycle -1.0 to 1.0)
-        public static final double kAgitatorSpeed   = 0.5;
-        public static final double kKickerSpeed     = 0.7;
-        public static final double kPreShooterSpeed = 0.85;
-        public static final double kShooterSpeed    = 1.0;
+        // --- Agitator (NEO + SparkMax) ---
+        public static final double kAgitatorForwardRPM  = 3000.0;
+        public static final double kAgitatorReverseRPM  = 1700.0;
+        public static final double kAgitatorP           = 0.0002;
+        public static final double kAgitatorI           = 0.0;
+        public static final double kAgitatorD           = 0.0;
+        public static final double kAgitatorFF          = 1.0 / 5676.0;  // NEO free speed
 
-        // Shooter flywheel speed detection
-        public static final double kShooterTargetRPM         = 4500.0;
+        // --- Kicker (NEO + SparkMax) ---
+        public static final double kKickerForwardRPM    = 3000.0;
+        public static final double kKickerReverseRPM    = 1000.0;
+        public static final double kKickerP             = 0.0002;
+        public static final double kKickerI             = 0.0;
+        public static final double kKickerD             = 0.0;
+        public static final double kKickerFF            = 1.0 / 5676.0;  // NEO free speed
+
+        // --- Pre-Shooter (NEO Vortex + SparkFlex) ---
+        public static final double kPreShooterForwardRPM = 5000.0;
+        public static final double kPreShooterReverseRPM = 1000.0;
+        public static final double kPreShooterP          = 0.0002;
+        public static final double kPreShooterI          = 0.0;
+        public static final double kPreShooterD          = 0.0;
+        public static final double kPreShooterFF         = 1.0 / 6784.0;  // NEO Vortex free speed
+
+        // --- Shooter (2x NEO Vortex + SparkFlex) ---
+        public static final double kShooterForwardRPM    = 5500.0;
+        public static final double kShooterReverseRPM    = 500.0;
+        public static final double kShooterP             = 0.0002;
+        public static final double kShooterI             = 0.0;
+        public static final double kShooterD             = 0.0;
+        public static final double kShooterFF            = 1.0 / 6784.0;  // NEO Vortex free speed
+
+        // Shooter flywheel speed detection (used by ShootCommand to gate feeding)
+        public static final double kShooterTargetRPM         = 5500.0;
         public static final double kShooterSpeedToleranceRPM = 200.0;
     }
 
