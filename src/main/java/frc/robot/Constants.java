@@ -77,8 +77,6 @@ public final class Constants {
         public static final boolean kRollerMotorInverted    = false;
         public static final double kRollerForwardSpeed  = 1.0;
         public static final double kRollerReverseSpeed  = -0.5;
-        // Right trigger activation threshold (0.0-1.0)
-        public static final double kTriggerThreshold    = 0.1;
         // AndyMark am-5636 CAN color sensors (RIO CAN bus)
         public static final int kEntrySensorID  = 16;
         public static final int kMiddleSensorID = 17;
@@ -141,6 +139,9 @@ public final class Constants {
         // Shooter flywheel speed detection (used by ShootCommand to gate feeding)
         public static final double kShooterTargetRPM         = 5500.0;
         public static final double kShooterSpeedToleranceRPM = 200.0;
+
+        /** Maximum time (seconds) to wait for shooter spin-up before feeding anyway. */
+        public static final double kShooterSpinUpTimeoutSeconds = 1.5;
     }
 
     public static final class VisionConstants {
@@ -188,6 +189,8 @@ public final class Constants {
         public static final int    kDriverControllerPort   = 0;
         public static final int    kOperatorControllerPort = 1;
         public static final double kDriveDeadband          = 0.05;
+        // Trigger activation threshold (0.0-1.0)
+        public static final double kTriggerThreshold       = 0.1;
     }
 
     public static final class AutoConstants {

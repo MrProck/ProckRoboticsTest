@@ -7,6 +7,7 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -51,6 +52,11 @@ public class IntakeSubsystem extends SubsystemBase {
         checkREV("Extension PID I", m_extensionPID.setI(IntakeConstants.kExtensionI));
         checkREV("Extension PID D", m_extensionPID.setD(IntakeConstants.kExtensionD));
         checkREV("Extension PID FF", m_extensionPID.setFF(IntakeConstants.kExtensionFF));
+
+        checkREV("Extension soft limit forward set", m_extensionMotor.setSoftLimit(SoftLimitDirection.kForward, (float) IntakeConstants.kExtensionExtendedPosition));
+        checkREV("Extension soft limit reverse set", m_extensionMotor.setSoftLimit(SoftLimitDirection.kReverse, (float) IntakeConstants.kExtensionRetractedPosition));
+        checkREV("Extension soft limit forward", m_extensionMotor.enableSoftLimit(SoftLimitDirection.kForward, true));
+        checkREV("Extension soft limit reverse", m_extensionMotor.enableSoftLimit(SoftLimitDirection.kReverse, true));
 
         checkREV("Extension setPosition", m_extensionMotor.getEncoder().setPosition(0.0));
         checkREV("Extension burnFlash", m_extensionMotor.burnFlash());

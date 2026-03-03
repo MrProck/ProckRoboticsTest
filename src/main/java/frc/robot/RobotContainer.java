@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import com.pathplanner.lib.auto.AutoBuilder;
-import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AutonomousDriveCommand;
 import frc.robot.commands.TeleopDriveCommand;
@@ -100,7 +99,7 @@ public class RobotContainer {
 
         // Right Trigger (held) — run intake roller forward
         // Won't run if intake is locked out (enforced inside IntakeSubsystem)
-        m_operatorController.rightTrigger(IntakeConstants.kTriggerThreshold)
+        m_operatorController.rightTrigger(OIConstants.kTriggerThreshold)
             .whileTrue(new RunCommand(m_intakeSubsystem::runIntake, m_intakeSubsystem))
             .onFalse(new InstantCommand(m_intakeSubsystem::stopRoller, m_intakeSubsystem));
 
@@ -115,7 +114,7 @@ public class RobotContainer {
         );
 
         // Left Trigger (held) — run full shoot sequence (spin up, then feed when at speed)
-        m_operatorController.leftTrigger(IntakeConstants.kTriggerThreshold)
+        m_operatorController.leftTrigger(OIConstants.kTriggerThreshold)
             .whileTrue(new ShootCommand(m_shooterSubsystem));
 
         // Left Bumper (held) — manual reverse all shooter stages to clear jams
