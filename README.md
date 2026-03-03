@@ -1,9 +1,9 @@
 # ProckRoboticsTest
 
-FRC Robot project using the **WPILib 2025 command-based Java framework**.
+FRC Robot project using the **WPILib 2026 command-based Java framework**.
 
 ## Prerequisites
-- WPILib 2025 (includes Java 17 and VS Code extension)
+- WPILib 2026 (includes Java 17 and VS Code extension)
 - CTRE Phoenix 6 (Talon FX, CANcoder, Pigeon 2.0)
 - REV Robotics (CANSparkMax, CANSparkFlex)
 - Limelight 4 camera (configured for AprilTag pipeline)
