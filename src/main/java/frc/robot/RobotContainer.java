@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.AutonomousDriveCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -78,6 +79,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new InstantCommand();
+        return new AutonomousDriveCommand(m_driveSubsystem);
     }
 }
