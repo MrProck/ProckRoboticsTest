@@ -127,6 +127,19 @@ public class DriveSubsystem extends SubsystemBase {
         };
     }
 
+    public SwerveModuleState[] getModuleStates() {
+        return new SwerveModuleState[] {
+            m_frontLeft.getState(),
+            m_frontRight.getState(),
+            m_backLeft.getState(),
+            m_backRight.getState()
+        };
+    }
+
+    public ChassisSpeeds getChassisSpeeds() {
+        return SwerveConstants.kSwerveKinematics.toChassisSpeeds(getModuleStates());
+    }
+
     @Override
     public void periodic() {
         m_poseEstimator.update(getHeading(), getModulePositions());
@@ -134,5 +147,27 @@ public class DriveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Gyro Heading (deg)", getHeading().getDegrees());
         SmartDashboard.putNumber("Robot X (m)", getPose().getX());
         SmartDashboard.putNumber("Robot Y (m)", getPose().getY());
+
+        SwerveModuleState[] states = getModuleStates();
+        SmartDashboard.putNumber("FL Speed (m/s)", states[0].speedMetersPerSecond);
+        SmartDashboard.putNumber("FL Angle (deg)", states[0].angle.getDegrees());
+        SmartDashboard.putNumber("FR Speed (m/s)", states[1].speedMetersPerSecond);
+        SmartDashboard.putNumber("FR Angle (deg)", states[1].angle.getDegrees());
+        SmartDashboard.putNumber("BL Speed (m/s)", states[2].speedMetersPerSecond);
+        SmartDashboard.putNumber("BL Angle (deg)", states[2].angle.getDegrees());
+        SmartDashboard.putNumber("BR Speed (m/s)", states[3].speedMetersPerSecond);
+        SmartDashboard.putNumber("BR Angle (deg)", states[3].angle.getDegrees());
+
+        ChassisSpeeds speeds = SwerveConstants.kSwerveKinematics.toChassisSpeeds(states);
+        SmartDashboard.putNumber("ChassisSpeeds vx (m/s)", speeds.vxMetersPerSecond);
+        SmartDashboard.putNumber("ChassisSpeeds vy (m/s)", speeds.vyMetersPerSecond);
+        SmartDashboard.putNumber("ChassisSpeeds omega (rad/s)", speeds.omegaRadiansPerSecond);
+
+        SmartDashboard.putNumberArray("SwerveModuleStates", new double[] {
+            states[0].speedMetersPerSecond, states[0].angle.getDegrees(),
+            states[1].speedMetersPerSecond, states[1].angle.getDegrees(),
+            states[2].speedMetersPerSecond, states[2].angle.getDegrees(),
+            states[3].speedMetersPerSecond, states[3].angle.getDegrees()
+        });
     }
 }
