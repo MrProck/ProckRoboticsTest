@@ -142,6 +142,11 @@ public class SwerveModule {
 
     /**
      * Returns the current state of the module (velocity m/s, angle).
+     * <p>
+     * Note: The drive motor's {@code SensorToMechanismRatio} is set to {@code kDriveGearRatio},
+     * so {@code getVelocity()} already reports in <b>wheel rotations/sec</b> (post-gear-reduction).
+     * We only need to multiply by wheel circumference to get m/s — no additional gear-ratio
+     * division is needed here.
      */
     public SwerveModuleState getState() {
         double velocityMPS = m_driveMotor.getVelocity().getValueAsDouble()
@@ -153,6 +158,9 @@ public class SwerveModule {
 
     /**
      * Returns the current position of the module (distance m, angle).
+     * <p>
+     * Like {@link #getState()}, the drive encoder already reports in wheel rotations
+     * thanks to {@code SensorToMechanismRatio}, so we multiply by circumference only.
      */
     public SwerveModulePosition getPosition() {
         double distanceMeters = m_driveMotor.getPosition().getValueAsDouble()
@@ -179,7 +187,7 @@ public class SwerveModule {
             Rotation2d.fromRotations(m_CANcoder.getAbsolutePosition().getValueAsDouble())
         );
 
-        // Drive velocity in rotations/s
+        // Drive velocity in wheel rotations/s (SensorToMechanismRatio handles gear reduction)
         double driveRotationsPerSecond =
             optimized.speedMetersPerSecond / SwerveConstants.kWheelCircumferenceMeters;
         m_driveMotor.setControl(m_driveVelocityControl.withVelocity(driveRotationsPerSecond));
