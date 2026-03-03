@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.andymark.jni.AM_CAN_Color_Sensor;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
@@ -40,26 +41,38 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem() {
         // --- Extension Motor (SparkMax) ---
-        m_extensionMotor.restoreFactoryDefaults();
-        m_extensionMotor.setIdleMode(IdleMode.kBrake);
-        m_extensionMotor.setSmartCurrentLimit(IntakeConstants.kExtensionCurrentLimitAmps);
+        checkREV("Extension restoreFactoryDefaults", m_extensionMotor.restoreFactoryDefaults());
+        checkREV("Extension setIdleMode", m_extensionMotor.setIdleMode(IdleMode.kBrake));
+        checkREV("Extension setSmartCurrentLimit", m_extensionMotor.setSmartCurrentLimit(IntakeConstants.kExtensionCurrentLimitAmps));
         m_extensionMotor.setInverted(IntakeConstants.kExtensionMotorInverted);
 
         m_extensionPID = m_extensionMotor.getPIDController();
-        m_extensionPID.setP(IntakeConstants.kExtensionP);
-        m_extensionPID.setI(IntakeConstants.kExtensionI);
-        m_extensionPID.setD(IntakeConstants.kExtensionD);
-        m_extensionPID.setFF(IntakeConstants.kExtensionFF);
+        checkREV("Extension PID P", m_extensionPID.setP(IntakeConstants.kExtensionP));
+        checkREV("Extension PID I", m_extensionPID.setI(IntakeConstants.kExtensionI));
+        checkREV("Extension PID D", m_extensionPID.setD(IntakeConstants.kExtensionD));
+        checkREV("Extension PID FF", m_extensionPID.setFF(IntakeConstants.kExtensionFF));
 
-        m_extensionMotor.getEncoder().setPosition(0.0);
-        m_extensionMotor.burnFlash();
+        checkREV("Extension setPosition", m_extensionMotor.getEncoder().setPosition(0.0));
+        checkREV("Extension burnFlash", m_extensionMotor.burnFlash());
 
         // --- Roller Motor (SparkFlex) ---
-        m_rollerMotor.restoreFactoryDefaults();
-        m_rollerMotor.setIdleMode(IdleMode.kCoast);
-        m_rollerMotor.setSmartCurrentLimit(IntakeConstants.kRollerCurrentLimitAmps);
+        checkREV("Roller restoreFactoryDefaults", m_rollerMotor.restoreFactoryDefaults());
+        checkREV("Roller setIdleMode", m_rollerMotor.setIdleMode(IdleMode.kCoast));
+        checkREV("Roller setSmartCurrentLimit", m_rollerMotor.setSmartCurrentLimit(IntakeConstants.kRollerCurrentLimitAmps));
         m_rollerMotor.setInverted(IntakeConstants.kRollerMotorInverted);
-        m_rollerMotor.burnFlash();
+        checkREV("Roller burnFlash", m_rollerMotor.burnFlash());
+    }
+
+    /**
+     * Checks a REVLibError and logs a warning if it is not OK.
+     *
+     * @param label   A human-readable label for the operation (e.g., "Extension restoreFactoryDefaults")
+     * @param error   The REVLibError returned by the REV API call
+     */
+    private static void checkREV(String label, REVLibError error) {
+        if (error != REVLibError.kOk) {
+            System.err.println("[IntakeSubsystem] " + label + " failed: " + error);
+        }
     }
 
     // -------------------------------------------------------------------------
