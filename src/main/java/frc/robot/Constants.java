@@ -72,6 +72,10 @@ public final class Constants {
         public static final double kExtensionFF = 0.0;
         public static final double kExtensionRetractedPosition = 0.0;
         public static final double kExtensionExtendedPosition  = 50.0;
+        /** Gear ratio between motor and extension output. Adjust to your mechanism. */
+        public static final double kExtensionGearRatio = 1.0; // TODO: set to actual gear ratio
+        /** Conversion factor: output rotations per motor rotation. */
+        public static final double kExtensionPositionConversionFactor = 1.0 / kExtensionGearRatio;
         public static final int     kRollerMotorID          = 15;
         public static final int     kRollerCurrentLimitAmps = 17;
         public static final boolean kRollerMotorInverted    = false;
