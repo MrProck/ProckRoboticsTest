@@ -124,4 +124,9 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         return m_autoChooser.getSelected();
     }
+
+    /** Returns the intake subsystem for use outside this class (e.g., Robot.java). */
+    public IntakeSubsystem getIntakeSubsystem() {
+        return m_intakeSubsystem;
+    }
 }

@@ -139,7 +139,8 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public Rotation2d getHeading() {
-        return Rotation2d.fromDegrees(-m_pigeon.getYaw().getValueAsDouble());
+        double yaw = m_pigeon.getYaw().getValueAsDouble();
+        return Rotation2d.fromDegrees(SwerveConstants.kInvertGyro ? -yaw : yaw);
     }
 
     public void zeroHeading() {

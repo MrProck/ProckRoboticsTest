@@ -34,6 +34,16 @@ public class VisionSubsystem extends SubsystemBase {
 
         // Configure the Limelight pipeline for AprilTag detection
         LimelightHelpers.setPipelineIndex(m_limelightName, 0);
+
+        // Configure camera-to-robot transform so Limelight can compute field-relative poses
+        LimelightHelpers.setCameraPose_RobotSpace(
+            m_limelightName,
+            VisionConstants.kCameraForwardOffsetMeters,
+            VisionConstants.kCameraSideOffsetMeters,
+            VisionConstants.kCameraUpOffsetMeters,
+            VisionConstants.kCameraRollDegrees,
+            VisionConstants.kCameraPitchDegrees,
+            VisionConstants.kCameraYawDegrees);
     }
 
     /** Returns true if the Limelight currently sees at least one AprilTag. */
@@ -48,12 +58,20 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Telemetry state for this cycle
+        double lastPoseDiffMeters = 0.0;
+        double lastHeadingDiffDegrees = 0.0;
+        boolean measurementAccepted = false;
+        String rejectionReason = "No tags";
+        double avgTagDistance = 0.0;
+
         // Read the target validity from the Limelight
         m_hasTarget = LimelightHelpers.getTV(m_limelightName);
 
         if (!m_hasTarget) {
             m_tagCount = 0;
-            publishTelemetry();
+            publishTelemetry(lastPoseDiffMeters, lastHeadingDiffDegrees,
+                             measurementAccepted, rejectionReason, m_tagCount, avgTagDistance);
             return;
         }
 
@@ -69,29 +87,43 @@ public class VisionSubsystem extends SubsystemBase {
 
         if (poseEstimate == null || poseEstimate.tagCount < VisionConstants.kMinTagCount) {
             m_tagCount = poseEstimate != null ? poseEstimate.tagCount : 0;
-            publishTelemetry();
+            publishTelemetry(lastPoseDiffMeters, lastHeadingDiffDegrees,
+                             measurementAccepted, rejectionReason, m_tagCount, avgTagDistance);
             return;
         }
 
         m_tagCount = poseEstimate.tagCount;
         Pose2d visionPose = poseEstimate.pose;
 
+        // Compute average tag distance
+        if (poseEstimate.rawFiducials != null && poseEstimate.rawFiducials.length > 0) {
+            double totalDist = 0.0;
+            for (LimelightHelpers.RawFiducial fiducial : poseEstimate.rawFiducials) {
+                totalDist += fiducial.distToRobot;
+            }
+            avgTagDistance = totalDist / poseEstimate.rawFiducials.length;
+        }
+
         // Validate the measurement against current odometry to reject outliers
         Pose2d currentPose = m_driveSubsystem.getPose();
-        double poseDifference = currentPose.getTranslation()
+        lastPoseDiffMeters = currentPose.getTranslation()
             .getDistance(visionPose.getTranslation());
 
-        if (poseDifference > VisionConstants.kMaxAcceptableDistanceMeters) {
-            publishTelemetry();
+        if (lastPoseDiffMeters > VisionConstants.kMaxAcceptableDistanceMeters) {
+            rejectionReason = "Distance too far";
+            publishTelemetry(lastPoseDiffMeters, lastHeadingDiffDegrees,
+                             measurementAccepted, rejectionReason, m_tagCount, avgTagDistance);
             return;
         }
 
-        double headingDifference = Math.abs(
+        lastHeadingDiffDegrees = Math.abs(
             MathUtil.inputModulus(
                 currentPose.getRotation().getDegrees() - visionPose.getRotation().getDegrees(),
                 -180, 180));
-        if (headingDifference > VisionConstants.kMaxAcceptableRotationDegrees) {
-            publishTelemetry();
+        if (lastHeadingDiffDegrees > VisionConstants.kMaxAcceptableRotationDegrees) {
+            rejectionReason = "Heading mismatch";
+            publishTelemetry(lastPoseDiffMeters, lastHeadingDiffDegrees,
+                             measurementAccepted, rejectionReason, m_tagCount, avgTagDistance);
             return;
         }
 
@@ -115,11 +147,25 @@ public class VisionSubsystem extends SubsystemBase {
             poseEstimate.timestampSeconds,
             stdDevX, stdDevY, stdDevTheta);
 
-        publishTelemetry();
+        measurementAccepted = true;
+        rejectionReason = "Accepted";
+        publishTelemetry(lastPoseDiffMeters, lastHeadingDiffDegrees,
+                         measurementAccepted, rejectionReason, m_tagCount, avgTagDistance);
     }
 
-    private void publishTelemetry() {
+    private void publishTelemetry(
+            double poseDiffMeters,
+            double headingDiffDegrees,
+            boolean accepted,
+            String rejectionReason,
+            int tagCount,
+            double avgTagDistance) {
         SmartDashboard.putBoolean("Vision/HasTarget", m_hasTarget);
-        SmartDashboard.putNumber("Vision/TagCount", m_tagCount);
+        SmartDashboard.putNumber("Vision/TagCount", tagCount);
+        SmartDashboard.putNumber("Vision/LastPoseDiffMeters", poseDiffMeters);
+        SmartDashboard.putNumber("Vision/LastHeadingDiffDegrees", headingDiffDegrees);
+        SmartDashboard.putBoolean("Vision/MeasurementAccepted", accepted);
+        SmartDashboard.putString("Vision/RejectionReason", rejectionReason);
+        SmartDashboard.putNumber("Vision/AvgTagDistance", avgTagDistance);
     }
 }
