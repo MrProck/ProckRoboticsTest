@@ -14,7 +14,7 @@ import frc.robot.Constants.SwerveConstants;
 class ConstantsTest {
 
     @Test
-    void wheelCircumferenceEqualsdiameterTimesPi() {
+    void wheelCircumferenceEqualsDiameterTimesPi() {
         assertEquals(
             SwerveConstants.kWheelDiameterMeters * Math.PI,
             SwerveConstants.kWheelCircumferenceMeters,
