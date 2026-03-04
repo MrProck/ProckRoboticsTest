@@ -79,7 +79,7 @@ public class SwerveModule {
     private void configureDriveMotor(boolean inverted) {
         TalonFXConfiguration config = new TalonFXConfiguration();
 
-        // Current limit — 100A
+        // Current limit
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.SupplyCurrentLimit       = SwerveConstants.kDriveCurrentLimitAmps;
         config.CurrentLimits.SupplyCurrentThreshold   = SwerveConstants.kDriveCurrentLimitAmps;

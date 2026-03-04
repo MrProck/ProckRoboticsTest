@@ -107,3 +107,61 @@ Selectable via SmartDashboard **Auto Chooser**:
 - **Drive Forward**: Drives forward at 50% speed for 2 seconds (timed fallback)
 - **Just Leave**: PathPlanner-based auto to leave the community
 - **Score And Leave**: PathPlanner-based auto to score a game piece and leave
+
+## CAN Bus Map
+
+### CANivore Bus (`"CANivore"`)
+
+| CAN ID | Device | Motor/Sensor | Controller | Current Limit |
+|--------|--------|--------------|------------|---------------|
+| 1 | FL Drive Motor | Falcon 500 | TalonFX | 60 A |
+| 2 | FL Steer Motor | Falcon 500 | TalonFX | 40 A |
+| 3 | FR Drive Motor | Falcon 500 | TalonFX | 60 A |
+| 4 | FR Steer Motor | Falcon 500 | TalonFX | 40 A |
+| 5 | BL Drive Motor | Falcon 500 | TalonFX | 60 A |
+| 6 | BL Steer Motor | Falcon 500 | TalonFX | 40 A |
+| 7 | BR Drive Motor | Falcon 500 | TalonFX | 60 A |
+| 8 | BR Steer Motor | Falcon 500 | TalonFX | 40 A |
+| 9 | FL CANcoder | — | CANcoder | — |
+| 10 | FR CANcoder | — | CANcoder | — |
+| 11 | BL CANcoder | — | CANcoder | — |
+| 12 | BR CANcoder | — | CANcoder | — |
+| 13 | Pigeon 2.0 IMU | — | Pigeon2 | — |
+
+### RIO CAN Bus
+
+| CAN ID | Device | Motor/Sensor | Controller | Current Limit |
+|--------|--------|--------------|------------|---------------|
+| 14 | Intake Extension | NEO | SparkMax | 17 A |
+| 15 | Intake Roller | NEO Vortex | SparkFlex | 25 A |
+| 16 | Entry Color Sensor | — | am-5636 | — |
+| 17 | Middle Color Sensor | — | am-5636 | — |
+| 18 | Exit Color Sensor | — | am-5636 | — |
+| 19 | Shooter Agitator | NEO | SparkMax | 20 A |
+| 20 | Shooter Kicker | NEO Vortex | SparkFlex | 40 A |
+| 21 | Shooter Pre-Shooter | NEO Vortex | SparkFlex | 40 A |
+| 22 | Shooter Primary Flywheel | NEO Vortex | SparkFlex | 80 A |
+| 23 | Shooter Secondary Flywheel | NEO Vortex | SparkFlex | 80 A |
+
+## Current Limits Summary
+
+| Subsystem | Device | Limit | Type |
+|-----------|--------|-------|------|
+| Swerve Drive | Drive Motors (×4) | 60 A | Supply (TalonFX) |
+| Swerve Drive | Steer Motors (×4) | 40 A | Supply (TalonFX) |
+| Intake | Extension Motor | 17 A | Smart (SparkMax) |
+| Intake | Roller Motor | 25 A | Smart (SparkFlex) |
+| Shooter | Agitator | 20 A | Smart (SparkMax) |
+| Shooter | Kicker | 40 A | Smart (SparkFlex) |
+| Shooter | Pre-Shooter | 40 A | Smart (SparkFlex) |
+| Shooter | Primary Flywheel | 80 A | Smart (SparkFlex) |
+| Shooter | Secondary Flywheel | 80 A | Smart (SparkFlex) |
+
+> **Total worst-case current draw**: 4×60 + 4×40 + 17 + 25 + 20 + 40 + 40 + 80 + 80 = **702 A**
+> (all motors stalled simultaneously — theoretical maximum, not a realistic operating scenario)
+
+> **Note:** `SwerveModule.java` previously contained a stale comment `// Current limit — 100A` at line 82, but the actual configured value is `SwerveConstants.kDriveCurrentLimitAmps = 60`. The comment has been updated to remove the incorrect value.
+
+## Constants Reference
+
+> All CAN IDs and current limits are defined in [`Constants.java`](src/main/java/frc/robot/Constants.java) and applied in the corresponding subsystem constructors. If you change a CAN ID or current limit, update **both** `Constants.java` and this README.
