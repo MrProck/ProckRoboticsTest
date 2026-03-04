@@ -15,11 +15,11 @@ class SwerveModuleStateOptimizeTest {
         SwerveModuleState desired = new SwerveModuleState(1.0, Rotation2d.fromDegrees(180.0));
         Rotation2d currentAngle = Rotation2d.fromDegrees(0.0);
 
-        SwerveModuleState optimized = SwerveModuleState.optimize(desired, currentAngle);
+        desired.optimize(currentAngle);
 
         // Speed should be negated and angle should be adjusted
-        assertEquals(-1.0, optimized.speedMetersPerSecond, 1e-9);
-        assertEquals(0.0, optimized.angle.getDegrees(), 1e-9);
+        assertEquals(-1.0, desired.speedMetersPerSecond, 1e-9);
+        assertEquals(0.0, desired.angle.getDegrees(), 1e-9);
     }
 
     @Test
@@ -28,10 +28,10 @@ class SwerveModuleStateOptimizeTest {
         SwerveModuleState desired = new SwerveModuleState(1.0, Rotation2d.fromDegrees(45.0));
         Rotation2d currentAngle = Rotation2d.fromDegrees(0.0);
 
-        SwerveModuleState optimized = SwerveModuleState.optimize(desired, currentAngle);
+        desired.optimize(currentAngle);
 
-        assertEquals(1.0, optimized.speedMetersPerSecond, 1e-9);
-        assertEquals(45.0, optimized.angle.getDegrees(), 1e-9);
+        assertEquals(1.0, desired.speedMetersPerSecond, 1e-9);
+        assertEquals(45.0, desired.angle.getDegrees(), 1e-9);
     }
 
     @Test
@@ -40,9 +40,9 @@ class SwerveModuleStateOptimizeTest {
         SwerveModuleState desired = new SwerveModuleState(0.0, Rotation2d.fromDegrees(180.0));
         Rotation2d currentAngle = Rotation2d.fromDegrees(0.0);
 
-        SwerveModuleState optimized = SwerveModuleState.optimize(desired, currentAngle);
+        desired.optimize(currentAngle);
 
         // Negating 0 is still 0
-        assertEquals(0.0, optimized.speedMetersPerSecond, 1e-9);
+        assertEquals(0.0, desired.speedMetersPerSecond, 1e-9);
     }
 }

@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -56,9 +57,10 @@ public class SwerveModule {
     ) {
         m_CANcoderOffset = CANcoderOffset;
 
-        m_driveMotor = new TalonFX(driveMotorID, SwerveConstants.kCANivoreBus);
-        m_steerMotor = new TalonFX(steerMotorID, SwerveConstants.kCANivoreBus);
-        m_CANcoder   = new CANcoder(CANcoderID,  SwerveConstants.kCANivoreBus);
+        CANBus canBus = new CANBus(SwerveConstants.kCANivoreBus);
+        m_driveMotor = new TalonFX(driveMotorID, canBus);
+        m_steerMotor = new TalonFX(steerMotorID, canBus);
+        m_CANcoder   = new CANcoder(CANcoderID,  canBus);
 
         configureCANcoder();
         configureDriveMotor(driveInverted);

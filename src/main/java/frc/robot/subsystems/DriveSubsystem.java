@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
@@ -44,7 +45,7 @@ public class DriveSubsystem extends SubsystemBase {
         SwerveConstants.kBRCANcoderID, SwerveConstants.kBRCANcoderOffset,
         SwerveConstants.kBRDriveInverted, SwerveConstants.kBRSteerInverted);
 
-    private final Pigeon2 m_pigeon = new Pigeon2(SwerveConstants.kPigeonID, SwerveConstants.kCANivoreBus);
+    private final Pigeon2 m_pigeon = new Pigeon2(SwerveConstants.kPigeonID, new CANBus(SwerveConstants.kCANivoreBus));
 
     private final SwerveDrivePoseEstimator m_poseEstimator =
         new SwerveDrivePoseEstimator(
