@@ -159,6 +159,25 @@ public class IntakeSubsystem extends SubsystemBase {
         m_rollerMotor.stopMotor();
     }
 
+    /**
+     * Retracts the intake arm and stops the roller motor.
+     * Safe to call at any time, including when disabled.
+     */
+    public void safeRetract() {
+        retract();
+        stopRoller();
+    }
+
+    /**
+     * Returns true if the intake arm is currently in the extended position.
+     * Uses a threshold of half the extension range to determine state.
+     */
+    public boolean isExtended() {
+        // Half the full extension range (25 rotations) distinguishes "extended" from "retracted".
+        // Any position above the midpoint is considered extended.
+        return getExtensionPosition() > IntakeConstants.kExtensionExtendedPosition / 2.0;
+    }
+
     // -------------------------------------------------------------------------
     // Periodic
     // -------------------------------------------------------------------------

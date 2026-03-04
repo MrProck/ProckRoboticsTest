@@ -66,6 +66,12 @@ public final class Constants {
         public static final double kSteerD = 0.0;
         public static final double kSteerFF = 0.0;
         public static final double kDeadband = 0.05;
+
+        /**
+         * When true, the Pigeon 2 yaw is negated before being used as the robot heading.
+         * Set to true to match the WPILib convention (CCW positive) when the Pigeon reports CW positive.
+         */
+        public static final boolean kInvertGyro = true;
     }
 
     /**
@@ -205,6 +211,21 @@ public final class Constants {
         public static final double kMultiTagStdDevX = 0.5;
         public static final double kMultiTagStdDevY = 0.5;
         public static final double kMultiTagStdDevTheta = 999.0;
+
+        // Camera mount position relative to robot center (meters and degrees)
+        // TODO: Measure actual camera position on robot
+        /** Forward offset of the camera from the robot center (meters, positive = forward). */
+        public static final double kCameraForwardOffsetMeters = 0.0;
+        /** Side offset of the camera from the robot center (meters, positive = left). */
+        public static final double kCameraSideOffsetMeters = 0.0;
+        /** Height of the camera above the floor (meters). */
+        public static final double kCameraUpOffsetMeters = 0.0;
+        /** Camera roll angle (degrees). */
+        public static final double kCameraRollDegrees = 0.0;
+        /** Camera pitch angle (degrees, positive = tilted up). */
+        public static final double kCameraPitchDegrees = 0.0;
+        /** Camera yaw angle (degrees, positive = rotated left). */
+        public static final double kCameraYawDegrees = 0.0;
     }
 
     /**
