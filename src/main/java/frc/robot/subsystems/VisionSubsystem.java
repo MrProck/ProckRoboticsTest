@@ -2,8 +2,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
@@ -22,8 +20,6 @@ public class VisionSubsystem extends SubsystemBase {
     private final DriveSubsystem m_driveSubsystem;
     private final String m_limelightName;
 
-    private final NetworkTable m_table;
-
     private boolean m_hasTarget = false;
     private int m_tagCount = 0;
 
@@ -35,8 +31,6 @@ public class VisionSubsystem extends SubsystemBase {
     public VisionSubsystem(DriveSubsystem driveSubsystem) {
         m_driveSubsystem = driveSubsystem;
         m_limelightName = VisionConstants.kLimelightName;
-
-        m_table = NetworkTableInstance.getDefault().getTable(m_limelightName);
 
         // Configure the Limelight pipeline for AprilTag detection
         LimelightHelpers.setPipelineIndex(m_limelightName, 0);
@@ -54,9 +48,8 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Read the target validity from the Limelight NetworkTable
-        double tv = m_table.getEntry("tv").getDouble(0.0);
-        m_hasTarget = tv >= 1.0;
+        // Read the target validity from the Limelight
+        m_hasTarget = LimelightHelpers.getTV(m_limelightName);
 
         if (!m_hasTarget) {
             m_tagCount = 0;
