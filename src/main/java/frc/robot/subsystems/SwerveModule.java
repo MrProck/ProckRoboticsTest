@@ -56,9 +56,9 @@ public class SwerveModule {
     ) {
         m_CANcoderOffset = CANcoderOffset;
 
-        m_driveMotor = new TalonFX(driveMotorID, SwerveConstants.kCANivoreName);
-        m_steerMotor = new TalonFX(steerMotorID, SwerveConstants.kCANivoreName);
-        m_CANcoder   = new CANcoder(CANcoderID,  SwerveConstants.kCANivoreName);
+        m_driveMotor = new TalonFX(driveMotorID, SwerveConstants.kCANivoreBus);
+        m_steerMotor = new TalonFX(steerMotorID, SwerveConstants.kCANivoreBus);
+        m_CANcoder   = new CANcoder(CANcoderID,  SwerveConstants.kCANivoreBus);
 
         configureCANcoder();
         configureDriveMotor(driveInverted);
@@ -82,8 +82,8 @@ public class SwerveModule {
         // Current limit
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.SupplyCurrentLimit       = SwerveConstants.kDriveCurrentLimitAmps;
-        config.CurrentLimits.SupplyCurrentThreshold   = SwerveConstants.kDriveCurrentLimitAmps;
-        config.CurrentLimits.SupplyTimeThreshold       = 0.1;
+        config.CurrentLimits.SupplyCurrentLowerLimit  = SwerveConstants.kDriveCurrentLimitAmps;
+        config.CurrentLimits.SupplyCurrentLowerTime   = 0.1;
 
         // Inversion & neutral mode
         config.MotorOutput.Inverted    = inverted
@@ -109,8 +109,8 @@ public class SwerveModule {
         // Current limit — 40A
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.SupplyCurrentLimit       = SwerveConstants.kSteerCurrentLimitAmps;
-        config.CurrentLimits.SupplyCurrentThreshold   = SwerveConstants.kSteerCurrentLimitAmps;
-        config.CurrentLimits.SupplyTimeThreshold       = 0.1;
+        config.CurrentLimits.SupplyCurrentLowerLimit  = SwerveConstants.kSteerCurrentLimitAmps;
+        config.CurrentLimits.SupplyCurrentLowerTime   = 0.1;
 
         // Inversion & neutral mode
         config.MotorOutput.Inverted    = inverted

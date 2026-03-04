@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.ctre.phoenix6.CANBus;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
@@ -12,7 +14,7 @@ public final class Constants {
      * and speed limits for SDS MK4 L2 modules with Falcon 500 motors on a CANivore bus.
      */
     public static final class SwerveConstants {
-        public static final String kCANivoreName = "CANivore";
+        public static final CANBus kCANivoreBus = new CANBus("CANivore");
         public static final int kFLDriveMotorID = 1;
         public static final int kFRDriveMotorID = 3;
         public static final int kBLDriveMotorID = 5;
