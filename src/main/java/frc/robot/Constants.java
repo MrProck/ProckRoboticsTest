@@ -128,13 +128,13 @@ public final class Constants {
         public static final double kAgitatorD           = 0.0;
         public static final double kAgitatorFF          = 1.0 / 5676.0;  // NEO free speed
 
-        // --- Kicker (NEO + SparkMax) ---
+        // --- Kicker (NEO Vortex + SparkFlex) ---
         public static final double kKickerForwardRPM    = 3000.0;
         public static final double kKickerReverseRPM    = 1000.0;
         public static final double kKickerP             = 0.0002;
         public static final double kKickerI             = 0.0;
         public static final double kKickerD             = 0.0;
-        public static final double kKickerFF            = 1.0 / 5676.0;  // NEO free speed
+        public static final double kKickerFF            = 1.0 / 6784.0;  // NEO Vortex free speed
 
         // --- Pre-Shooter (NEO Vortex + SparkFlex) ---
         public static final double kPreShooterForwardRPM = 5000.0;
