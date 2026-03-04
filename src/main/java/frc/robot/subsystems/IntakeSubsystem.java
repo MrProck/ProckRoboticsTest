@@ -1,20 +1,22 @@
 package frc.robot.subsystems;
 
 import com.andymark.jni.AM_CAN_Color_Sensor;
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkBase.SoftLimitDirection;
-import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.IntakeConstants;
-import frc.robot.util.REVUtil;
 
 /**
  * Intake subsystem with:
@@ -27,11 +29,11 @@ import frc.robot.util.REVUtil;
 public class IntakeSubsystem extends SubsystemBase {
 
     // Motors
-    private final CANSparkMax  m_extensionMotor = new CANSparkMax(IntakeConstants.kExtensionMotorID, MotorType.kBrushless);
-    private final CANSparkFlex m_rollerMotor    = new CANSparkFlex(IntakeConstants.kRollerMotorID,   MotorType.kBrushless);
+    private final SparkMax  m_extensionMotor = new SparkMax(IntakeConstants.kExtensionMotorID, MotorType.kBrushless);
+    private final SparkFlex m_rollerMotor    = new SparkFlex(IntakeConstants.kRollerMotorID,   MotorType.kBrushless);
 
-    // PID controller for extension position
-    private final SparkPIDController m_extensionPID;
+    // Closed-loop controller for extension position
+    private final SparkClosedLoopController m_extensionController;
 
     // Color sensors (on RIO CAN bus)
     private final AM_CAN_Color_Sensor m_sensorEntry  = new AM_CAN_Color_Sensor(IntakeConstants.kEntrySensorID);
@@ -43,32 +45,34 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem() {
         // --- Extension Motor (SparkMax) ---
-        REVUtil.checkREV("Extension restoreFactoryDefaults", m_extensionMotor.restoreFactoryDefaults());
-        REVUtil.checkREV("Extension setIdleMode", m_extensionMotor.setIdleMode(IdleMode.kBrake));
-        REVUtil.checkREV("Extension setSmartCurrentLimit", m_extensionMotor.setSmartCurrentLimit(IntakeConstants.kExtensionCurrentLimitAmps));
-        m_extensionMotor.setInverted(IntakeConstants.kExtensionMotorInverted);
-
-        m_extensionPID = m_extensionMotor.getPIDController();
-        REVUtil.checkREV("Extension PID P", m_extensionPID.setP(IntakeConstants.kExtensionP));
-        REVUtil.checkREV("Extension PID I", m_extensionPID.setI(IntakeConstants.kExtensionI));
-        REVUtil.checkREV("Extension PID D", m_extensionPID.setD(IntakeConstants.kExtensionD));
-        REVUtil.checkREV("Extension PID FF", m_extensionPID.setFF(IntakeConstants.kExtensionFF));
-
-        REVUtil.checkREV("Extension soft limit forward set", m_extensionMotor.setSoftLimit(SoftLimitDirection.kForward, (float) IntakeConstants.kExtensionExtendedPosition));
-        REVUtil.checkREV("Extension soft limit reverse set", m_extensionMotor.setSoftLimit(SoftLimitDirection.kReverse, (float) IntakeConstants.kExtensionRetractedPosition));
-        REVUtil.checkREV("Extension soft limit forward", m_extensionMotor.enableSoftLimit(SoftLimitDirection.kForward, true));
-        REVUtil.checkREV("Extension soft limit reverse", m_extensionMotor.enableSoftLimit(SoftLimitDirection.kReverse, true));
-
-        REVUtil.checkREV("Extension setPosition", m_extensionMotor.getEncoder().setPosition(0.0));
-        REVUtil.checkREV("Extension setPositionConversionFactor", m_extensionMotor.getEncoder().setPositionConversionFactor(IntakeConstants.kExtensionPositionConversionFactor));
-        REVUtil.burnFlashWithDelay(m_extensionMotor, "Extension burnFlash");
+        SparkMaxConfig extensionConfig = new SparkMaxConfig();
+        extensionConfig
+            .inverted(IntakeConstants.kExtensionMotorInverted)
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(IntakeConstants.kExtensionCurrentLimitAmps);
+        extensionConfig.encoder
+            .positionConversionFactor(IntakeConstants.kExtensionPositionConversionFactor);
+        extensionConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(IntakeConstants.kExtensionP)
+            .i(IntakeConstants.kExtensionI)
+            .d(IntakeConstants.kExtensionD);
+        extensionConfig.softLimit
+            .forwardSoftLimit(IntakeConstants.kExtensionExtendedPosition)
+            .forwardSoftLimitEnabled(true)
+            .reverseSoftLimit(IntakeConstants.kExtensionRetractedPosition)
+            .reverseSoftLimitEnabled(true);
+        m_extensionMotor.configure(extensionConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        m_extensionMotor.getEncoder().setPosition(0.0);
+        m_extensionController = m_extensionMotor.getClosedLoopController();
 
         // --- Roller Motor (SparkFlex) ---
-        REVUtil.checkREV("Roller restoreFactoryDefaults", m_rollerMotor.restoreFactoryDefaults());
-        REVUtil.checkREV("Roller setIdleMode", m_rollerMotor.setIdleMode(IdleMode.kCoast));
-        REVUtil.checkREV("Roller setSmartCurrentLimit", m_rollerMotor.setSmartCurrentLimit(IntakeConstants.kRollerCurrentLimitAmps));
-        m_rollerMotor.setInverted(IntakeConstants.kRollerMotorInverted);
-        REVUtil.burnFlashWithDelay(m_rollerMotor, "Roller burnFlash");
+        SparkFlexConfig rollerConfig = new SparkFlexConfig();
+        rollerConfig
+            .inverted(IntakeConstants.kRollerMotorInverted)
+            .idleMode(IdleMode.kCoast)
+            .smartCurrentLimit(IntakeConstants.kRollerCurrentLimitAmps);
+        m_rollerMotor.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     // -------------------------------------------------------------------------
@@ -105,19 +109,19 @@ public class IntakeSubsystem extends SubsystemBase {
 
     /** Extends the intake arm to the deployed position. */
     public void extend() {
-        m_extensionPID.setReference(
+        m_extensionController.setSetpoint(
             IntakeConstants.kExtensionExtendedPosition, ControlType.kPosition);
     }
 
     /** Retracts the intake arm to the stowed position. */
     public void retract() {
-        m_extensionPID.setReference(
+        m_extensionController.setSetpoint(
             IntakeConstants.kExtensionRetractedPosition, ControlType.kPosition);
     }
 
     /** Holds the extension arm at its current position. */
     public void holdPosition() {
-        m_extensionPID.setReference(
+        m_extensionController.setSetpoint(
             m_extensionMotor.getEncoder().getPosition(), ControlType.kPosition);
     }
 

@@ -1,18 +1,21 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.util.REVUtil;
 
 /**
  * Shooter subsystem with a 4-stage shooting pipeline:
@@ -24,79 +27,99 @@ import frc.robot.util.REVUtil;
 public class ShooterSubsystem extends SubsystemBase {
 
     // Motors
-    private final CANSparkMax  m_agitatorMotor          = new CANSparkMax(ShooterConstants.kAgitatorMotorID,         MotorType.kBrushless);
-    private final CANSparkFlex m_kickerMotor             = new CANSparkFlex(ShooterConstants.kKickerMotorID,          MotorType.kBrushless);
-    private final CANSparkFlex m_preShooterMotor         = new CANSparkFlex(ShooterConstants.kPreShooterMotorID,      MotorType.kBrushless);
-    private final CANSparkFlex m_shooterPrimaryMotor     = new CANSparkFlex(ShooterConstants.kShooterPrimaryMotorID,  MotorType.kBrushless);
-    private final CANSparkFlex m_shooterSecondaryMotor   = new CANSparkFlex(ShooterConstants.kShooterSecondaryMotorID, MotorType.kBrushless);
+    private final SparkMax  m_agitatorMotor          = new SparkMax(ShooterConstants.kAgitatorMotorID,         MotorType.kBrushless);
+    private final SparkFlex m_kickerMotor             = new SparkFlex(ShooterConstants.kKickerMotorID,          MotorType.kBrushless);
+    private final SparkFlex m_preShooterMotor         = new SparkFlex(ShooterConstants.kPreShooterMotorID,      MotorType.kBrushless);
+    private final SparkFlex m_shooterPrimaryMotor     = new SparkFlex(ShooterConstants.kShooterPrimaryMotorID,  MotorType.kBrushless);
+    private final SparkFlex m_shooterSecondaryMotor   = new SparkFlex(ShooterConstants.kShooterSecondaryMotorID, MotorType.kBrushless);
 
-    // PID controllers
-    private final SparkPIDController m_agitatorPID;
-    private final SparkPIDController m_kickerPID;
-    private final SparkPIDController m_preShooterPID;
-    private final SparkPIDController m_shooterPrimaryPID;
-    private final SparkPIDController m_shooterSecondaryPID;
+    // Closed-loop controllers
+    private final SparkClosedLoopController m_agitatorController;
+    private final SparkClosedLoopController m_kickerController;
+    private final SparkClosedLoopController m_preShooterController;
+    private final SparkClosedLoopController m_shooterPrimaryController;
+    private final SparkClosedLoopController m_shooterSecondaryController;
 
     public ShooterSubsystem() {
         // --- Agitator Motor (NEO + SparkMax) ---
-        REVUtil.checkREV("Agitator restoreFactoryDefaults", m_agitatorMotor.restoreFactoryDefaults());
-        REVUtil.checkREV("Agitator setIdleMode", m_agitatorMotor.setIdleMode(IdleMode.kBrake));
-        REVUtil.checkREV("Agitator setSmartCurrentLimit", m_agitatorMotor.setSmartCurrentLimit(ShooterConstants.kAgitatorCurrentLimitAmps));
-        m_agitatorMotor.setInverted(ShooterConstants.kAgitatorInverted);
-        m_agitatorPID = m_agitatorMotor.getPIDController();
-        REVUtil.checkREV("Agitator PID P", m_agitatorPID.setP(ShooterConstants.kAgitatorP));
-        REVUtil.checkREV("Agitator PID I", m_agitatorPID.setI(ShooterConstants.kAgitatorI));
-        REVUtil.checkREV("Agitator PID D", m_agitatorPID.setD(ShooterConstants.kAgitatorD));
-        REVUtil.checkREV("Agitator PID FF", m_agitatorPID.setFF(ShooterConstants.kAgitatorFF));
-        REVUtil.burnFlashWithDelay(m_agitatorMotor, "Agitator burnFlash");
+        SparkMaxConfig agitatorConfig = new SparkMaxConfig();
+        agitatorConfig
+            .inverted(ShooterConstants.kAgitatorInverted)
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(ShooterConstants.kAgitatorCurrentLimitAmps);
+        agitatorConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(ShooterConstants.kAgitatorP)
+            .i(ShooterConstants.kAgitatorI)
+            .d(ShooterConstants.kAgitatorD)
+            .feedForward
+            .kV(ShooterConstants.kAgitatorFF * 12.0);
+        m_agitatorMotor.configure(agitatorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        m_agitatorController = m_agitatorMotor.getClosedLoopController();
 
         // --- Kicker Motor (NEO Vortex + SparkFlex) ---
-        REVUtil.checkREV("Kicker restoreFactoryDefaults", m_kickerMotor.restoreFactoryDefaults());
-        REVUtil.checkREV("Kicker setIdleMode", m_kickerMotor.setIdleMode(IdleMode.kBrake));
-        REVUtil.checkREV("Kicker setSmartCurrentLimit", m_kickerMotor.setSmartCurrentLimit(ShooterConstants.kKickerCurrentLimitAmps));
-        m_kickerMotor.setInverted(ShooterConstants.kKickerInverted);
-        m_kickerPID = m_kickerMotor.getPIDController();
-        REVUtil.checkREV("Kicker PID P", m_kickerPID.setP(ShooterConstants.kKickerP));
-        REVUtil.checkREV("Kicker PID I", m_kickerPID.setI(ShooterConstants.kKickerI));
-        REVUtil.checkREV("Kicker PID D", m_kickerPID.setD(ShooterConstants.kKickerD));
-        REVUtil.checkREV("Kicker PID FF", m_kickerPID.setFF(ShooterConstants.kKickerFF));
-        REVUtil.burnFlashWithDelay(m_kickerMotor, "Kicker burnFlash");
+        SparkFlexConfig kickerConfig = new SparkFlexConfig();
+        kickerConfig
+            .inverted(ShooterConstants.kKickerInverted)
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(ShooterConstants.kKickerCurrentLimitAmps);
+        kickerConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(ShooterConstants.kKickerP)
+            .i(ShooterConstants.kKickerI)
+            .d(ShooterConstants.kKickerD)
+            .feedForward
+            .kV(ShooterConstants.kKickerFF * 12.0);
+        m_kickerMotor.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        m_kickerController = m_kickerMotor.getClosedLoopController();
 
         // --- Pre-Shooter Motor (NEO Vortex + SparkFlex) ---
-        REVUtil.checkREV("PreShooter restoreFactoryDefaults", m_preShooterMotor.restoreFactoryDefaults());
-        REVUtil.checkREV("PreShooter setIdleMode", m_preShooterMotor.setIdleMode(IdleMode.kCoast));
-        REVUtil.checkREV("PreShooter setSmartCurrentLimit", m_preShooterMotor.setSmartCurrentLimit(ShooterConstants.kPreShooterCurrentLimitAmps));
-        m_preShooterMotor.setInverted(ShooterConstants.kPreShooterInverted);
-        m_preShooterPID = m_preShooterMotor.getPIDController();
-        REVUtil.checkREV("PreShooter PID P", m_preShooterPID.setP(ShooterConstants.kPreShooterP));
-        REVUtil.checkREV("PreShooter PID I", m_preShooterPID.setI(ShooterConstants.kPreShooterI));
-        REVUtil.checkREV("PreShooter PID D", m_preShooterPID.setD(ShooterConstants.kPreShooterD));
-        REVUtil.checkREV("PreShooter PID FF", m_preShooterPID.setFF(ShooterConstants.kPreShooterFF));
-        REVUtil.burnFlashWithDelay(m_preShooterMotor, "PreShooter burnFlash");
+        SparkFlexConfig preShooterConfig = new SparkFlexConfig();
+        preShooterConfig
+            .inverted(ShooterConstants.kPreShooterInverted)
+            .idleMode(IdleMode.kCoast)
+            .smartCurrentLimit(ShooterConstants.kPreShooterCurrentLimitAmps);
+        preShooterConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(ShooterConstants.kPreShooterP)
+            .i(ShooterConstants.kPreShooterI)
+            .d(ShooterConstants.kPreShooterD)
+            .feedForward
+            .kV(ShooterConstants.kPreShooterFF * 12.0);
+        m_preShooterMotor.configure(preShooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        m_preShooterController = m_preShooterMotor.getClosedLoopController();
 
         // --- Shooter Primary Motor (NEO Vortex + SparkFlex, CAN 22) ---
-        REVUtil.checkREV("ShooterPrimary restoreFactoryDefaults", m_shooterPrimaryMotor.restoreFactoryDefaults());
-        REVUtil.checkREV("ShooterPrimary setIdleMode", m_shooterPrimaryMotor.setIdleMode(IdleMode.kCoast));
-        REVUtil.checkREV("ShooterPrimary setSmartCurrentLimit", m_shooterPrimaryMotor.setSmartCurrentLimit(ShooterConstants.kShooterCurrentLimitAmps));
-        m_shooterPrimaryMotor.setInverted(ShooterConstants.kShooterPrimaryInverted);
-        m_shooterPrimaryPID = m_shooterPrimaryMotor.getPIDController();
-        REVUtil.checkREV("ShooterPrimary PID P", m_shooterPrimaryPID.setP(ShooterConstants.kShooterP));
-        REVUtil.checkREV("ShooterPrimary PID I", m_shooterPrimaryPID.setI(ShooterConstants.kShooterI));
-        REVUtil.checkREV("ShooterPrimary PID D", m_shooterPrimaryPID.setD(ShooterConstants.kShooterD));
-        REVUtil.checkREV("ShooterPrimary PID FF", m_shooterPrimaryPID.setFF(ShooterConstants.kShooterFF));
-        REVUtil.burnFlashWithDelay(m_shooterPrimaryMotor, "ShooterPrimary burnFlash");
+        SparkFlexConfig shooterPrimaryConfig = new SparkFlexConfig();
+        shooterPrimaryConfig
+            .inverted(ShooterConstants.kShooterPrimaryInverted)
+            .idleMode(IdleMode.kCoast)
+            .smartCurrentLimit(ShooterConstants.kShooterCurrentLimitAmps);
+        shooterPrimaryConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(ShooterConstants.kShooterP)
+            .i(ShooterConstants.kShooterI)
+            .d(ShooterConstants.kShooterD)
+            .feedForward
+            .kV(ShooterConstants.kShooterFF * 12.0);
+        m_shooterPrimaryMotor.configure(shooterPrimaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        m_shooterPrimaryController = m_shooterPrimaryMotor.getClosedLoopController();
 
         // --- Shooter Secondary Motor (NEO Vortex + SparkFlex, CAN 23) ---
-        REVUtil.checkREV("ShooterSecondary restoreFactoryDefaults", m_shooterSecondaryMotor.restoreFactoryDefaults());
-        REVUtil.checkREV("ShooterSecondary setIdleMode", m_shooterSecondaryMotor.setIdleMode(IdleMode.kCoast));
-        REVUtil.checkREV("ShooterSecondary setSmartCurrentLimit", m_shooterSecondaryMotor.setSmartCurrentLimit(ShooterConstants.kShooterCurrentLimitAmps));
-        m_shooterSecondaryMotor.setInverted(ShooterConstants.kShooterSecondaryInverted);
-        m_shooterSecondaryPID = m_shooterSecondaryMotor.getPIDController();
-        REVUtil.checkREV("ShooterSecondary PID P", m_shooterSecondaryPID.setP(ShooterConstants.kShooterP));
-        REVUtil.checkREV("ShooterSecondary PID I", m_shooterSecondaryPID.setI(ShooterConstants.kShooterI));
-        REVUtil.checkREV("ShooterSecondary PID D", m_shooterSecondaryPID.setD(ShooterConstants.kShooterD));
-        REVUtil.checkREV("ShooterSecondary PID FF", m_shooterSecondaryPID.setFF(ShooterConstants.kShooterFF));
-        REVUtil.burnFlashWithDelay(m_shooterSecondaryMotor, "ShooterSecondary burnFlash");
+        SparkFlexConfig shooterSecondaryConfig = new SparkFlexConfig();
+        shooterSecondaryConfig
+            .inverted(ShooterConstants.kShooterSecondaryInverted)
+            .idleMode(IdleMode.kCoast)
+            .smartCurrentLimit(ShooterConstants.kShooterCurrentLimitAmps);
+        shooterSecondaryConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(ShooterConstants.kShooterP)
+            .i(ShooterConstants.kShooterI)
+            .d(ShooterConstants.kShooterD)
+            .feedForward
+            .kV(ShooterConstants.kShooterFF * 12.0);
+        m_shooterSecondaryMotor.configure(shooterSecondaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        m_shooterSecondaryController = m_shooterSecondaryMotor.getClosedLoopController();
     }
 
     // -------------------------------------------------------------------------
@@ -105,7 +128,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** Runs the agitator motor at the configured forward RPM using closed-loop velocity control. */
     public void runAgitator() {
-        m_agitatorPID.setReference(ShooterConstants.kAgitatorForwardRPM, ControlType.kVelocity);
+        m_agitatorController.setSetpoint(ShooterConstants.kAgitatorForwardRPM, ControlType.kVelocity);
     }
 
     /** Stops the agitator motor. */
@@ -119,7 +142,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** Runs the kicker motor at the configured forward RPM using closed-loop velocity control. */
     public void runKicker() {
-        m_kickerPID.setReference(ShooterConstants.kKickerForwardRPM, ControlType.kVelocity);
+        m_kickerController.setSetpoint(ShooterConstants.kKickerForwardRPM, ControlType.kVelocity);
     }
 
     /** Stops the kicker motor. */
@@ -133,7 +156,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** Runs the pre-shooter motor at the configured forward RPM using closed-loop velocity control. */
     public void runPreShooter() {
-        m_preShooterPID.setReference(ShooterConstants.kPreShooterForwardRPM, ControlType.kVelocity);
+        m_preShooterController.setSetpoint(ShooterConstants.kPreShooterForwardRPM, ControlType.kVelocity);
     }
 
     /** Stops the pre-shooter motor. */
@@ -147,8 +170,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** Runs both shooter flywheel motors at the configured forward RPM using closed-loop velocity control. */
     public void runShooter() {
-        m_shooterPrimaryPID.setReference(ShooterConstants.kShooterForwardRPM, ControlType.kVelocity);
-        m_shooterSecondaryPID.setReference(ShooterConstants.kShooterForwardRPM, ControlType.kVelocity);
+        m_shooterPrimaryController.setSetpoint(ShooterConstants.kShooterForwardRPM, ControlType.kVelocity);
+        m_shooterSecondaryController.setSetpoint(ShooterConstants.kShooterForwardRPM, ControlType.kVelocity);
     }
 
     /** Stops both shooter flywheel motors. */
@@ -171,11 +194,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** Runs all 4 stages simultaneously in reverse for clearing jams. */
     public void reverseAll() {
-        m_agitatorPID.setReference(-ShooterConstants.kAgitatorReverseRPM, ControlType.kVelocity);
-        m_kickerPID.setReference(-ShooterConstants.kKickerReverseRPM, ControlType.kVelocity);
-        m_preShooterPID.setReference(-ShooterConstants.kPreShooterReverseRPM, ControlType.kVelocity);
-        m_shooterPrimaryPID.setReference(-ShooterConstants.kShooterReverseRPM, ControlType.kVelocity);
-        m_shooterSecondaryPID.setReference(-ShooterConstants.kShooterReverseRPM, ControlType.kVelocity);
+        m_agitatorController.setSetpoint(-ShooterConstants.kAgitatorReverseRPM, ControlType.kVelocity);
+        m_kickerController.setSetpoint(-ShooterConstants.kKickerReverseRPM, ControlType.kVelocity);
+        m_preShooterController.setSetpoint(-ShooterConstants.kPreShooterReverseRPM, ControlType.kVelocity);
+        m_shooterPrimaryController.setSetpoint(-ShooterConstants.kShooterReverseRPM, ControlType.kVelocity);
+        m_shooterSecondaryController.setSetpoint(-ShooterConstants.kShooterReverseRPM, ControlType.kVelocity);
     }
 
     /** Stops all 4 stages (5 motors). */
