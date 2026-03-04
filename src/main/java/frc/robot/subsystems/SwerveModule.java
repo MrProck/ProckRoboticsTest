@@ -82,8 +82,6 @@ public class SwerveModule {
         // Current limit
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.SupplyCurrentLimit       = SwerveConstants.kDriveCurrentLimitAmps;
-        config.CurrentLimits.SupplyCurrentLowerLimit  = SwerveConstants.kDriveCurrentLimitAmps;
-        config.CurrentLimits.SupplyCurrentLowerTime   = 0.1;
 
         // Inversion & neutral mode
         config.MotorOutput.Inverted    = inverted
@@ -109,8 +107,6 @@ public class SwerveModule {
         // Current limit — 40A
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
         config.CurrentLimits.SupplyCurrentLimit       = SwerveConstants.kSteerCurrentLimitAmps;
-        config.CurrentLimits.SupplyCurrentLowerLimit  = SwerveConstants.kSteerCurrentLimitAmps;
-        config.CurrentLimits.SupplyCurrentLowerTime   = 0.1;
 
         // Inversion & neutral mode
         config.MotorOutput.Inverted    = inverted
