@@ -44,7 +44,7 @@ public class DriveSubsystem extends SubsystemBase {
         SwerveConstants.kBRCANcoderID, SwerveConstants.kBRCANcoderOffset,
         SwerveConstants.kBRDriveInverted, SwerveConstants.kBRSteerInverted);
 
-    private final Pigeon2 m_pigeon = new Pigeon2(SwerveConstants.kPigeonID, SwerveConstants.kCANivoreName);
+    private final Pigeon2 m_pigeon = new Pigeon2(SwerveConstants.kPigeonID, SwerveConstants.kCANivoreBus);
 
     private final SwerveDrivePoseEstimator m_poseEstimator =
         new SwerveDrivePoseEstimator(
