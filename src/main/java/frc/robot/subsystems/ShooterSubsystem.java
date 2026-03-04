@@ -17,7 +17,7 @@ import frc.robot.util.REVUtil;
 /**
  * Shooter subsystem with a 4-stage shooting pipeline:
  *  - Agitator    (NEO + SparkMax, CAN 19, 20A)
- *  - Kicker      (NEO + SparkMax, CAN 20, 40A)
+ *  - Kicker      (NEO Vortex + SparkFlex, CAN 20, 40A)
  *  - Pre-Shooter (NEO Vortex + SparkFlex, CAN 21, 40A)
  *  - Shooter     (2x NEO Vortex + SparkFlex, CAN 22 + 23, 80A each)
  */
@@ -25,7 +25,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     // Motors
     private final CANSparkMax  m_agitatorMotor          = new CANSparkMax(ShooterConstants.kAgitatorMotorID,         MotorType.kBrushless);
-    private final CANSparkMax  m_kickerMotor             = new CANSparkMax(ShooterConstants.kKickerMotorID,           MotorType.kBrushless);
+    private final CANSparkFlex m_kickerMotor             = new CANSparkFlex(ShooterConstants.kKickerMotorID,          MotorType.kBrushless);
     private final CANSparkFlex m_preShooterMotor         = new CANSparkFlex(ShooterConstants.kPreShooterMotorID,      MotorType.kBrushless);
     private final CANSparkFlex m_shooterPrimaryMotor     = new CANSparkFlex(ShooterConstants.kShooterPrimaryMotorID,  MotorType.kBrushless);
     private final CANSparkFlex m_shooterSecondaryMotor   = new CANSparkFlex(ShooterConstants.kShooterSecondaryMotorID, MotorType.kBrushless);
@@ -50,7 +50,7 @@ public class ShooterSubsystem extends SubsystemBase {
         REVUtil.checkREV("Agitator PID FF", m_agitatorPID.setFF(ShooterConstants.kAgitatorFF));
         REVUtil.burnFlashWithDelay(m_agitatorMotor, "Agitator burnFlash");
 
-        // --- Kicker Motor (NEO + SparkMax) ---
+        // --- Kicker Motor (NEO Vortex + SparkFlex) ---
         REVUtil.checkREV("Kicker restoreFactoryDefaults", m_kickerMotor.restoreFactoryDefaults());
         REVUtil.checkREV("Kicker setIdleMode", m_kickerMotor.setIdleMode(IdleMode.kBrake));
         REVUtil.checkREV("Kicker setSmartCurrentLimit", m_kickerMotor.setSmartCurrentLimit(ShooterConstants.kKickerCurrentLimitAmps));
