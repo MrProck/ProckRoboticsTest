@@ -178,19 +178,18 @@ public class SwerveModule {
             return;
         }
 
-        SwerveModuleState optimized = SwerveModuleState.optimize(
-            desiredState,
+        desiredState.optimize(
             Rotation2d.fromRotations(m_CANcoder.getAbsolutePosition().getValueAsDouble())
         );
 
         // Drive velocity in wheel rotations/s (SensorToMechanismRatio handles gear reduction)
         double driveRotationsPerSecond =
-            optimized.speedMetersPerSecond / SwerveConstants.kWheelCircumferenceMeters;
+            desiredState.speedMetersPerSecond / SwerveConstants.kWheelCircumferenceMeters;
         m_driveMotor.setControl(m_driveVelocityControl.withVelocity(driveRotationsPerSecond));
 
         // Steer position in rotations
         m_steerMotor.setControl(m_steerPositionControl.withPosition(
-            optimized.angle.getRotations()));
+            desiredState.angle.getRotations()));
     }
 
     /** Stops both drive and steer motors. */
