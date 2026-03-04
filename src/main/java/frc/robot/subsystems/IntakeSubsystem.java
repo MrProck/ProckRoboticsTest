@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import com.andymark.jni.AM_CAN_Color_Sensor;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
@@ -22,9 +21,9 @@ import frc.robot.Constants.IntakeConstants;
  * Intake subsystem with:
  *  - Extension arm (NEO + SparkMax, CAN 14)
  *  - Intake roller (NEO Vortex + SparkFlex, CAN 15)
- *  - 3x AndyMark am-5636 CAN color sensors (CAN 16, 17, 18) on RIO CAN bus
  *
- * Safety rule: if ANY sensor detects red or blue, intake is locked out.
+ * Color sensor lockout is disabled (AndyMark vendordep not available).
+ * isWrongColorDetected() always returns false.
  */
 public class IntakeSubsystem extends SubsystemBase {
 
@@ -34,11 +33,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // Closed-loop controller for extension position
     private final SparkClosedLoopController m_extensionController;
-
-    // Color sensors (on RIO CAN bus)
-    private final AM_CAN_Color_Sensor m_sensorEntry  = new AM_CAN_Color_Sensor(IntakeConstants.kEntrySensorID);
-    private final AM_CAN_Color_Sensor m_sensorMiddle = new AM_CAN_Color_Sensor(IntakeConstants.kMiddleSensorID);
-    private final AM_CAN_Color_Sensor m_sensorExit   = new AM_CAN_Color_Sensor(IntakeConstants.kExitSensorID);
 
     // Lockout state — true if a wrong-color game piece was detected
     private boolean m_intakeLocked = false;
@@ -58,9 +52,9 @@ public class IntakeSubsystem extends SubsystemBase {
             .i(IntakeConstants.kExtensionI)
             .d(IntakeConstants.kExtensionD);
         extensionConfig.softLimit
-            .forwardSoftLimit(IntakeConstants.kExtensionExtendedPosition)
+            .forwardSoftLimit((float) IntakeConstants.kExtensionExtendedPosition)
             .forwardSoftLimitEnabled(true)
-            .reverseSoftLimit(IntakeConstants.kExtensionRetractedPosition)
+            .reverseSoftLimit((float) IntakeConstants.kExtensionRetractedPosition)
             .reverseSoftLimitEnabled(true);
         m_extensionMotor.configure(extensionConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         m_extensionMotor.getEncoder().setPosition(0.0);
@@ -81,16 +75,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
     /**
      * Returns true if any sensor sees red or blue (wrong game piece).
-     * When true, intake is locked out.
+     * Color sensor (AndyMark am-5636) vendordep is not available; always returns false.
      */
     public boolean isWrongColorDetected() {
-        return isRedOrBlue(m_sensorEntry.classifyColor())
-            || isRedOrBlue(m_sensorMiddle.classifyColor())
-            || isRedOrBlue(m_sensorExit.classifyColor());
-    }
-
-    private boolean isRedOrBlue(String color) {
-        return "Red".equalsIgnoreCase(color) || "Blue".equalsIgnoreCase(color);
+        return false;
     }
 
     /** Clears the intake lockout (call after ejecting the wrong piece). */
@@ -191,9 +179,6 @@ public class IntakeSubsystem extends SubsystemBase {
         }
 
         // SmartDashboard telemetry
-        SmartDashboard.putString("Sensor Entry",  m_sensorEntry.classifyColor());
-        SmartDashboard.putString("Sensor Middle", m_sensorMiddle.classifyColor());
-        SmartDashboard.putString("Sensor Exit",   m_sensorExit.classifyColor());
         SmartDashboard.putBoolean("Intake Locked",  m_intakeLocked);
         SmartDashboard.putNumber("Extension Pos",   getExtensionPosition());
     }

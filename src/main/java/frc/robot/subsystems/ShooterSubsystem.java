@@ -51,8 +51,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(ShooterConstants.kAgitatorP)
             .i(ShooterConstants.kAgitatorI)
-            .d(ShooterConstants.kAgitatorD)
-            .feedForward
+            .d(ShooterConstants.kAgitatorD);
+        agitatorConfig.closedLoop.feedForward
             .kV(ShooterConstants.kAgitatorFF * 12.0);
         m_agitatorMotor.configure(agitatorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         m_agitatorController = m_agitatorMotor.getClosedLoopController();
@@ -67,8 +67,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(ShooterConstants.kKickerP)
             .i(ShooterConstants.kKickerI)
-            .d(ShooterConstants.kKickerD)
-            .feedForward
+            .d(ShooterConstants.kKickerD);
+        kickerConfig.closedLoop.feedForward
             .kV(ShooterConstants.kKickerFF * 12.0);
         m_kickerMotor.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         m_kickerController = m_kickerMotor.getClosedLoopController();
@@ -83,8 +83,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(ShooterConstants.kPreShooterP)
             .i(ShooterConstants.kPreShooterI)
-            .d(ShooterConstants.kPreShooterD)
-            .feedForward
+            .d(ShooterConstants.kPreShooterD);
+        preShooterConfig.closedLoop.feedForward
             .kV(ShooterConstants.kPreShooterFF * 12.0);
         m_preShooterMotor.configure(preShooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         m_preShooterController = m_preShooterMotor.getClosedLoopController();
@@ -99,8 +99,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(ShooterConstants.kShooterP)
             .i(ShooterConstants.kShooterI)
-            .d(ShooterConstants.kShooterD)
-            .feedForward
+            .d(ShooterConstants.kShooterD);
+        shooterPrimaryConfig.closedLoop.feedForward
             .kV(ShooterConstants.kShooterFF * 12.0);
         m_shooterPrimaryMotor.configure(shooterPrimaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         m_shooterPrimaryController = m_shooterPrimaryMotor.getClosedLoopController();
@@ -115,8 +115,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(ShooterConstants.kShooterP)
             .i(ShooterConstants.kShooterI)
-            .d(ShooterConstants.kShooterD)
-            .feedForward
+            .d(ShooterConstants.kShooterD);
+        shooterSecondaryConfig.closedLoop.feedForward
             .kV(ShooterConstants.kShooterFF * 12.0);
         m_shooterSecondaryMotor.configure(shooterSecondaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         m_shooterSecondaryController = m_shooterSecondaryMotor.getClosedLoopController();
