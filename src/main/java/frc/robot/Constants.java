@@ -83,7 +83,7 @@ public final class Constants {
          * where ω is angular velocity (rad/s) and r is this offset distance (meters).
          */
         public static final double kPigeonOffsetXMeters = 0.0;     // forward/back from center (meters), positive = forward
-        public static final double kPigeonOffsetYMeters = -0.1524; // left/right from center (meters), negative = backwards
+        public static final double kPigeonOffsetYMeters = -0.1524; // forward/back from center (meters), negative = backwards
     }
 
     /**
