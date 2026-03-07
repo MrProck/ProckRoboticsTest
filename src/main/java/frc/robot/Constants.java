@@ -26,43 +26,44 @@ public final class Constants {
         public static final int kBLCANcoderID = 11;
         public static final int kBRCANcoderID = 12;
         public static final int kPigeonID = 13;
-        public static final double kFLCANcoderOffset = 0.0;
-        public static final double kFRCANcoderOffset = 0.0;
-        public static final double kBLCANcoderOffset = 0.0;
-        public static final double kBRCANcoderOffset = 0.0;
-        public static final boolean kFLDriveInverted = true;
-        public static final boolean kFRDriveInverted = false;
-        public static final boolean kBLDriveInverted = true;
-        public static final boolean kBRDriveInverted = false;
-        public static final boolean kFLSteerInverted = true;
-        public static final boolean kFRSteerInverted = true;
-        public static final boolean kBLSteerInverted = true;
-        public static final boolean kBRSteerInverted = true;
-        public static final double kDriveGearRatio = 6.75;
-        public static final double kSteerGearRatio = (150.0 / 7.0);
+        public static final double kFLCANcoderOffset =  0.4736328125;
+        public static final double kFRCANcoderOffset = -0.484375;
+        public static final double kBLCANcoderOffset = -0.2744140625;
+        public static final double kBRCANcoderOffset =  0.0498046875;
+        public static final boolean kFLDriveInverted = false;
+        public static final boolean kFRDriveInverted = true;
+        public static final boolean kBLDriveInverted = false;
+        public static final boolean kBRDriveInverted = true;
+        public static final boolean kFLSteerInverted = false;
+        public static final boolean kFRSteerInverted = false;
+        public static final boolean kBLSteerInverted = false;
+        public static final boolean kBRSteerInverted = false;
+        public static final double kDriveGearRatio = 6.746031746031747;
+        public static final double kSteerGearRatio = 12.8;
         public static final double kWheelDiameterMeters = 0.1016;
         public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
-        public static final double kTrackWidthMeters = 0.71;
-        public static final double kWheelBaseMeters = 0.32;
+        public static final double kTrackWidthMeters = 0.6985;  // 27.5 inches
+        public static final double kWheelBaseMeters  = 0.3175;  // 12.5 inches
         public static final SwerveDriveKinematics kSwerveKinematics = new SwerveDriveKinematics(
             new Translation2d( kWheelBaseMeters / 2.0,  kTrackWidthMeters / 2.0),
             new Translation2d( kWheelBaseMeters / 2.0, -kTrackWidthMeters / 2.0),
             new Translation2d(-kWheelBaseMeters / 2.0,  kTrackWidthMeters / 2.0),
             new Translation2d(-kWheelBaseMeters / 2.0, -kTrackWidthMeters / 2.0));
-        public static final double kMaxDriveSpeedMetersPerSecond = 4.96;
+        public static final double kMaxDriveSpeedMetersPerSecond = 4.58;
         public static final double kMaxAngularVelocityRadiansPerSecond = 2.0 * Math.PI;
         public static final double kTeleopMaxDriveSpeed = 1.0;
         public static final double kTeleopMaxAngularSpeed = 0.75;
         public static final int kDriveCurrentLimitAmps = 60;
         public static final int kSteerCurrentLimitAmps = 40;
-        public static final double kDriveP = 0.1;
-        public static final double kDriveI = 0.0;
-        public static final double kDriveD = 0.0;
-        public static final double kDriveFF = 1.0 / (kMaxDriveSpeedMetersPerSecond / kWheelCircumferenceMeters);
-        public static final double kSteerP = 7.0;
-        public static final double kSteerI = 0.0;
-        public static final double kSteerD = 0.0;
-        public static final double kSteerFF = 0.0;
+        public static final double kDriveP  = 0.1;
+        public static final double kDriveI  = 0.0;
+        public static final double kDriveD  = 0.0;
+        public static final double kDriveFF = 0.124;   // kV (V per rot/s)
+        public static final double kSteerP  = 100.0;
+        public static final double kSteerI  = 0.0;
+        public static final double kSteerD  = 0.5;
+        public static final double kSteerS  = 0.1;     // static friction feedforward (V)
+        public static final double kSteerFF = 1.59;    // kV (V per rot/s)
         public static final double kDeadband = 0.05;
 
         /**

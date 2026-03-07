@@ -120,6 +120,7 @@ public class SwerveModule {
         config.Slot0.kP = SwerveConstants.kSteerP;
         config.Slot0.kI = SwerveConstants.kSteerI;
         config.Slot0.kD = SwerveConstants.kSteerD;
+        config.Slot0.kS = SwerveConstants.kSteerS;
         config.Slot0.kV = SwerveConstants.kSteerFF;
 
         // Fuse CANcoder as remote feedback sensor
