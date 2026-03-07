@@ -145,7 +145,7 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public void zeroHeading() {
-        m_pigeon.reset();
+        m_pigeon.setYaw(0.0);
     }
 
     public Pose2d getPose() {
