@@ -70,6 +70,20 @@ public final class Constants {
          * Set to true to match the WPILib convention (CCW positive) when the Pigeon reports CW positive.
          */
         public static final boolean kInvertGyro = true;
+
+        /**
+         * Physical offset of the Pigeon 2.0 from the robot's center of rotation (meters).
+         * The Pigeon is mounted 6 inches (0.1524 m) behind center on the Y axis.
+         *
+         * <p>This does NOT affect yaw/heading accuracy — angular velocity is uniform across
+         * the entire rigid robot body. However, if the Pigeon's accelerometer data is ever
+         * used (e.g. for translational velocity estimation), this offset would need to be
+         * compensated for by subtracting the centripetal acceleration term:
+         * <pre>  a_center = a_pigeon - ω² × r</pre>
+         * where ω is angular velocity (rad/s) and r is this offset distance (meters).
+         */
+        public static final double kPigeonOffsetXMeters = 0.0;     // forward/back from center (meters), positive = forward
+        public static final double kPigeonOffsetYMeters = -0.1524; // left/right from center (meters), negative = backwards
     }
 
     /**
