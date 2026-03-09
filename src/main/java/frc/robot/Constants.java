@@ -107,7 +107,7 @@ public final class Constants {
         public static final double kExtensionPositionConversionFactor = 1.0 / kExtensionGearRatio;
         public static final int     kRollerMotorID          = 15;
         public static final int     kRollerCurrentLimitAmps = 25;
-        public static final boolean kRollerMotorInverted    = false;
+        public static final boolean kRollerMotorInverted    = true;
         public static final double kRollerForwardSpeed  = 1.0;
         public static final double kRollerReverseSpeed  = -0.5;
         // AndyMark am-5636 CAN color sensors (RIO CAN bus)
@@ -137,7 +137,7 @@ public final class Constants {
         // Motor inversion
         public static final boolean kAgitatorInverted          = false;
         public static final boolean kKickerInverted            = false;
-        public static final boolean kPreShooterInverted        = false;
+        public static final boolean kPreShooterInverted        = true;
         public static final boolean kShooterPrimaryInverted    = false;
         public static final boolean kShooterSecondaryInverted  = true;
 
