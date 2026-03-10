@@ -49,17 +49,26 @@ public class TeleopDriveCommand extends Command {
         // Calculate progressive brake: 0.0 trigger = full speed, 1.0 trigger = full stop
         double speedMultiplier = 1.0 - MathUtil.clamp(m_slowMode.getAsDouble(), 0.0, 1.0);
 
-        double xSpeedMPS = MathUtil.applyDeadband(m_xSpeed.getAsDouble(), SwerveConstants.kDeadband)
+        double xSpeedMPS = squaredInput(MathUtil.applyDeadband(m_xSpeed.getAsDouble(), SwerveConstants.kDeadband))
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
             * speedMultiplier;
-        double ySpeedMPS = MathUtil.applyDeadband(m_ySpeed.getAsDouble(), SwerveConstants.kDeadband)
+        double ySpeedMPS = squaredInput(MathUtil.applyDeadband(m_ySpeed.getAsDouble(), SwerveConstants.kDeadband))
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
             * speedMultiplier;
-        double rotRadPerSec = MathUtil.applyDeadband(m_rotation.getAsDouble(), SwerveConstants.kDeadband)
+        double rotRadPerSec = squaredInput(MathUtil.applyDeadband(m_rotation.getAsDouble(), SwerveConstants.kDeadband))
             * SwerveConstants.kMaxAngularVelocityRadiansPerSecond * SwerveConstants.kTeleopMaxAngularSpeed
             * speedMultiplier;
 
         m_driveSubsystem.drive(xSpeedMPS, ySpeedMPS, rotRadPerSec, true);
+    }
+
+    /**
+     * Applies a squared input curve to reduce sensitivity near the stick center,
+     * while preserving the direction (sign) of the input.
+     * Small deflections produce much smaller outputs; full deflection is unchanged.
+     */
+    private double squaredInput(double input) {
+        return Math.copySign(input * input, input);
     }
 
     @Override

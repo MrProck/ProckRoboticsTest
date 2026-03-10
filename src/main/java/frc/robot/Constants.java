@@ -64,7 +64,7 @@ public final class Constants {
         public static final double kSteerD  = 0.5;
         public static final double kSteerS  = 0.1;     // static friction feedforward (V)
         public static final double kSteerFF = 1.59;    // kV (V per rot/s)
-        public static final double kDeadband = 0.05;
+        public static final double kDeadband = 0.08;  // increased from 0.05 for easier straight driving
 
         /**
          * When true, the Pigeon 2 yaw is negated before being used as the robot heading.
