@@ -278,4 +278,54 @@ public final class Constants {
             SwerveConstants.kWheelBaseMeters / 2.0,
             SwerveConstants.kTrackWidthMeters / 2.0);
     }
+
+    /**
+     * Constants for the Limelight orbital drive mode targeting the 2026 REBUILT field hub.
+     *
+     * <p>The hub is a central hexagonal field element. Its center coordinates are derived
+     * from the official WPILib 2026-rebuilt-welded AprilTag field layout JSON.
+     * Field dimensions: 16.541 m (length) × 8.069 m (width).
+     *
+     * <p>Blue hub AprilTag cluster (IDs 18–21, 24–27) center: (~4.876, ~4.035)
+     * Red  hub AprilTag cluster (IDs  2–5,  8–11) center: (~11.916, ~4.035)
+     */
+    public static final class OrbitalConstants {
+
+        // ---- Hub positions (meters, WPILib Blue-alliance origin) ----
+
+        /** X coordinate of the Blue alliance hub center (meters). */
+        public static final double kHubBlueX = 4.8755;
+
+        /** X coordinate of the Red alliance hub center (meters). */
+        public static final double kHubRedX  = 11.9155;
+
+        /**
+         * Y coordinate of the hub center shared by both alliances (meters).
+         * The hub sits on the field centerline.
+         */
+        public static final double kHubY = 4.0346;
+
+        // ---- Rotational PID (heading lock toward hub) ----
+
+        /** Proportional gain for the heading-to-hub PID controller. */
+        public static final double kOrbitalP = 5.5;
+
+        /** Integral gain for the heading-to-hub PID controller. */
+        public static final double kOrbitalI = 0.0;
+
+        /** Derivative gain for the heading-to-hub PID controller. */
+        public static final double kOrbitalD = 0.2;
+
+        /**
+         * Heading tolerance (degrees). The PID output is zeroed when the robot
+         * is within this angle of the hub direction.
+         */
+        public static final double kOrbitalToleranceDegrees = 2.0;
+
+        /**
+         * Maximum rotational output magnitude (rad/s) while orbiting.
+         * Prevents the robot from spinning uncontrollably if heading error is large.
+         */
+        public static final double kOrbitalMaxRotationRadPerSec = Math.PI; // 180 °/s
+    }
 }
