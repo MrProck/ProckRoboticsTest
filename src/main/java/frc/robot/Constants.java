@@ -107,7 +107,7 @@ public final class Constants {
         public static final double kExtensionPositionConversionFactor = 1.0 / kExtensionGearRatio;
         public static final int     kRollerMotorID          = 15;
         public static final int     kRollerCurrentLimitAmps = 25;
-        public static final boolean kRollerMotorInverted    = true;
+        public static final boolean kRollerMotorInverted    = false; // reverted: motor runs correct direction uninverted
         public static final double kRollerForwardSpeed  = 1.0;
         public static final double kRollerReverseSpeed  = -0.5;
         // AndyMark am-5636 CAN color sensors (RIO CAN bus)
@@ -160,6 +160,8 @@ public final class Constants {
         // --- Pre-Shooter (NEO Vortex + SparkFlex) ---
         public static final double kPreShooterForwardRPM = 5000.0;
         public static final double kPreShooterReverseRPM = 1000.0;
+        // FUTURE TUNING: Increasing kPreShooterP (e.g. 0.0004) will make the pre-shooter
+        // ramp up faster. Watch for overshoot/oscillation on the SmartDashboard RPM readout.
         public static final double kPreShooterP          = 0.0002;
         public static final double kPreShooterI          = 0.0;
         public static final double kPreShooterD          = 0.0;
@@ -168,6 +170,15 @@ public final class Constants {
         // --- Shooter (2x NEO Vortex + SparkFlex) ---
         public static final double kShooterForwardRPM    = 5500.0;
         public static final double kShooterReverseRPM    = 500.0;
+        // FUTURE TUNING: To improve shooter spin-up time, consider:
+        //   1. Increase kShooterP (e.g. 0.0004) — more aggressive PID response to large RPM errors.
+        //      Watch SmartDashboard "Shooter/Shooter Primary RPM" for overshoot/oscillation.
+        //   2. Fine-tune kShooterFF (e.g. 1.0 / 6500.0) — slightly higher FF gives a bigger
+        //      initial voltage push toward setpoint.
+        //   3. Add .closedLoopRampRate(0.0) to the SparkFlex config in ShooterSubsystem.java
+        //      to explicitly eliminate any ramp delay on the controller side.
+        //   4. Widen kShooterSpeedToleranceRPM (e.g. 300.0) to reduce the perceived wait time
+        //      before the ShootCommand gates feeding — only if shot accuracy allows it.
         public static final double kShooterP             = 0.0002;
         public static final double kShooterI             = 0.0;
         public static final double kShooterD             = 0.0;
