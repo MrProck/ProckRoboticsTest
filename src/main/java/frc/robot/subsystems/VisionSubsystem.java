@@ -2,10 +2,13 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.LimelightHelpers;
+
+import java.util.Optional;
 
 /**
  * Vision subsystem using a Limelight 4 for AprilTag-based pose estimation.
@@ -81,9 +84,12 @@ public class VisionSubsystem extends SubsystemBase {
             m_driveSubsystem.getHeading().getDegrees(),
             0, 0, 0, 0, 0);
 
-        // Retrieve the MegaTag2 pose estimate
+        // Retrieve the MegaTag2 pose estimate (alliance-aware)
+        Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
         LimelightHelpers.PoseEstimate poseEstimate =
-            LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(m_limelightName);
+            (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red)
+                ? LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2(m_limelightName)
+                : LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(m_limelightName);
 
         if (poseEstimate == null || poseEstimate.tagCount < VisionConstants.kMinTagCount) {
             m_tagCount = poseEstimate != null ? poseEstimate.tagCount : 0;

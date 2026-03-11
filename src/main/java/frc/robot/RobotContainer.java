@@ -11,6 +11,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AutonomousDriveCommand;
 import frc.robot.commands.IntakeExtensionCommand;
+import frc.robot.commands.OrbitalDriveCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.subsystems.DriveSubsystem;
@@ -90,6 +91,15 @@ public class RobotContainer {
         m_driverController.start().onTrue(
             new InstantCommand(m_driveSubsystem::zeroHeading, m_driveSubsystem)
         );
+
+        // Left Bumper (held) — orbital mode: lock heading toward 2026 REBUILT field hub
+        m_driverController.leftBumper()
+            .whileTrue(new OrbitalDriveCommand(
+                m_driveSubsystem,
+                () -> -m_driverController.getLeftY(),
+                () -> -m_driverController.getLeftX(),
+                () ->  m_driverController.getRightTriggerAxis()
+            ));
 
         // ---- Operator Controller ----
 
