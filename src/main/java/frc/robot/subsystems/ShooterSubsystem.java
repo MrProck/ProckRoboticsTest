@@ -131,6 +131,11 @@ public class ShooterSubsystem extends SubsystemBase {
         m_agitatorController.setSetpoint(ShooterConstants.kAgitatorForwardRPM, ControlType.kVelocity);
     }
 
+    /** Runs the agitator motor at a custom RPM using closed-loop velocity control. */
+    public void runAgitatorAtRPM(double rpm) {
+        m_agitatorController.setSetpoint(rpm, ControlType.kVelocity);
+    }
+
     /** Stops the agitator motor. */
     public void stopAgitator() {
         m_agitatorMotor.stopMotor();

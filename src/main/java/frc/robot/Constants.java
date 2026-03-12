@@ -141,7 +141,7 @@ public final class Constants {
         public static final int kShooterCurrentLimitAmps           = 80;
 
         // Motor inversion
-        public static final boolean kAgitatorInverted          = false;
+        public static final boolean kAgitatorInverted          = true;
         public static final boolean kKickerInverted            = false;
         public static final boolean kPreShooterInverted        = true;
         public static final boolean kShooterPrimaryInverted    = false;
@@ -150,6 +150,7 @@ public final class Constants {
         // --- Agitator (NEO + SparkMax) ---
         public static final double kAgitatorForwardRPM  = 3000.0;
         public static final double kAgitatorReverseRPM  = 1700.0;
+        public static final double kAgitatorIntakeRPM   = 2000.0;
         public static final double kAgitatorP           = 0.0002;
         public static final double kAgitatorI           = 0.0;
         public static final double kAgitatorD           = 0.0;
@@ -174,7 +175,7 @@ public final class Constants {
         public static final double kPreShooterFF         = 1.0 / 6784.0;  // NEO Vortex free speed
 
         // --- Shooter (2x NEO Vortex + SparkFlex) ---
-        public static final double kShooterForwardRPM    = 5500.0;
+        public static final double kShooterForwardRPM    = 3400.0;
         public static final double kShooterReverseRPM    = 500.0;
         // FUTURE TUNING: To improve shooter spin-up time, consider:
         //   1. Increase kShooterP (e.g. 0.0004) — more aggressive PID response to large RPM errors.
@@ -191,7 +192,7 @@ public final class Constants {
         public static final double kShooterFF            = 1.0 / 6784.0;  // NEO Vortex free speed
 
         // Shooter flywheel speed detection (used by ShootCommand to gate feeding)
-        public static final double kShooterTargetRPM         = 5500.0;
+        public static final double kShooterTargetRPM         = 3400.0;
         public static final double kShooterSpeedToleranceRPM = 200.0;
 
         /** Maximum time (seconds) to wait for shooter spin-up before feeding anyway. */

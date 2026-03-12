@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import com.pathplanner.lib.auto.AutoBuilder;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.commands.AutonomousDriveCommand;
 import frc.robot.commands.IntakeExtensionCommand;
 import frc.robot.commands.OrbitalDriveCommand;
@@ -103,11 +104,17 @@ public class RobotContainer {
 
         // ---- Operator Controller ----
 
-        // Right Trigger (held) — run intake roller forward
+        // Right Trigger (held) — run intake roller forward + agitator at 2000 RPM
         // Won't run if intake is locked out (enforced inside IntakeSubsystem)
         m_operatorController.rightTrigger(OIConstants.kTriggerThreshold)
-            .whileTrue(new RunCommand(m_intakeSubsystem::runIntake, m_intakeSubsystem))
-            .onFalse(new InstantCommand(m_intakeSubsystem::stopRoller, m_intakeSubsystem));
+            .whileTrue(new RunCommand(() -> {
+                m_intakeSubsystem.runIntake();
+                m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorIntakeRPM);
+            }, m_intakeSubsystem, m_shooterSubsystem))
+            .onFalse(new InstantCommand(() -> {
+                m_intakeSubsystem.stopRoller();
+                m_shooterSubsystem.stopAgitator();
+            }, m_intakeSubsystem, m_shooterSubsystem));
 
         // Right Bumper (held) — eject (roller reverse, always allowed)
         m_operatorController.rightBumper()
