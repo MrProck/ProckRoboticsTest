@@ -70,7 +70,7 @@ public final class Constants {
          * When true, the Pigeon 2 yaw is negated before being used as the robot heading.
          * Set to true to match the WPILib convention (CCW positive) when the Pigeon reports CW positive.
          */
-        public static final boolean kInvertGyro = true;
+        public static final boolean kInvertGyro = false;
 
         /**
          * Physical offset of the Pigeon 2.0 from the robot's center of rotation (meters).
@@ -135,8 +135,8 @@ public final class Constants {
         public static final int kShooterSecondaryMotorID  = 23;
 
         // Current limits (amps)
-        public static final int kAgitatorCurrentLimitAmps          = 20;
-        public static final int kKickerCurrentLimitAmps            = 40;
+        public static final int kAgitatorCurrentLimitAmps          = 30;
+        public static final int kKickerCurrentLimitAmps            = 50;
         public static final int kPreShooterCurrentLimitAmps        = 40;
         public static final int kShooterCurrentLimitAmps           = 80;
 

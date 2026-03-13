@@ -104,17 +104,18 @@ public class RobotContainer {
 
         // ---- Operator Controller ----
 
-        // Right Trigger (held) — run intake roller forward + agitator at 2000 RPM
+        // Right Trigger (held) — run intake roller forward + agitator
+        // Uses forward RPM (higher) so it doesn't conflict with shooter.
         // Won't run if intake is locked out (enforced inside IntakeSubsystem)
         m_operatorController.rightTrigger(OIConstants.kTriggerThreshold)
             .whileTrue(new RunCommand(() -> {
                 m_intakeSubsystem.runIntake();
-                m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorIntakeRPM);
-            }, m_intakeSubsystem, m_shooterSubsystem))
+                m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
+            }, m_intakeSubsystem))
             .onFalse(new InstantCommand(() -> {
                 m_intakeSubsystem.stopRoller();
                 m_shooterSubsystem.stopAgitator();
-            }, m_intakeSubsystem, m_shooterSubsystem));
+            }, m_intakeSubsystem));
 
         // Right Bumper (held) — eject (roller reverse, always allowed)
         m_operatorController.rightBumper()

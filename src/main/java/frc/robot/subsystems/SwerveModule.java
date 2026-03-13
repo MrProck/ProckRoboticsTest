@@ -124,7 +124,7 @@ public class SwerveModule {
         config.Slot0.kV = SwerveConstants.kSteerFF;
 
         // Fuse CANcoder as remote feedback sensor
-        config.Feedback.FeedbackSensorSource   = FeedbackSensorSourceValue.FusedCANcoder;
+        config.Feedback.FeedbackSensorSource   = FeedbackSensorSourceValue.RemoteCANcoder;
         config.Feedback.FeedbackRemoteSensorID = m_CANcoder.getDeviceID();
         config.Feedback.SensorToMechanismRatio  = 1.0;
         config.Feedback.RotorToSensorRatio      = SwerveConstants.kSteerGearRatio;
