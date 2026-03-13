@@ -64,7 +64,23 @@ public final class Constants {
         public static final double kSteerD  = 0.5;
         public static final double kSteerS  = 0.1;     // static friction feedforward (V)
         public static final double kSteerFF = 1.59;    // kV (V per rot/s)
-        public static final double kDeadband = 0.08;  // increased from 0.05 for easier straight driving
+        public static final double kDeadband = 0.05;  // reduced: blended cubic curve handles near-zero sensitivity
+
+        /**
+         * Slew rate limit (units per second) applied to each drive axis in TeleopDriveCommand.
+         * Limits how fast the commanded speed can change per second, smoothing acceleration and
+         * preventing wheel slip. Higher values = snappier acceleration; lower = smoother ramp.
+         */
+        public static final double kTeleopSlewRatePerSecond = 3.5;
+
+        /**
+         * Linear blend fraction for the input curve in TeleopDriveCommand.
+         * Output = linearBlend * x + (1 - linearBlend) * x³
+         * 0.0 = pure cubic (max sensitivity reduction near center)
+         * 1.0 = pure linear (no curve)
+         * 0.15 is a good starting point: smooth near zero, full speed at full stick.
+         */
+        public static final double kInputCurveLinearBlend = 0.15;
 
         /**
          * When true, the Pigeon 2 yaw is negated before being used as the robot heading.
