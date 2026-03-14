@@ -250,9 +250,9 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     /**
-     * Returns true if both shooter flywheel motors and the pre-shooter motor are within
-     * tolerance of their respective target RPMs. Useful for commands that need to wait
-     * for spin-up before feeding.
+     * Returns true if both shooter flywheel motors and the pre-shooter motor have
+     * reached or exceeded their respective target RPMs. Useful for commands that
+     * need to wait for spin-up before feeding.
      */
     public boolean isShooterAtSpeed() {
         double targetRPM = Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
@@ -260,9 +260,9 @@ public class ShooterSubsystem extends SubsystemBase {
         double secondaryVelocity = m_shooterSecondaryMotor.getEncoder().getVelocity();
         double preShooterTargetRPM = Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM);
         double preShooterVelocity = m_preShooterMotor.getEncoder().getVelocity();
-        return Math.abs(primaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
-            && Math.abs(secondaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
-            && Math.abs(preShooterVelocity - preShooterTargetRPM) <= ShooterConstants.kPreShooterSpeedToleranceRPM;
+        return primaryVelocity >= targetRPM
+            && secondaryVelocity >= targetRPM
+            && preShooterVelocity >= preShooterTargetRPM;
     }
 
     // -------------------------------------------------------------------------
@@ -278,10 +278,11 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Shooter/Shooter Secondary RPM", m_shooterSecondaryMotor.getEncoder().getVelocity());
         SmartDashboard.putBoolean("Shooter/AtSpeed",              isShooterAtSpeed());
         SmartDashboard.putBoolean("Shooter/PreShooter AtSpeed",
-            Math.abs(m_preShooterMotor.getEncoder().getVelocity()
-                - Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM))
-                <= ShooterConstants.kPreShooterSpeedToleranceRPM);
+            m_preShooterMotor.getEncoder().getVelocity()
+                >= Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM));
         SmartDashboard.putNumber("Shooter/Commanded RPM",
             Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM));
+        SmartDashboard.putNumber("Shooter/Commanded PreShooter RPM",
+            Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM));
     }
 }
