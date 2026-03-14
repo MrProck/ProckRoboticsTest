@@ -62,7 +62,8 @@ class TeleopDriveCommandTest {
         double slowMode = 0.0;
         double blend = SwerveConstants.kInputCurveLinearBlend;
         double curvedInput = blend * xInput + (1.0 - blend) * (xInput * xInput * xInput);
-        double speedMultiplier = 1.0 - MathUtil.clamp(slowMode, 0.0, 1.0);
+        double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
+        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
         double xSpeedMPS = MathUtil.applyDeadband(xInput, SwerveConstants.kDeadband)
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
             * speedMultiplier;
