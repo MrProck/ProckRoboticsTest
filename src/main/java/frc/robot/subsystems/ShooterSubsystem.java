@@ -12,6 +12,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -40,7 +41,14 @@ public class ShooterSubsystem extends SubsystemBase {
     private final SparkClosedLoopController m_shooterPrimaryController;
     private final SparkClosedLoopController m_shooterSecondaryController;
 
+    // Preferences keys for dashboard-tunable RPMs
+    private static final String kShooterRPMKey = "Shooter/Target RPM";
+    private static final String kPreShooterRPMKey = "Shooter/PreShooter Target RPM";
+
     public ShooterSubsystem() {
+        // Initialize Preferences with defaults (only writes if key doesn't already exist)
+        Preferences.initDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
+        Preferences.initDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM);
         // --- Agitator Motor (NEO + SparkMax) ---
         SparkMaxConfig agitatorConfig = new SparkMaxConfig();
         agitatorConfig
@@ -159,9 +167,10 @@ public class ShooterSubsystem extends SubsystemBase {
     // Pre-Shooter
     // -------------------------------------------------------------------------
 
-    /** Runs the pre-shooter motor at the configured forward RPM using closed-loop velocity control. */
+    /** Runs the pre-shooter motor at the dashboard-tunable RPM using closed-loop velocity control. */
     public void runPreShooter() {
-        m_preShooterController.setSetpoint(ShooterConstants.kPreShooterForwardRPM, ControlType.kVelocity);
+        double rpm = Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM);
+        m_preShooterController.setSetpoint(rpm, ControlType.kVelocity);
     }
 
     /** Stops the pre-shooter motor. */
@@ -173,10 +182,11 @@ public class ShooterSubsystem extends SubsystemBase {
     // Shooter
     // -------------------------------------------------------------------------
 
-    /** Runs both shooter flywheel motors at the configured forward RPM using closed-loop velocity control. */
+    /** Runs both shooter flywheel motors at the dashboard-tunable RPM using closed-loop velocity control. */
     public void runShooter() {
-        m_shooterPrimaryController.setSetpoint(ShooterConstants.kShooterForwardRPM, ControlType.kVelocity);
-        m_shooterSecondaryController.setSetpoint(ShooterConstants.kShooterForwardRPM, ControlType.kVelocity);
+        double rpm = Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
+        m_shooterPrimaryController.setSetpoint(rpm, ControlType.kVelocity);
+        m_shooterSecondaryController.setSetpoint(rpm, ControlType.kVelocity);
     }
 
     /** Stops both shooter flywheel motors. */
@@ -219,10 +229,11 @@ public class ShooterSubsystem extends SubsystemBase {
      * Useful for commands that need to wait for spin-up before feeding.
      */
     public boolean isShooterAtSpeed() {
+        double targetRPM = Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
         double primaryVelocity = m_shooterPrimaryMotor.getEncoder().getVelocity();
         double secondaryVelocity = m_shooterSecondaryMotor.getEncoder().getVelocity();
-        return Math.abs(primaryVelocity - ShooterConstants.kShooterTargetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
-            && Math.abs(secondaryVelocity - ShooterConstants.kShooterTargetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
+        return Math.abs(primaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
+            && Math.abs(secondaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
     }
 
     // -------------------------------------------------------------------------
@@ -237,5 +248,7 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Shooter/Shooter Primary RPM",   m_shooterPrimaryMotor.getEncoder().getVelocity());
         SmartDashboard.putNumber("Shooter/Shooter Secondary RPM", m_shooterSecondaryMotor.getEncoder().getVelocity());
         SmartDashboard.putBoolean("Shooter/AtSpeed",              isShooterAtSpeed());
+        SmartDashboard.putNumber("Shooter/Commanded RPM",
+            Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM));
     }
 }

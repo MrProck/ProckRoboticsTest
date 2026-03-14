@@ -102,6 +102,17 @@ public class RobotContainer {
                 () ->  m_driverController.getRightTriggerAxis()
             ));
 
+        // Left Trigger (held) — driver intake: run roller + agitator
+        m_driverController.leftTrigger(OIConstants.kTriggerThreshold)
+            .whileTrue(new RunCommand(() -> {
+                m_intakeSubsystem.runIntake();
+                m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
+            }, m_intakeSubsystem))
+            .onFalse(new InstantCommand(() -> {
+                m_intakeSubsystem.stopRoller();
+                m_shooterSubsystem.stopAgitator();
+            }, m_intakeSubsystem));
+
         // ---- Operator Controller ----
 
         // Right Trigger (held) — run intake roller forward + agitator
@@ -127,8 +138,17 @@ public class RobotContainer {
             new InstantCommand(m_intakeSubsystem::clearLockout, m_intakeSubsystem)
         );
 
-        // Left Trigger (held) — run full shoot sequence (spin up, then feed when at speed)
-        m_operatorController.leftTrigger(OIConstants.kTriggerThreshold)
+        // Left Trigger (>25%) — spin up shooter flywheels only (pre-spin, no feeding)
+        m_operatorController.leftTrigger(0.25)
+            .and(m_operatorController.leftTrigger(0.9).negate())
+            .whileTrue(new RunCommand(() -> {
+                m_shooterSubsystem.runPreShooter();
+                m_shooterSubsystem.runShooter();
+            }, m_shooterSubsystem))
+            .onFalse(new InstantCommand(m_shooterSubsystem::stopAll, m_shooterSubsystem));
+
+        // Left Trigger (>90%) — full shoot sequence (spin up + feed when at speed)
+        m_operatorController.leftTrigger(0.9)
             .whileTrue(new ShootCommand(m_shooterSubsystem));
 
         // Left Bumper (held) — manual reverse all shooter stages to clear jams
