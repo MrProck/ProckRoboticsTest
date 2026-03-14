@@ -13,7 +13,8 @@ class TeleopDriveCommandTest {
     void fullTriggerResultsInZeroSpeedMultiplier() {
         // When slow-mode trigger is fully depressed (1.0), speed multiplier is 0
         double slowMode = 1.0;
-        double speedMultiplier = 1.0 - MathUtil.clamp(slowMode, 0.0, 1.0);
+        double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
+        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
         assertEquals(0.0, speedMultiplier, 1e-9);
     }
 
@@ -21,8 +22,28 @@ class TeleopDriveCommandTest {
     void noTriggerResultsInFullSpeedMultiplier() {
         // When slow-mode trigger is not pressed (0.0), speed multiplier is 1
         double slowMode = 0.0;
-        double speedMultiplier = 1.0 - MathUtil.clamp(slowMode, 0.0, 1.0);
+        double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
+        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
         assertEquals(1.0, speedMultiplier, 1e-9);
+    }
+
+    @Test
+    void halfTriggerCubedBrakeScaling() {
+        // 50% trigger pull: 0.5³ = 0.125, so speedMultiplier = 1.0 - 0.125 = 0.875
+        // (linear scaling would give 0.5, so cubed gives much less braking at half pull)
+        double slowMode = 0.5;
+        double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
+        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
+        assertEquals(0.875, speedMultiplier, 1e-9);
+    }
+
+    @Test
+    void quarterTriggerCubedBrakeScaling() {
+        // 25% trigger pull: 0.25³ = 0.015625, so speedMultiplier = 1.0 - 0.015625 = 0.984375
+        double slowMode = 0.25;
+        double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
+        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
+        assertEquals(0.984375, speedMultiplier, 1e-9);
     }
 
     @Test
