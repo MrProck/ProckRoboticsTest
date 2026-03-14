@@ -20,10 +20,9 @@ import java.util.function.DoubleSupplier;
  *   <li>Scaled to m/s or rad/s and multiplied by the throttle accelerator factor</li>
  * </ol>
  * <p>
- * The driver's right trigger acts as a proportional brake with cubic scaling:
- * the robot moves at full speed by default and slows to a stop as the trigger
- * is pulled. A light pull applies very little braking for finer low-trigger
- * control, while a full press stops the robot entirely.
+ * The driver's right trigger acts as a linear accelerator:
+ * the robot is stopped when the trigger is not pressed and linearly ramps up
+ * to full speed as the trigger is fully pulled.
  */
 public class TeleopDriveCommand extends Command {
 
@@ -49,8 +48,8 @@ public class TeleopDriveCommand extends Command {
      * @param xSpeed         Forward/backward input (−1 to 1)
      * @param ySpeed         Left/right strafe input (−1 to 1)
      * @param rotation       Rotation input (−1 to 1)
-     * @param throttle       Brake input (0 = full speed, 1 = stopped); braking scales
-     *                       as the cube of the trigger value for finer low-pull control
+     * @param throttle       Accelerator input (0 = stopped, 1 = full speed); linearly
+     *                       scales all drive outputs
      */
     public TeleopDriveCommand(
         DriveSubsystem driveSubsystem,
@@ -74,10 +73,10 @@ public class TeleopDriveCommand extends Command {
 
     @Override
     public void execute() {
-        // Proportional brake with cubic scaling: light pull = very little braking,
-        // full press = full stop. Formula: speedMultiplier = 1 - trigger³
+        // Linear accelerator: trigger value directly becomes the speed multiplier.
+        // 0 = stopped, 1 = full speed.
         double trigger = MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
-        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
+        double speedMultiplier = trigger;
         // X-axis throttle is ramped to prevent tipping on the narrow 12.5" wheelbase.
         // Y-axis and rotation use the raw speedMultiplier for instant responsiveness.
         double xSpeedMultiplier = m_throttleXLimiter.calculate(speedMultiplier);

@@ -10,40 +10,39 @@ import frc.robot.Constants.SwerveConstants;
 class TeleopDriveCommandTest {
 
     @Test
-    void fullTriggerResultsInZeroSpeedMultiplier() {
-        // When slow-mode trigger is fully depressed (1.0), speed multiplier is 0
+    void fullTriggerResultsInFullSpeedMultiplier() {
+        // When accelerator trigger is fully depressed (1.0), speed multiplier is 1.0
         double slowMode = 1.0;
         double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
-        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
-        assertEquals(0.0, speedMultiplier, 1e-9);
-    }
-
-    @Test
-    void noTriggerResultsInFullSpeedMultiplier() {
-        // When slow-mode trigger is not pressed (0.0), speed multiplier is 1
-        double slowMode = 0.0;
-        double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
-        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
+        double speedMultiplier = trigger;
         assertEquals(1.0, speedMultiplier, 1e-9);
     }
 
     @Test
-    void halfTriggerCubedBrakeScaling() {
-        // 50% trigger pull: 0.5³ = 0.125, so speedMultiplier = 1.0 - 0.125 = 0.875
-        // (linear scaling would give 0.5, so cubed gives much less braking at half pull)
-        double slowMode = 0.5;
+    void noTriggerResultsInZeroSpeedMultiplier() {
+        // When accelerator trigger is not pressed (0.0), speed multiplier is 0.0 (stopped)
+        double slowMode = 0.0;
         double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
-        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
-        assertEquals(0.875, speedMultiplier, 1e-9);
+        double speedMultiplier = trigger;
+        assertEquals(0.0, speedMultiplier, 1e-9);
     }
 
     @Test
-    void quarterTriggerCubedBrakeScaling() {
-        // 25% trigger pull: 0.25³ = 0.015625, so speedMultiplier = 1.0 - 0.015625 = 0.984375
+    void halfTriggerLinearAccelerator() {
+        // 50% trigger pull: linear scaling gives speedMultiplier = 0.5
+        double slowMode = 0.5;
+        double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
+        double speedMultiplier = trigger;
+        assertEquals(0.5, speedMultiplier, 1e-9);
+    }
+
+    @Test
+    void quarterTriggerLinearAccelerator() {
+        // 25% trigger pull: linear scaling gives speedMultiplier = 0.25
         double slowMode = 0.25;
         double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
-        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
-        assertEquals(0.984375, speedMultiplier, 1e-9);
+        double speedMultiplier = trigger;
+        assertEquals(0.25, speedMultiplier, 1e-9);
     }
 
     @Test
@@ -56,14 +55,14 @@ class TeleopDriveCommandTest {
 
     @Test
     void fullStickInputProducesMaxTeleopSpeed() {
-        // Full stick input (1.0) with no trigger should produce max teleop speed.
+        // Full stick input (1.0) with full trigger (1.0) should produce max teleop speed.
         // blendedCubicInput(1.0) = blend * 1.0 + (1 - blend) * 1.0^3 = 1.0 always.
         double xInput = 1.0;
-        double slowMode = 0.0;
+        double slowMode = 1.0;
         double blend = SwerveConstants.kInputCurveLinearBlend;
         double curvedInput = blend * xInput + (1.0 - blend) * (xInput * xInput * xInput);
         double trigger = MathUtil.clamp(slowMode, 0.0, 1.0);
-        double speedMultiplier = 1.0 - (trigger * trigger * trigger);
+        double speedMultiplier = trigger;
         double xSpeedMPS = MathUtil.applyDeadband(xInput, SwerveConstants.kDeadband)
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
             * speedMultiplier;

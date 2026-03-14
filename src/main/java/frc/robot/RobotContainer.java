@@ -138,8 +138,8 @@ public class RobotContainer {
             new InstantCommand(m_intakeSubsystem::clearLockout, m_intakeSubsystem)
         );
 
-        // Left Trigger (>25%) — spin up shooter flywheels only (pre-spin, no feeding)
-        m_operatorController.leftTrigger(0.25)
+        // Left Trigger (>10%) — spin up shooter flywheels only (pre-spin, no feeding)
+        m_operatorController.leftTrigger(0.1)
             .and(m_operatorController.leftTrigger(0.9).negate())
             .whileTrue(Commands.startEnd(
                 () -> {
