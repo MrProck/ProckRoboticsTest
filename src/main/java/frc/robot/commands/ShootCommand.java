@@ -46,7 +46,7 @@ public class ShootCommand extends Command {
             // Keep kicker slowly inverting while waiting for shooter to reach speed
             m_shooterSubsystem.runKickerSlowReverse();
 
-            boolean atSpeed = m_shooterSubsystem.isShooterAtSpeed();
+            boolean atSpeed = m_shooterSubsystem.isPreShooterAboveKickerThreshold();
             boolean timedOut = m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
 
             if (atSpeed || timedOut) {

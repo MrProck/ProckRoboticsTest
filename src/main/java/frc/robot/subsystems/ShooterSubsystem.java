@@ -230,6 +230,15 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     /**
+     * Returns true when the pre-shooter motor's encoder velocity has reached or exceeded
+     * {@link ShooterConstants#kPreShooterKickerThresholdRPM}, indicating it is spinning
+     * fast enough for the kicker to begin feeding.
+     */
+    public boolean isPreShooterAboveKickerThreshold() {
+        return m_preShooterMotor.getEncoder().getVelocity() >= ShooterConstants.kPreShooterKickerThresholdRPM;
+    }
+
+    /**
      * Returns true if both shooter flywheel motors and the pre-shooter motor are within
      * tolerance of their respective target RPMs. Useful for commands that need to wait
      * for spin-up before feeding.
