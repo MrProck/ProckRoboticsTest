@@ -216,8 +216,8 @@ public final class Constants {
         public static final double kShooterFF            = 1.0 / 6784.0;  // NEO Vortex free speed
 
         // Shooter flywheel speed detection (used by ShootCommand to gate feeding)
-        public static final double kShooterTargetRPM         = 2700.0;
-        public static final double kShooterSpeedToleranceRPM = 200.0;
+        public static final double kShooterSpeedToleranceRPM    = 200.0;
+        public static final double kPreShooterSpeedToleranceRPM = 300.0;
 
         /** Maximum time (seconds) to wait for shooter spin-up before feeding anyway. */
         public static final double kShooterSpinUpTimeoutSeconds = 3.0;

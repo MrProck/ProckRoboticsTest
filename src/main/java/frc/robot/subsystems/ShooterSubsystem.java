@@ -20,8 +20,8 @@ import frc.robot.Constants.ShooterConstants;
 
 /**
  * Shooter subsystem with a 4-stage shooting pipeline:
- *  - Agitator    (NEO + SparkMax, CAN 19, 20A)
- *  - Kicker      (NEO Vortex + SparkFlex, CAN 20, 40A)
+ *  - Agitator    (NEO + SparkMax, CAN 19, 30A)
+ *  - Kicker      (NEO Vortex + SparkFlex, CAN 20, 50A)
  *  - Pre-Shooter (NEO Vortex + SparkFlex, CAN 21, 40A)
  *  - Shooter     (2x NEO Vortex + SparkFlex, CAN 22 + 23, 80A each)
  */
@@ -225,15 +225,19 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     /**
-     * Returns true if both shooter flywheel motors are within tolerance of the target RPM.
-     * Useful for commands that need to wait for spin-up before feeding.
+     * Returns true if both shooter flywheel motors and the pre-shooter motor are within
+     * tolerance of their respective target RPMs. Useful for commands that need to wait
+     * for spin-up before feeding.
      */
     public boolean isShooterAtSpeed() {
         double targetRPM = Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
         double primaryVelocity = m_shooterPrimaryMotor.getEncoder().getVelocity();
         double secondaryVelocity = m_shooterSecondaryMotor.getEncoder().getVelocity();
+        double preShooterTargetRPM = Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM);
+        double preShooterVelocity = m_preShooterMotor.getEncoder().getVelocity();
         return Math.abs(primaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
-            && Math.abs(secondaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
+            && Math.abs(secondaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
+            && Math.abs(preShooterVelocity - preShooterTargetRPM) <= ShooterConstants.kPreShooterSpeedToleranceRPM;
     }
 
     // -------------------------------------------------------------------------
@@ -248,6 +252,10 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Shooter/Shooter Primary RPM",   m_shooterPrimaryMotor.getEncoder().getVelocity());
         SmartDashboard.putNumber("Shooter/Shooter Secondary RPM", m_shooterSecondaryMotor.getEncoder().getVelocity());
         SmartDashboard.putBoolean("Shooter/AtSpeed",              isShooterAtSpeed());
+        SmartDashboard.putBoolean("Shooter/PreShooter AtSpeed",
+            Math.abs(m_preShooterMotor.getEncoder().getVelocity()
+                - Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM))
+                <= ShooterConstants.kPreShooterSpeedToleranceRPM);
         SmartDashboard.putNumber("Shooter/Commanded RPM",
             Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM));
     }
