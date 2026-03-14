@@ -32,7 +32,7 @@ import java.util.function.DoubleSupplier;
  *
  * <p>Translation inputs pass through unchanged (field-centric swerve).
  * The right-trigger brake from {@link TeleopDriveCommand} is preserved
- * as a proportional speed multiplier (0 = full speed, 1 = stopped).
+ * as a proportional speed multiplier with cubic scaling (0 = full speed, 1 = stopped).
  */
 public class OrbitalDriveCommand extends Command {
 
@@ -118,7 +118,10 @@ public class OrbitalDriveCommand extends Command {
         }
 
         // ---- Translation inputs (pass-through, with brake) ----
-        double speedMult = 1.0 - MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
+        // Proportional brake with cubic scaling: light pull = very little braking,
+        // full press = full stop. Formula: speedMult = 1 - trigger³
+        double trigger = MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
+        double speedMult = 1.0 - (trigger * trigger * trigger);
         // X-axis throttle is ramped to prevent tipping on the narrow 12.5" wheelbase.
         // Y-axis uses the raw speedMult for instant responsiveness.
         double xSpeedMult = m_throttleXLimiter.calculate(speedMult);
