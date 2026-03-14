@@ -221,8 +221,11 @@ public final class Constants {
         public static final double kShooterSpeedToleranceRPM    = 200.0;
         public static final double kPreShooterSpeedToleranceRPM = 300.0;
 
+        /** Pre-shooter RPM threshold at which the kicker begins feeding. */
+        public static final double kPreShooterKickerThresholdRPM = 3000.0;
+
         /** Maximum time (seconds) to wait for shooter spin-up before feeding anyway. */
-        public static final double kShooterSpinUpTimeoutSeconds = 3.0;
+        public static final double kShooterSpinUpTimeoutSeconds = 2.0;
     }
 
     /**
