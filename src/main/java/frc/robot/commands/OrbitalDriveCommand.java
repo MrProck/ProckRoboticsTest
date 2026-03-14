@@ -30,15 +30,15 @@ import java.util.function.DoubleSupplier;
  * </ul>
  *
  * <p>Translation inputs pass through unchanged (field-centric swerve).
- * The right-trigger slow-mode from {@link TeleopDriveCommand} is preserved
- * as an optional speed multiplier.
+ * The right-trigger accelerator from {@link TeleopDriveCommand} is preserved
+ * as a proportional speed multiplier.
  */
 public class OrbitalDriveCommand extends Command {
 
     private final DriveSubsystem  m_driveSubsystem;
     private final DoubleSupplier  m_xSpeed;
     private final DoubleSupplier  m_ySpeed;
-    private final DoubleSupplier  m_slowMode;
+    private final DoubleSupplier  m_throttle;
 
     private final PIDController m_headingPID;
 
@@ -48,18 +48,18 @@ public class OrbitalDriveCommand extends Command {
      * @param driveSubsystem The swerve drive subsystem.
      * @param xSpeed         Forward/backward translation supplier (−1 to 1).
      * @param ySpeed         Left/right strafe supplier (−1 to 1).
-     * @param slowMode       Speed-reduction supplier (0 = full speed, 1 = stop).
+     * @param throttle       Accelerator supplier (0 = stopped, 1 = full speed).
      */
     public OrbitalDriveCommand(
             DriveSubsystem driveSubsystem,
             DoubleSupplier xSpeed,
             DoubleSupplier ySpeed,
-            DoubleSupplier slowMode) {
+            DoubleSupplier throttle) {
 
         m_driveSubsystem = driveSubsystem;
         m_xSpeed         = xSpeed;
         m_ySpeed         = ySpeed;
-        m_slowMode       = slowMode;
+        m_throttle       = throttle;
 
         m_headingPID = new PIDController(
                 OrbitalConstants.kOrbitalP,
@@ -110,8 +110,8 @@ public class OrbitalDriveCommand extends Command {
             rotationRadPerSec = 0.0;
         }
 
-        // ---- Translation inputs (pass-through, with slow-mode) ----
-        double speedMult = 1.0 - MathUtil.clamp(m_slowMode.getAsDouble(), 0.0, 1.0);
+        // ---- Translation inputs (pass-through, with accelerator) ----
+        double speedMult = MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
 
         double xSpeedMPS = squaredInput(
                 MathUtil.applyDeadband(m_xSpeed.getAsDouble(), SwerveConstants.kDeadband))

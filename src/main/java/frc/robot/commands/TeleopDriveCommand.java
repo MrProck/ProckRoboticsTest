@@ -17,12 +17,12 @@ import java.util.function.DoubleSupplier;
  *   <li>Deadband applied ({@link SwerveConstants#kDeadband})</li>
  *   <li>Blended cubic curve applied ({@link SwerveConstants#kInputCurveLinearBlend})</li>
  *   <li>Slew rate limiter applied ({@link SwerveConstants#kTeleopSlewRatePerSecond})</li>
- *   <li>Scaled to m/s or rad/s and multiplied by the slow-mode brake factor</li>
+ *   <li>Scaled to m/s or rad/s and multiplied by the throttle accelerator factor</li>
  * </ol>
  * <p>
- * The driver's right trigger acts as a progressive brake: pulling the trigger
- * proportionally reduces drive and rotation speed. Fully depressing the trigger
- * stops the robot entirely.
+ * The driver's right trigger acts as a proportional accelerator: the robot's
+ * speed scales linearly with the trigger pull. Releasing the trigger stops the
+ * robot entirely.
  */
 public class TeleopDriveCommand extends Command {
 
@@ -30,7 +30,7 @@ public class TeleopDriveCommand extends Command {
     private final DoubleSupplier m_xSpeed;
     private final DoubleSupplier m_ySpeed;
     private final DoubleSupplier m_rotation;
-    private final DoubleSupplier m_slowMode;
+    private final DoubleSupplier m_throttle;
 
     // Slew rate limiters smooth acceleration on each axis independently.
     // Rate is in normalized units/second (input is −1 to 1 before scaling).
@@ -43,27 +43,27 @@ public class TeleopDriveCommand extends Command {
      * @param xSpeed         Forward/backward input (−1 to 1)
      * @param ySpeed         Left/right strafe input (−1 to 1)
      * @param rotation       Rotation input (−1 to 1)
-     * @param slowMode       Slow-mode input (0 = full speed, 1 = full stop)
+     * @param throttle       Accelerator input (0 = stopped, 1 = full speed)
      */
     public TeleopDriveCommand(
         DriveSubsystem driveSubsystem,
         DoubleSupplier xSpeed,
         DoubleSupplier ySpeed,
         DoubleSupplier rotation,
-        DoubleSupplier slowMode
+        DoubleSupplier throttle
     ) {
         m_driveSubsystem = driveSubsystem;
         m_xSpeed   = xSpeed;
         m_ySpeed   = ySpeed;
         m_rotation = rotation;
-        m_slowMode = slowMode;
+        m_throttle = throttle;
         addRequirements(driveSubsystem);
     }
 
     @Override
     public void execute() {
-        // Calculate progressive brake: 0.0 trigger = full speed, 1.0 trigger = full stop
-        double speedMultiplier = 1.0 - MathUtil.clamp(m_slowMode.getAsDouble(), 0.0, 1.0);
+        // Proportional accelerator: 0.0 trigger = stopped, 1.0 trigger = full speed
+        double speedMultiplier = MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
 
         double rawX = m_xSpeed.getAsDouble();
         double rawY = m_ySpeed.getAsDouble();

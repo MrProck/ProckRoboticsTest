@@ -68,7 +68,7 @@ The robot uses a **Limelight 4** camera for AprilTag-based field localization:
 | Left Stick Y (Driver) | Forward / Backward |
 | Left Stick X (Driver) | Strafe Left / Right |
 | Right Stick X (Driver) | Rotate |
-| Right Trigger (Driver) | Progressive brake (slow mode) |
+| Right Trigger (Driver) | Proportional accelerator (speed scales with trigger pull) |
 | Start (Driver) | Zero gyro heading |
 | Left Stick Y (Operator) | Extend / Retract intake |
 | Right Trigger (Operator) | Run intake roller |
@@ -83,7 +83,7 @@ The robot uses a **Limelight 4** camera for AprilTag-based field localization:
 | Left Stick Y | Forward / Backward |
 | Left Stick X | Strafe Left / Right |
 | Right Stick X | Rotate |
-| Right Trigger | Progressive brake (0 = full speed, fully held = full stop) |
+| Right Trigger | Proportional accelerator (0 = stopped, fully held = full speed) |
 | Start | Zero gyro heading |
 
 ### Operator Controller (Port 1)
