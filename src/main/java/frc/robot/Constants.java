@@ -214,7 +214,7 @@ public final class Constants {
         //      to explicitly eliminate any ramp delay on the controller side.
         //   4. Widen kShooterSpeedToleranceRPM (e.g. 300.0) to reduce the perceived wait time
         //      before the ShootCommand gates feeding — only if shot accuracy allows it.
-        public static final double kShooterP             = 0.0002;
+        public static final double kShooterP             = 0.001;
         public static final double kShooterI             = 0.0;
         public static final double kShooterD             = 0.0;
         public static final double kShooterFF            = 1.0 / 6784.0;  // NEO Vortex free speed
