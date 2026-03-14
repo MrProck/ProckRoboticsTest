@@ -62,7 +62,7 @@ public class ShooterSubsystem extends SubsystemBase {
             .i(ShooterConstants.kAgitatorI)
             .d(ShooterConstants.kAgitatorD);
         agitatorConfig.closedLoop.feedForward
-            .kV(ShooterConstants.kAgitatorFF * 12.0);
+            .kV(ShooterConstants.kAgitatorFF);
         REVUtil.check(
             m_agitatorMotor.configure(agitatorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Agitator motor (SparkMax ID " + ShooterConstants.kAgitatorMotorID + ") configure");
@@ -80,7 +80,7 @@ public class ShooterSubsystem extends SubsystemBase {
             .i(ShooterConstants.kKickerI)
             .d(ShooterConstants.kKickerD);
         kickerConfig.closedLoop.feedForward
-            .kV(ShooterConstants.kKickerFF * 12.0);
+            .kV(ShooterConstants.kKickerFF);
         REVUtil.check(
             m_kickerMotor.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Kicker motor (SparkFlex ID " + ShooterConstants.kKickerMotorID + ") configure");
@@ -98,7 +98,7 @@ public class ShooterSubsystem extends SubsystemBase {
             .i(ShooterConstants.kPreShooterI)
             .d(ShooterConstants.kPreShooterD);
         preShooterConfig.closedLoop.feedForward
-            .kV(ShooterConstants.kPreShooterFF * 12.0);
+            .kV(ShooterConstants.kPreShooterFF);
         REVUtil.check(
             m_preShooterMotor.configure(preShooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Pre-shooter motor (SparkFlex ID " + ShooterConstants.kPreShooterMotorID + ") configure");
@@ -116,7 +116,7 @@ public class ShooterSubsystem extends SubsystemBase {
             .i(ShooterConstants.kShooterI)
             .d(ShooterConstants.kShooterD);
         shooterPrimaryConfig.closedLoop.feedForward
-            .kV(ShooterConstants.kShooterFF * 12.0);
+            .kV(ShooterConstants.kShooterFF);
         REVUtil.check(
             m_shooterPrimaryMotor.configure(shooterPrimaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Shooter primary motor (SparkFlex ID " + ShooterConstants.kShooterPrimaryMotorID + ") configure");
@@ -134,7 +134,7 @@ public class ShooterSubsystem extends SubsystemBase {
             .i(ShooterConstants.kShooterI)
             .d(ShooterConstants.kShooterD);
         shooterSecondaryConfig.closedLoop.feedForward
-            .kV(ShooterConstants.kShooterFF * 12.0);
+            .kV(ShooterConstants.kShooterFF);
         REVUtil.check(
             m_shooterSecondaryMotor.configure(shooterSecondaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Shooter secondary motor (SparkFlex ID " + ShooterConstants.kShooterSecondaryMotorID + ") configure");

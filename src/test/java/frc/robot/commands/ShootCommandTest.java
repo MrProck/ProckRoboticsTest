@@ -50,7 +50,7 @@ class ShootCommandTest {
 
     @Test
     void executeDoesNotFeedBeforeShooterAtSpeed() {
-        when(m_shooter.isPreShooterAboveKickerThreshold()).thenReturn(false);
+        when(m_shooter.isShooterAtSpeed()).thenReturn(false);
 
         m_command.initialize();
         m_command.execute();
@@ -60,7 +60,7 @@ class ShootCommandTest {
 
     @Test
     void executeStartsFeedingOnceShooterAtSpeed() {
-        when(m_shooter.isPreShooterAboveKickerThreshold()).thenReturn(true);
+        when(m_shooter.isShooterAtSpeed()).thenReturn(true);
 
         m_command.initialize();
         m_command.execute();
