@@ -195,6 +195,11 @@ public class SwerveModule {
             desiredState.angle.getRotations()));
     }
 
+    /** Returns the drive motor duty cycle output (−1 to 1). */
+    public double getDriveOutput() {
+        return m_driveMotor.getDutyCycle().getValueAsDouble();
+    }
+
     /** Stops both drive and steer motors. */
     public void stop() {
         m_driveMotor.stopMotor();

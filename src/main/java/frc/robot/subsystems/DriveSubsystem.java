@@ -229,5 +229,10 @@ public class DriveSubsystem extends SubsystemBase {
             states[2].speedMetersPerSecond, states[2].angle.getDegrees(),
             states[3].speedMetersPerSecond, states[3].angle.getDegrees()
         });
+
+        SmartDashboard.putNumber("FL Drive Output", m_frontLeft.getDriveOutput());
+        SmartDashboard.putNumber("FR Drive Output", m_frontRight.getDriveOutput());
+        SmartDashboard.putNumber("BL Drive Output", m_backLeft.getDriveOutput());
+        SmartDashboard.putNumber("BR Drive Output", m_backRight.getDriveOutput());
     }
 }

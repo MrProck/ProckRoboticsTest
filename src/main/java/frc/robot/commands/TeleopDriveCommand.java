@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.DriveSubsystem;
@@ -64,18 +65,30 @@ public class TeleopDriveCommand extends Command {
         // Calculate progressive brake: 0.0 trigger = full speed, 1.0 trigger = full stop
         double speedMultiplier = 1.0 - MathUtil.clamp(m_slowMode.getAsDouble(), 0.0, 1.0);
 
+        double rawX = m_xSpeed.getAsDouble();
+        double rawY = m_ySpeed.getAsDouble();
+        double rawRot = m_rotation.getAsDouble();
+
+        SmartDashboard.putNumber("Joystick Raw X", rawX);
+        SmartDashboard.putNumber("Joystick Raw Y", rawY);
+        SmartDashboard.putNumber("Joystick Raw Rot", rawRot);
+
         double xSpeedMPS = m_xLimiter.calculate(
-                blendedCubicInput(MathUtil.applyDeadband(m_xSpeed.getAsDouble(), SwerveConstants.kDeadband)))
+                blendedCubicInput(MathUtil.applyDeadband(rawX, SwerveConstants.kDeadband)))
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
             * speedMultiplier;
         double ySpeedMPS = m_yLimiter.calculate(
-                blendedCubicInput(MathUtil.applyDeadband(m_ySpeed.getAsDouble(), SwerveConstants.kDeadband)))
+                blendedCubicInput(MathUtil.applyDeadband(rawY, SwerveConstants.kDeadband)))
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
             * speedMultiplier;
         double rotRadPerSec = m_rotLimiter.calculate(
-                blendedCubicInput(MathUtil.applyDeadband(m_rotation.getAsDouble(), SwerveConstants.kDeadband)))
+                blendedCubicInput(MathUtil.applyDeadband(rawRot, SwerveConstants.kDeadband)))
             * SwerveConstants.kMaxAngularVelocityRadiansPerSecond * SwerveConstants.kTeleopMaxAngularSpeed
             * speedMultiplier;
+
+        SmartDashboard.putNumber("Cmd xSpeed (m/s)", xSpeedMPS);
+        SmartDashboard.putNumber("Cmd ySpeed (m/s)", ySpeedMPS);
+        SmartDashboard.putNumber("Cmd rot (rad/s)", rotRadPerSec);
 
         m_driveSubsystem.drive(xSpeedMPS, ySpeedMPS, rotRadPerSec, true);
     }
