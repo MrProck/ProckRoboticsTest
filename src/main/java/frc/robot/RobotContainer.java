@@ -107,6 +107,24 @@ public class RobotContainer {
             .whileTrue(createIntakeRunCommand())
             .onFalse(createIntakeStopCommand());
 
+        // X (held) — pre-spin shooter flywheels only (no feeding)
+        m_driverController.x()
+            .whileTrue(Commands.startEnd(
+                () -> {
+                    m_shooterSubsystem.runPreShooter();
+                    m_shooterSubsystem.runShooter();
+                },
+                () -> {
+                    m_shooterSubsystem.stopPreShooter();
+                    m_shooterSubsystem.stopShooter();
+                },
+                m_shooterSubsystem
+            ));
+
+        // A (held) — full shoot sequence (spin up + feed when at speed)
+        m_driverController.a()
+            .whileTrue(new ShootCommand(m_shooterSubsystem));
+
         // ---- Operator Controller ----
 
         // Right Trigger (held) — run intake roller forward + agitator

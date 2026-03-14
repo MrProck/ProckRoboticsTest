@@ -220,7 +220,7 @@ public final class Constants {
         public static final double kShooterFF            = 1.0 / 6784.0;  // NEO Vortex free speed
 
         // Shooter flywheel speed detection (used by ShootCommand to gate feeding)
-        public static final double kShooterSpeedToleranceRPM    = 200.0;
+        public static final double kShooterSpeedToleranceRPM    = 175.0;
         public static final double kPreShooterSpeedToleranceRPM = 300.0;
 
         /** Pre-shooter RPM threshold at which the kicker begins feeding. */

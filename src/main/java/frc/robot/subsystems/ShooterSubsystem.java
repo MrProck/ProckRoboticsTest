@@ -250,19 +250,15 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     /**
-     * Returns true if both shooter flywheel motors and the pre-shooter motor have
-     * reached or exceeded their respective target RPMs. Useful for commands that
-     * need to wait for spin-up before feeding.
+     * Returns true if both shooter flywheel motors are within the tolerance
+     * window of the dashboard-tunable target RPM.
      */
     public boolean isShooterAtSpeed() {
         double targetRPM = Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
         double primaryVelocity = m_shooterPrimaryMotor.getEncoder().getVelocity();
         double secondaryVelocity = m_shooterSecondaryMotor.getEncoder().getVelocity();
-        double preShooterTargetRPM = Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM);
-        double preShooterVelocity = m_preShooterMotor.getEncoder().getVelocity();
-        return primaryVelocity >= targetRPM
-            && secondaryVelocity >= targetRPM
-            && preShooterVelocity >= preShooterTargetRPM;
+        return Math.abs(primaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
+            && Math.abs(secondaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
     }
 
     // -------------------------------------------------------------------------
