@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -38,25 +39,17 @@ public class ShootCommand extends Command {
 
     @Override
     public void execute() {
-        // Continuously command flywheels to maintain speed
-        m_shooterSubsystem.runPreShooter();
-        m_shooterSubsystem.runShooter();
+        boolean atSpeed = m_shooterSubsystem.isShooterAtSpeed();
+        boolean timedOut = m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
 
-        if (!m_feedingStarted) {
-            // Keep kicker slowly inverting while waiting for shooter to reach speed
+        SmartDashboard.putBoolean("Shooter/FeedGate AtSpeed", atSpeed);
+        SmartDashboard.putBoolean("Shooter/FeedGate TimedOut", timedOut);
+
+        if (atSpeed || timedOut) {
+            m_shooterSubsystem.runAgitator();
+            m_shooterSubsystem.runKicker();
+        } else {
             m_shooterSubsystem.runKickerSlowReverse();
-
-            boolean atSpeed = m_shooterSubsystem.isPreShooterAboveKickerThreshold();
-            boolean timedOut = m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
-
-            if (atSpeed || timedOut) {
-                if (timedOut && !atSpeed) {
-                    System.err.println("[ShootCommand] WARNING: Spin-up timeout elapsed — feeding without reaching target RPM");
-                }
-                m_shooterSubsystem.runAgitator();
-                m_shooterSubsystem.runKicker();
-                m_feedingStarted = true;
-            }
         }
     }
 

@@ -71,15 +71,15 @@ public final class Constants {
          * Limits how fast the commanded speed can change per second, smoothing acceleration and
          * preventing wheel slip. Higher values = snappier acceleration; lower = smoother ramp.
          */
-        public static final double kTeleopSlewRatePerSecond = 3.5;
+        public static final double kTeleopSlewRatePerSecond = 2.5;
 
         /**
          * Max rate of change for the X-axis throttle multiplier (units/sec).
-         * A value of 2.0 means it takes 0.5s to go from stopped to full speed on the X axis.
+         * A value of 1.5 means it takes ~0.67s to go from stopped to full speed on the X axis.
          * Limits forward/backward acceleration to prevent tipping on the narrow wheelbase (12.5").
          * Y-axis (strafe) and rotation use the unramped throttle for instant responsiveness.
          */
-        public static final double kThrottleXSlewRatePerSecond = 2.0;
+        public static final double kThrottleXSlewRatePerSecond = 1.5;
 
         /**
          * Linear blend fraction for the input curve in TeleopDriveCommand.
@@ -203,7 +203,7 @@ public final class Constants {
         public static final double kPreShooterFF         = 1.0 / 6784.0;  // NEO Vortex free speed
 
         // --- Shooter (2x NEO Vortex + SparkFlex) ---
-        public static final double kShooterForwardRPM    = 2700.0;
+        public static final double kShooterForwardRPM    = 5000.0;
         public static final double kShooterReverseRPM    = 500.0;
         // FUTURE TUNING: To improve shooter spin-up time, consider:
         //   1. Increase kShooterP (e.g. 0.0004) — more aggressive PID response to large RPM errors.
