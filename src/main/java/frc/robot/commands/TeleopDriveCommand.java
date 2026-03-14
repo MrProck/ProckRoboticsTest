@@ -20,9 +20,9 @@ import java.util.function.DoubleSupplier;
  *   <li>Scaled to m/s or rad/s and multiplied by the throttle accelerator factor</li>
  * </ol>
  * <p>
- * The driver's right trigger acts as a proportional accelerator: the robot's
- * speed scales linearly with the trigger pull. Releasing the trigger stops the
- * robot entirely.
+ * The driver's right trigger acts as a proportional brake: the robot moves at
+ * full speed by default and slows to a stop as the trigger is pulled. Pulling
+ * the trigger to full stops the robot entirely.
  */
 public class TeleopDriveCommand extends Command {
 
@@ -48,7 +48,7 @@ public class TeleopDriveCommand extends Command {
      * @param xSpeed         Forward/backward input (−1 to 1)
      * @param ySpeed         Left/right strafe input (−1 to 1)
      * @param rotation       Rotation input (−1 to 1)
-     * @param throttle       Accelerator input (0 = stopped, 1 = full speed)
+     * @param throttle       Brake input (0 = full speed, 1 = stopped)
      */
     public TeleopDriveCommand(
         DriveSubsystem driveSubsystem,
@@ -72,8 +72,8 @@ public class TeleopDriveCommand extends Command {
 
     @Override
     public void execute() {
-        // Proportional accelerator: 0.0 trigger = stopped, 1.0 trigger = full speed
-        double speedMultiplier = MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
+        // Proportional brake: 0.0 trigger = full speed, 1.0 trigger = stopped
+        double speedMultiplier = 1.0 - MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
         // X-axis throttle is ramped to prevent tipping on the narrow 12.5" wheelbase.
         // Y-axis and rotation use the raw speedMultiplier for instant responsiveness.
         double xSpeedMultiplier = m_throttleXLimiter.calculate(speedMultiplier);

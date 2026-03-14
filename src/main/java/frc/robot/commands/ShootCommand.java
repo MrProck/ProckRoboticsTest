@@ -7,9 +7,11 @@ import frc.robot.subsystems.ShooterSubsystem;
 
 /**
  * Orchestrates the full shooting sequence:
- *  1. Spins up the pre-shooter and shooter flywheels immediately.
+ *  1. Spins up the pre-shooter and shooter flywheels immediately while running
+ *     the kicker slowly in reverse to prevent pre-loading.
  *  2. Once the shooter is at speed (or the spin-up timeout elapses), starts
- *     the agitator and kicker to feed the game piece into the spinning flywheels.
+ *     the agitator and switches the kicker to its normal forward direction to
+ *     feed the game piece into the spinning flywheels.
  *  3. Stops everything when the command ends.
  *
  * Runs until cancelled (e.g., button released).
@@ -31,6 +33,7 @@ public class ShootCommand extends Command {
         m_spinUpTimer.restart();
         m_shooterSubsystem.runPreShooter();
         m_shooterSubsystem.runShooter();
+        m_shooterSubsystem.runKickerSlowReverse();
     }
 
     @Override
@@ -40,6 +43,9 @@ public class ShootCommand extends Command {
         m_shooterSubsystem.runShooter();
 
         if (!m_feedingStarted) {
+            // Keep kicker slowly inverting while waiting for shooter to reach speed
+            m_shooterSubsystem.runKickerSlowReverse();
+
             boolean atSpeed = m_shooterSubsystem.isShooterAtSpeed();
             boolean timedOut = m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
 

@@ -183,6 +183,8 @@ public final class Constants {
         // --- Kicker (NEO Vortex + SparkFlex) ---
         public static final double kKickerForwardRPM    = 3000.0;
         public static final double kKickerReverseRPM    = 1000.0;
+        /** Slow reverse speed (RPM) used during shooter spin-up to prevent pre-loading. */
+        public static final double kKickerSlowInvertRPM = 500.0;
         public static final double kKickerP             = 0.0002;
         public static final double kKickerI             = 0.0;
         public static final double kKickerD             = 0.0;

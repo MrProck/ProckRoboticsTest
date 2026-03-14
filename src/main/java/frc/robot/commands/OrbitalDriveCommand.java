@@ -31,8 +31,8 @@ import java.util.function.DoubleSupplier;
  * </ul>
  *
  * <p>Translation inputs pass through unchanged (field-centric swerve).
- * The right-trigger accelerator from {@link TeleopDriveCommand} is preserved
- * as a proportional speed multiplier.
+ * The right-trigger brake from {@link TeleopDriveCommand} is preserved
+ * as a proportional speed multiplier (0 = full speed, 1 = stopped).
  */
 public class OrbitalDriveCommand extends Command {
 
@@ -54,7 +54,7 @@ public class OrbitalDriveCommand extends Command {
      * @param driveSubsystem The swerve drive subsystem.
      * @param xSpeed         Forward/backward translation supplier (−1 to 1).
      * @param ySpeed         Left/right strafe supplier (−1 to 1).
-     * @param throttle       Accelerator supplier (0 = stopped, 1 = full speed).
+     * @param throttle       Brake supplier (0 = full speed, 1 = stopped).
      */
     public OrbitalDriveCommand(
             DriveSubsystem driveSubsystem,
@@ -117,8 +117,8 @@ public class OrbitalDriveCommand extends Command {
             rotationRadPerSec = 0.0;
         }
 
-        // ---- Translation inputs (pass-through, with accelerator) ----
-        double speedMult = MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
+        // ---- Translation inputs (pass-through, with brake) ----
+        double speedMult = 1.0 - MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
         // X-axis throttle is ramped to prevent tipping on the narrow 12.5" wheelbase.
         // Y-axis uses the raw speedMult for instant responsiveness.
         double xSpeedMult = m_throttleXLimiter.calculate(speedMult);
