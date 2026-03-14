@@ -137,8 +137,8 @@ Selectable via SmartDashboard **Auto Chooser**:
 | 16 | Entry Color Sensor | — | am-5636 | — |
 | 17 | Middle Color Sensor | — | am-5636 | — |
 | 18 | Exit Color Sensor | — | am-5636 | — |
-| 19 | Shooter Agitator | NEO | SparkMax | 20 A |
-| 20 | Shooter Kicker | NEO Vortex | SparkFlex | 40 A |
+| 19 | Shooter Agitator | NEO | SparkMax | 30 A |
+| 20 | Shooter Kicker | NEO Vortex | SparkFlex | 50 A |
 | 21 | Shooter Pre-Shooter | NEO Vortex | SparkFlex | 40 A |
 | 22 | Shooter Primary Flywheel | NEO Vortex | SparkFlex | 80 A |
 | 23 | Shooter Secondary Flywheel | NEO Vortex | SparkFlex | 80 A |
@@ -151,13 +151,13 @@ Selectable via SmartDashboard **Auto Chooser**:
 | Swerve Drive | Steer Motors (×4) | 40 A | Supply (TalonFX) |
 | Intake | Extension Motor | 17 A | Smart (SparkMax) |
 | Intake | Roller Motor | 25 A | Smart (SparkFlex) |
-| Shooter | Agitator | 20 A | Smart (SparkMax) |
-| Shooter | Kicker | 40 A | Smart (SparkFlex) |
+| Shooter | Agitator | 30 A | Smart (SparkMax) |
+| Shooter | Kicker | 50 A | Smart (SparkFlex) |
 | Shooter | Pre-Shooter | 40 A | Smart (SparkFlex) |
 | Shooter | Primary Flywheel | 80 A | Smart (SparkFlex) |
 | Shooter | Secondary Flywheel | 80 A | Smart (SparkFlex) |
 
-> **Total worst-case current draw**: 4×60 + 4×40 + 17 + 25 + 20 + 40 + 40 + 80 + 80 = **702 A**
+> **Total worst-case current draw**: 4×60 + 4×40 + 17 + 25 + 30 + 50 + 40 + 80 + 80 = **722 A**
 > (all motors stalled simultaneously — theoretical maximum, not a realistic operating scenario)
 
 > **Note:** `SwerveModule.java` previously contained a stale comment `// Current limit — 100A` at line 82, but the actual configured value is `SwerveConstants.kDriveCurrentLimitAmps = 60`. The comment has been updated to remove the incorrect value.

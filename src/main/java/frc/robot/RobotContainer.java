@@ -107,11 +107,11 @@ public class RobotContainer {
             .whileTrue(new RunCommand(() -> {
                 m_intakeSubsystem.runIntake();
                 m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
-            }, m_intakeSubsystem))
+            }, m_intakeSubsystem, m_shooterSubsystem))
             .onFalse(new InstantCommand(() -> {
                 m_intakeSubsystem.stopRoller();
                 m_shooterSubsystem.stopAgitator();
-            }, m_intakeSubsystem));
+            }, m_intakeSubsystem, m_shooterSubsystem));
 
         // ---- Operator Controller ----
 
@@ -122,11 +122,11 @@ public class RobotContainer {
             .whileTrue(new RunCommand(() -> {
                 m_intakeSubsystem.runIntake();
                 m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
-            }, m_intakeSubsystem))
+            }, m_intakeSubsystem, m_shooterSubsystem))
             .onFalse(new InstantCommand(() -> {
                 m_intakeSubsystem.stopRoller();
                 m_shooterSubsystem.stopAgitator();
-            }, m_intakeSubsystem));
+            }, m_intakeSubsystem, m_shooterSubsystem));
 
         // Right Bumper (held) — eject (roller reverse, always allowed)
         m_operatorController.rightBumper()
@@ -141,11 +141,17 @@ public class RobotContainer {
         // Left Trigger (>25%) — spin up shooter flywheels only (pre-spin, no feeding)
         m_operatorController.leftTrigger(0.25)
             .and(m_operatorController.leftTrigger(0.9).negate())
-            .whileTrue(new RunCommand(() -> {
-                m_shooterSubsystem.runPreShooter();
-                m_shooterSubsystem.runShooter();
-            }, m_shooterSubsystem))
-            .onFalse(new InstantCommand(m_shooterSubsystem::stopAll, m_shooterSubsystem));
+            .whileTrue(Commands.startEnd(
+                () -> {
+                    m_shooterSubsystem.runPreShooter();
+                    m_shooterSubsystem.runShooter();
+                },
+                () -> {
+                    m_shooterSubsystem.stopPreShooter();
+                    m_shooterSubsystem.stopShooter();
+                },
+                m_shooterSubsystem
+            ));
 
         // Left Trigger (>90%) — full shoot sequence (spin up + feed when at speed)
         m_operatorController.leftTrigger(0.9)
