@@ -38,6 +38,11 @@ public class TeleopDriveCommand extends Command {
     private final SlewRateLimiter m_yLimiter   = new SlewRateLimiter(SwerveConstants.kTeleopSlewRatePerSecond);
     private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(SwerveConstants.kTeleopSlewRatePerSecond);
 
+    // Slew rate limiter on the X-axis throttle multiplier only.
+    // Limits forward/backward acceleration to prevent tipping on the narrow 12.5" wheelbase.
+    // Y-axis (strafe) and rotation use the unramped throttle for instant responsiveness.
+    private final SlewRateLimiter m_throttleXLimiter = new SlewRateLimiter(SwerveConstants.kThrottleXSlewRatePerSecond);
+
     /**
      * @param driveSubsystem The swerve drive subsystem
      * @param xSpeed         Forward/backward input (−1 to 1)
@@ -61,9 +66,17 @@ public class TeleopDriveCommand extends Command {
     }
 
     @Override
+    public void initialize() {
+        m_throttleXLimiter.reset(0.0);
+    }
+
+    @Override
     public void execute() {
         // Proportional accelerator: 0.0 trigger = stopped, 1.0 trigger = full speed
         double speedMultiplier = MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
+        // X-axis throttle is ramped to prevent tipping on the narrow 12.5" wheelbase.
+        // Y-axis and rotation use the raw speedMultiplier for instant responsiveness.
+        double xSpeedMultiplier = m_throttleXLimiter.calculate(speedMultiplier);
 
         double rawX = m_xSpeed.getAsDouble();
         double rawY = m_ySpeed.getAsDouble();
@@ -76,7 +89,7 @@ public class TeleopDriveCommand extends Command {
         double xSpeedMPS = m_xLimiter.calculate(
                 blendedCubicInput(MathUtil.applyDeadband(rawX, SwerveConstants.kDeadband)))
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
-            * speedMultiplier;
+            * xSpeedMultiplier;
         double ySpeedMPS = m_yLimiter.calculate(
                 blendedCubicInput(MathUtil.applyDeadband(rawY, SwerveConstants.kDeadband)))
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
