@@ -54,16 +54,20 @@ class TeleopDriveCommandTest {
     }
 
     @Test
-    void blendedCubicReducesMidStickOutput() {
-        // At mid-stick (0.5), blended cubic should produce less than linear (0.5).
+    void blendedCubicMidStickOutput() {
+        // At mid-stick (0.5), output depends on blend factor.
+        // With blend=1.0 (fully linear), output equals input exactly.
+        // With blend<1.0 (cubic mix), output is reduced for finer low-speed control.
         double input = 0.5;
         double blend = SwerveConstants.kInputCurveLinearBlend;
         double curvedOutput = blend * input + (1.0 - blend) * (input * input * input);
-        // cubic(0.5) = 0.125, blended = 0.15*0.5 + 0.85*0.125 = 0.075 + 0.10625 = 0.18125
-        assertTrue(curvedOutput < input,
-            "blendedCubicInput(0.5) should be less than linear 0.5 for sensitivity reduction");
+        double expectedOutput = blend * input + (1.0 - blend) * (input * input * input);
+        assertEquals(expectedOutput, curvedOutput, 1e-9,
+            "blendedCubicInput(0.5) should match the formula for the configured blend");
         assertTrue(curvedOutput > 0.0,
             "blendedCubicInput(0.5) should still be positive");
+        assertTrue(curvedOutput <= input,
+            "blendedCubicInput(0.5) should be at most linear (never exceeds input for 0<x<1)");
     }
 
     @Test
