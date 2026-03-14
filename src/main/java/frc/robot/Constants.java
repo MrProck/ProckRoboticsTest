@@ -74,6 +74,14 @@ public final class Constants {
         public static final double kTeleopSlewRatePerSecond = 3.5;
 
         /**
+         * Max rate of change for the X-axis throttle multiplier (units/sec).
+         * A value of 2.0 means it takes 0.5s to go from stopped to full speed on the X axis.
+         * Limits forward/backward acceleration to prevent tipping on the narrow wheelbase (12.5").
+         * Y-axis (strafe) and rotation use the unramped throttle for instant responsiveness.
+         */
+        public static final double kThrottleXSlewRatePerSecond = 2.0;
+
+        /**
          * Linear blend fraction for the input curve in TeleopDriveCommand.
          * Output = linearBlend * x + (1 - linearBlend) * x³
          * 0.0 = pure cubic (max sensitivity reduction near center)

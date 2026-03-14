@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -42,6 +43,11 @@ public class OrbitalDriveCommand extends Command {
 
     private final PIDController m_headingPID;
 
+    // Slew rate limiter on the X-axis throttle multiplier only.
+    // Limits forward/backward acceleration to prevent tipping on the narrow 12.5" wheelbase.
+    // Y-axis (strafe) uses the unramped throttle for instant responsiveness.
+    private final SlewRateLimiter m_throttleXLimiter = new SlewRateLimiter(SwerveConstants.kThrottleXSlewRatePerSecond);
+
     /**
      * Creates a new OrbitalDriveCommand.
      *
@@ -80,6 +86,7 @@ public class OrbitalDriveCommand extends Command {
     @Override
     public void initialize() {
         m_headingPID.reset();
+        m_throttleXLimiter.reset(0.0);
     }
 
     @Override
@@ -112,12 +119,15 @@ public class OrbitalDriveCommand extends Command {
 
         // ---- Translation inputs (pass-through, with accelerator) ----
         double speedMult = MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
+        // X-axis throttle is ramped to prevent tipping on the narrow 12.5" wheelbase.
+        // Y-axis uses the raw speedMult for instant responsiveness.
+        double xSpeedMult = m_throttleXLimiter.calculate(speedMult);
 
         double xSpeedMPS = squaredInput(
                 MathUtil.applyDeadband(m_xSpeed.getAsDouble(), SwerveConstants.kDeadband))
                 * SwerveConstants.kMaxDriveSpeedMetersPerSecond
                 * SwerveConstants.kTeleopMaxDriveSpeed
-                * speedMult;
+                * xSpeedMult;
 
         double ySpeedMPS = squaredInput(
                 MathUtil.applyDeadband(m_ySpeed.getAsDouble(), SwerveConstants.kDeadband))
