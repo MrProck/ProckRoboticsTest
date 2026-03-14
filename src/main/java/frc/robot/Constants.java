@@ -163,7 +163,8 @@ public final class Constants {
         public static final int kAgitatorCurrentLimitAmps          = 30;
         public static final int kKickerCurrentLimitAmps            = 50;
         public static final int kPreShooterCurrentLimitAmps        = 40;
-        public static final int kShooterCurrentLimitAmps           = 80;
+        /** Current limit for each shooter flywheel motor (amps). */
+        public static final int kShooterCurrentLimitAmps = 90;
 
         // Motor inversion
         public static final boolean kAgitatorInverted          = true;
@@ -225,8 +226,8 @@ public final class Constants {
         /** Pre-shooter RPM threshold at which the kicker begins feeding. */
         public static final double kPreShooterKickerThresholdRPM = 3000.0;
 
-        /** Maximum time (seconds) to wait for shooter spin-up before feeding anyway. */
-        public static final double kShooterSpinUpTimeoutSeconds = 2.0;
+        /** The maximum time (seconds) to wait for shooter spin-up before feeding anyway. */
+        public static final double kShooterSpinUpTimeoutSeconds = 3.0;
     }
 
     /**
