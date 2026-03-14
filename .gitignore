@@ -8,3 +8,13 @@ bin/
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch/
+
+# Build artifacts
+*.jar
+*.log
+out/
+META-INF/
+
+# IDE
+.idea/
+*.iml

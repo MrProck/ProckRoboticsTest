@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.util.REVUtil;
 
 /**
  * Intake subsystem with:
@@ -56,7 +57,9 @@ public class IntakeSubsystem extends SubsystemBase {
             .forwardSoftLimitEnabled(true)
             .reverseSoftLimit((float) IntakeConstants.kExtensionRetractedPosition)
             .reverseSoftLimitEnabled(true);
-        m_extensionMotor.configure(extensionConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        REVUtil.check(
+            m_extensionMotor.configure(extensionConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
+            "Extension motor (SparkMax ID " + IntakeConstants.kExtensionMotorID + ") configure");
         m_extensionMotor.getEncoder().setPosition(0.0);
         m_extensionController = m_extensionMotor.getClosedLoopController();
 
@@ -66,7 +69,9 @@ public class IntakeSubsystem extends SubsystemBase {
             .inverted(IntakeConstants.kRollerMotorInverted)
             .idleMode(IdleMode.kCoast)
             .smartCurrentLimit(IntakeConstants.kRollerCurrentLimitAmps);
-        m_rollerMotor.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        REVUtil.check(
+            m_rollerMotor.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
+            "Roller motor (SparkFlex ID " + IntakeConstants.kRollerMotorID + ") configure");
     }
 
     // -------------------------------------------------------------------------

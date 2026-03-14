@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.util.REVUtil;
 
 /**
  * Shooter subsystem with a 4-stage shooting pipeline:
@@ -62,7 +63,9 @@ public class ShooterSubsystem extends SubsystemBase {
             .d(ShooterConstants.kAgitatorD);
         agitatorConfig.closedLoop.feedForward
             .kV(ShooterConstants.kAgitatorFF * 12.0);
-        m_agitatorMotor.configure(agitatorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        REVUtil.check(
+            m_agitatorMotor.configure(agitatorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
+            "Agitator motor (SparkMax ID " + ShooterConstants.kAgitatorMotorID + ") configure");
         m_agitatorController = m_agitatorMotor.getClosedLoopController();
 
         // --- Kicker Motor (NEO Vortex + SparkFlex) ---
@@ -78,7 +81,9 @@ public class ShooterSubsystem extends SubsystemBase {
             .d(ShooterConstants.kKickerD);
         kickerConfig.closedLoop.feedForward
             .kV(ShooterConstants.kKickerFF * 12.0);
-        m_kickerMotor.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        REVUtil.check(
+            m_kickerMotor.configure(kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
+            "Kicker motor (SparkFlex ID " + ShooterConstants.kKickerMotorID + ") configure");
         m_kickerController = m_kickerMotor.getClosedLoopController();
 
         // --- Pre-Shooter Motor (NEO Vortex + SparkFlex) ---
@@ -94,7 +99,9 @@ public class ShooterSubsystem extends SubsystemBase {
             .d(ShooterConstants.kPreShooterD);
         preShooterConfig.closedLoop.feedForward
             .kV(ShooterConstants.kPreShooterFF * 12.0);
-        m_preShooterMotor.configure(preShooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        REVUtil.check(
+            m_preShooterMotor.configure(preShooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
+            "Pre-shooter motor (SparkFlex ID " + ShooterConstants.kPreShooterMotorID + ") configure");
         m_preShooterController = m_preShooterMotor.getClosedLoopController();
 
         // --- Shooter Primary Motor (NEO Vortex + SparkFlex, CAN 22) ---
@@ -110,7 +117,9 @@ public class ShooterSubsystem extends SubsystemBase {
             .d(ShooterConstants.kShooterD);
         shooterPrimaryConfig.closedLoop.feedForward
             .kV(ShooterConstants.kShooterFF * 12.0);
-        m_shooterPrimaryMotor.configure(shooterPrimaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        REVUtil.check(
+            m_shooterPrimaryMotor.configure(shooterPrimaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
+            "Shooter primary motor (SparkFlex ID " + ShooterConstants.kShooterPrimaryMotorID + ") configure");
         m_shooterPrimaryController = m_shooterPrimaryMotor.getClosedLoopController();
 
         // --- Shooter Secondary Motor (NEO Vortex + SparkFlex, CAN 23) ---
@@ -126,7 +135,9 @@ public class ShooterSubsystem extends SubsystemBase {
             .d(ShooterConstants.kShooterD);
         shooterSecondaryConfig.closedLoop.feedForward
             .kV(ShooterConstants.kShooterFF * 12.0);
-        m_shooterSecondaryMotor.configure(shooterSecondaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        REVUtil.check(
+            m_shooterSecondaryMotor.configure(shooterSecondaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
+            "Shooter secondary motor (SparkFlex ID " + ShooterConstants.kShooterSecondaryMotorID + ") configure");
         m_shooterSecondaryController = m_shooterSecondaryMotor.getClosedLoopController();
     }
 
