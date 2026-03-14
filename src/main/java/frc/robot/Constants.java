@@ -98,7 +98,8 @@ public final class Constants {
 
         /**
          * Physical offset of the Pigeon 2.0 from the robot's center of rotation (meters).
-         * The Pigeon is mounted 6 inches (0.1524 m) behind center on the Y axis.
+         * The Pigeon is mounted 6 inches (0.1524 m) to the right of center on the Y axis
+         * (negative Y = right per WPILib convention where positive Y = left).
          *
          * <p>This does NOT affect yaw/heading accuracy — angular velocity is uniform across
          * the entire rigid robot body. However, if the Pigeon's accelerometer data is ever
@@ -108,7 +109,7 @@ public final class Constants {
          * where ω is angular velocity (rad/s) and r is this offset distance (meters).
          */
         public static final double kPigeonOffsetXMeters = 0.0;     // forward/back from center (meters), positive = forward
-        public static final double kPigeonOffsetYMeters = -0.1524; // forward/back from center (meters), negative = backwards
+        public static final double kPigeonOffsetYMeters = -0.1524; // left/right from center (meters), negative = right
     }
 
     /**

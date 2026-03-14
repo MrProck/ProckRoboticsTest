@@ -125,6 +125,9 @@ public class TeleopDriveCommand extends Command {
      */
     private double blendedCubicInput(double input) {
         double blend = SwerveConstants.kInputCurveLinearBlend;
+        // NOTE: With kInputCurveLinearBlend = 1.0 this is intentionally a no-op
+        // (reduces to `return input`). The cubic term is kept for future tuning —
+        // lower the blend value toward 0.0 to re-enable sensitivity reduction near center.
         return blend * input + (1.0 - blend) * (input * input * input);
     }
 

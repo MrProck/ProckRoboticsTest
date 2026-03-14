@@ -104,14 +104,8 @@ public class RobotContainer {
 
         // Left Trigger (held) — driver intake: run roller + agitator
         m_driverController.leftTrigger(OIConstants.kTriggerThreshold)
-            .whileTrue(new RunCommand(() -> {
-                m_intakeSubsystem.runIntake();
-                m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
-            }, m_intakeSubsystem, m_shooterSubsystem))
-            .onFalse(new InstantCommand(() -> {
-                m_intakeSubsystem.stopRoller();
-                m_shooterSubsystem.stopAgitator();
-            }, m_intakeSubsystem, m_shooterSubsystem));
+            .whileTrue(createIntakeRunCommand())
+            .onFalse(createIntakeStopCommand());
 
         // ---- Operator Controller ----
 
@@ -119,14 +113,8 @@ public class RobotContainer {
         // Uses forward RPM (higher) so it doesn't conflict with shooter.
         // Won't run if intake is locked out (enforced inside IntakeSubsystem)
         m_operatorController.rightTrigger(OIConstants.kTriggerThreshold)
-            .whileTrue(new RunCommand(() -> {
-                m_intakeSubsystem.runIntake();
-                m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
-            }, m_intakeSubsystem, m_shooterSubsystem))
-            .onFalse(new InstantCommand(() -> {
-                m_intakeSubsystem.stopRoller();
-                m_shooterSubsystem.stopAgitator();
-            }, m_intakeSubsystem, m_shooterSubsystem));
+            .whileTrue(createIntakeRunCommand())
+            .onFalse(createIntakeStopCommand());
 
         // Right Bumper (held) — eject (roller reverse, always allowed)
         m_operatorController.rightBumper()
@@ -163,6 +151,22 @@ public class RobotContainer {
                 m_shooterSubsystem.reverseAll();
             }, m_shooterSubsystem))
             .onFalse(new InstantCommand(m_shooterSubsystem::stopAll, m_shooterSubsystem));
+    }
+
+    /** Runs the intake roller and agitator together (used by both driver and operator triggers). */
+    private Command createIntakeRunCommand() {
+        return new RunCommand(() -> {
+            m_intakeSubsystem.runIntake();
+            m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
+        }, m_intakeSubsystem, m_shooterSubsystem);
+    }
+
+    /** Stops the intake roller and agitator (used by both driver and operator triggers). */
+    private Command createIntakeStopCommand() {
+        return new InstantCommand(() -> {
+            m_intakeSubsystem.stopRoller();
+            m_shooterSubsystem.stopAgitator();
+        }, m_intakeSubsystem, m_shooterSubsystem);
     }
 
     public Command getAutonomousCommand() {
