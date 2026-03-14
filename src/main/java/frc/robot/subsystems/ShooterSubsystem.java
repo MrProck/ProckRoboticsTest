@@ -158,6 +158,11 @@ public class ShooterSubsystem extends SubsystemBase {
         m_kickerController.setSetpoint(ShooterConstants.kKickerForwardRPM, ControlType.kVelocity);
     }
 
+    /** Runs the kicker motor slowly in reverse during shooter spin-up to prevent pre-loading. */
+    public void runKickerSlowReverse() {
+        m_kickerController.setSetpoint(-ShooterConstants.kKickerSlowInvertRPM, ControlType.kVelocity);
+    }
+
     /** Stops the kicker motor. */
     public void stopKicker() {
         m_kickerMotor.stopMotor();
