@@ -125,6 +125,11 @@ public class RobotContainer {
         m_driverController.a()
             .whileTrue(new ShootCommand(m_shooterSubsystem));
 
+        // Right Bumper (held) — reverse all shooter stages to clear jams
+        m_driverController.rightBumper()
+            .whileTrue(new RunCommand(m_shooterSubsystem::reverseAll, m_shooterSubsystem))
+            .onFalse(new InstantCommand(m_shooterSubsystem::stopAll, m_shooterSubsystem));
+
         // ---- Operator Controller ----
 
         // Right Trigger (held) — run intake roller forward + agitator

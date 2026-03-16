@@ -87,6 +87,10 @@ public class ShooterSubsystem extends SubsystemBase {
         m_kickerController = m_kickerMotor.getClosedLoopController();
 
         // --- Pre-Shooter Motor (NEO Vortex + SparkFlex) ---
+        // High-P onboard PID (acts like bang-bang at 1kHz on motor controller)
+        // No feedforward — P alone drives full power when below target, coasts when above
+        // Previous settings: .p(0.0002), .kV(1.0/6784.0)
+        // Previous roboRIO bang-bang: full power below target, coast above (20ms loop)
         SparkFlexConfig preShooterConfig = new SparkFlexConfig();
         preShooterConfig
             .inverted(ShooterConstants.kPreShooterInverted)
@@ -94,17 +98,16 @@ public class ShooterSubsystem extends SubsystemBase {
             .smartCurrentLimit(ShooterConstants.kPreShooterCurrentLimitAmps);
         preShooterConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(ShooterConstants.kPreShooterP)
-            .i(ShooterConstants.kPreShooterI)
-            .d(ShooterConstants.kPreShooterD);
-        preShooterConfig.closedLoop.feedForward
-            .kV(ShooterConstants.kPreShooterFF);
+            .p(ShooterConstants.kShooterBangBangP)
+            .i(0.0)
+            .d(0.0);
         REVUtil.check(
             m_preShooterMotor.configure(preShooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Pre-shooter motor (SparkFlex ID " + ShooterConstants.kPreShooterMotorID + ") configure");
         m_preShooterController = m_preShooterMotor.getClosedLoopController();
 
         // --- Shooter Primary Motor (NEO Vortex + SparkFlex, CAN 22) ---
+        // High-P onboard PID (bang-bang style at 1kHz)
         SparkFlexConfig shooterPrimaryConfig = new SparkFlexConfig();
         shooterPrimaryConfig
             .inverted(ShooterConstants.kShooterPrimaryInverted)
@@ -112,17 +115,16 @@ public class ShooterSubsystem extends SubsystemBase {
             .smartCurrentLimit(ShooterConstants.kShooterCurrentLimitAmps);
         shooterPrimaryConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(ShooterConstants.kShooterP)
-            .i(ShooterConstants.kShooterI)
-            .d(ShooterConstants.kShooterD);
-        shooterPrimaryConfig.closedLoop.feedForward
-            .kV(ShooterConstants.kShooterFF);
+            .p(ShooterConstants.kShooterBangBangP)
+            .i(0.0)
+            .d(0.0);
         REVUtil.check(
             m_shooterPrimaryMotor.configure(shooterPrimaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Shooter primary motor (SparkFlex ID " + ShooterConstants.kShooterPrimaryMotorID + ") configure");
         m_shooterPrimaryController = m_shooterPrimaryMotor.getClosedLoopController();
 
         // --- Shooter Secondary Motor (NEO Vortex + SparkFlex, CAN 23) ---
+        // High-P onboard PID (bang-bang style at 1kHz)
         SparkFlexConfig shooterSecondaryConfig = new SparkFlexConfig();
         shooterSecondaryConfig
             .inverted(ShooterConstants.kShooterSecondaryInverted)
@@ -130,11 +132,9 @@ public class ShooterSubsystem extends SubsystemBase {
             .smartCurrentLimit(ShooterConstants.kShooterCurrentLimitAmps);
         shooterSecondaryConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(ShooterConstants.kShooterP)
-            .i(ShooterConstants.kShooterI)
-            .d(ShooterConstants.kShooterD);
-        shooterSecondaryConfig.closedLoop.feedForward
-            .kV(ShooterConstants.kShooterFF);
+            .p(ShooterConstants.kShooterBangBangP)
+            .i(0.0)
+            .d(0.0);
         REVUtil.check(
             m_shooterSecondaryMotor.configure(shooterSecondaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Shooter secondary motor (SparkFlex ID " + ShooterConstants.kShooterSecondaryMotorID + ") configure");
@@ -183,7 +183,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // Pre-Shooter
     // -------------------------------------------------------------------------
 
-    /** Runs the pre-shooter motor at the dashboard-tunable RPM using closed-loop velocity control. */
+    /** Runs the pre-shooter at the dashboard-tunable RPM using high-P onboard PID. */
     public void runPreShooter() {
         double rpm = Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM);
         m_preShooterController.setSetpoint(rpm, ControlType.kVelocity);
@@ -198,7 +198,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // Shooter
     // -------------------------------------------------------------------------
 
-    /** Runs both shooter flywheel motors at the dashboard-tunable RPM using closed-loop velocity control. */
+    /** Runs both shooter flywheels at the dashboard-tunable RPM using high-P onboard PID. */
     public void runShooter() {
         double rpm = Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
         m_shooterPrimaryController.setSetpoint(rpm, ControlType.kVelocity);
