@@ -12,6 +12,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -35,10 +36,16 @@ public class IntakeSubsystem extends SubsystemBase {
     // Closed-loop controller for extension position
     private final SparkClosedLoopController m_extensionController;
 
+    // Preferences key for dashboard-tunable extension distance
+    private static final String kExtensionDistanceKey = "Intake/Extension Distance";
+
     // Lockout state — true if a wrong-color game piece was detected
     private boolean m_intakeLocked = false;
 
     public IntakeSubsystem() {
+        // Initialize Preferences with default (only writes if key doesn't already exist)
+        Preferences.initDouble(kExtensionDistanceKey, IntakeConstants.kExtensionExtendedPosition);
+
         // --- Extension Motor (SparkMax) ---
         SparkMaxConfig extensionConfig = new SparkMaxConfig();
         extensionConfig

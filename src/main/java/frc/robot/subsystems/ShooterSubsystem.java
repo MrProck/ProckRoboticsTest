@@ -100,7 +100,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(ShooterConstants.kShooterBangBangP)
             .i(0.0)
-            .d(0.0);
+            .d(0.0)
+            .outputRange(0, 1);
         REVUtil.check(
             m_preShooterMotor.configure(preShooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Pre-shooter motor (SparkFlex ID " + ShooterConstants.kPreShooterMotorID + ") configure");
@@ -117,7 +118,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(ShooterConstants.kShooterBangBangP)
             .i(0.0)
-            .d(0.0);
+            .d(0.0)
+            .outputRange(0, 1);
         REVUtil.check(
             m_shooterPrimaryMotor.configure(shooterPrimaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Shooter primary motor (SparkFlex ID " + ShooterConstants.kShooterPrimaryMotorID + ") configure");
@@ -134,7 +136,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(ShooterConstants.kShooterBangBangP)
             .i(0.0)
-            .d(0.0);
+            .d(0.0)
+            .outputRange(0, 1);
         REVUtil.check(
             m_shooterSecondaryMotor.configure(shooterSecondaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Shooter secondary motor (SparkFlex ID " + ShooterConstants.kShooterSecondaryMotorID + ") configure");
@@ -227,9 +230,10 @@ public class ShooterSubsystem extends SubsystemBase {
     public void reverseAll() {
         m_agitatorController.setSetpoint(-ShooterConstants.kAgitatorReverseRPM, ControlType.kVelocity);
         m_kickerController.setSetpoint(-ShooterConstants.kKickerReverseRPM, ControlType.kVelocity);
-        m_preShooterController.setSetpoint(-ShooterConstants.kPreShooterReverseRPM, ControlType.kVelocity);
-        m_shooterPrimaryController.setSetpoint(-ShooterConstants.kShooterReverseRPM, ControlType.kVelocity);
-        m_shooterSecondaryController.setSetpoint(-ShooterConstants.kShooterReverseRPM, ControlType.kVelocity);
+        // Bang-bang motors have outputRange(0,1) so PID can't reverse — use raw duty cycle
+        m_preShooterMotor.set(-ShooterConstants.kReverseAllDutyCycle);
+        m_shooterPrimaryMotor.set(-ShooterConstants.kReverseAllDutyCycle);
+        m_shooterSecondaryMotor.set(-ShooterConstants.kReverseAllDutyCycle);
     }
 
     /** Stops all 4 stages (5 motors). */

@@ -205,6 +205,7 @@ public final class Constants {
         // --- Shooter (2x NEO Vortex + SparkFlex) ---
         public static final double kShooterForwardRPM    = 5000.0;
         public static final double kShooterReverseRPM    = 500.0;
+        public static final double kReverseAllDutyCycle  = 0.3;  // 30% duty cycle for reverse (bang-bang motors)
         // FUTURE TUNING: To improve shooter spin-up time, consider:
         //   1. Increase kShooterP (e.g. 0.0004) — more aggressive PID response to large RPM errors.
         //      Watch SmartDashboard "Shooter/Shooter Primary RPM" for overshoot/oscillation.
