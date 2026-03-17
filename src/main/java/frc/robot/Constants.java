@@ -58,7 +58,7 @@ public final class Constants {
         public static final double kDriveP  = 0.1;
         public static final double kDriveI  = 0.0;
         public static final double kDriveD  = 0.0;
-        public static final double kDriveFF = 0.124;   // kV in V per (wheel rot/s) — SensorToMechanismRatio already accounts for gear reduction
+        public static final double kDriveFF = 0.124 * kDriveGearRatio;   // kV scaled from motor rot/s to wheel rot/s
         public static final double kSteerP  = 100.0;
         public static final double kSteerI  = 0.0;
         public static final double kSteerD  = 0.5;
