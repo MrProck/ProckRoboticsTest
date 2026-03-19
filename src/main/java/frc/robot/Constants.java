@@ -388,29 +388,33 @@ public final class Constants {
      * Values between rows are linearly interpolated.
      * Values outside the range clamp to the nearest endpoint.
      *
+     * <p>Distances are measured from the hub edge to the robot center.
+     *
      * <p>TUNING GUIDE:
-     *   1. Drive the robot to a known distance from the hub center.
+     *   1. Drive the robot to a known distance from the hub edge.
      *   2. Use SmartDashboard "Shooter/Distance To Hub" to confirm the reading.
      *   3. Manually tune RPMs until shots are consistent at that distance.
      *   4. Record those RPMs as a row here.
-     *   5. Repeat at several distances (e.g. 1.5m, 2.5m, 3.5m, 4.5m).
+     *   5. Repeat at several distances.
      */
     public static final class ShooterTableConstants {
 
         /**
          * Interpolation table: each row is { distanceMeters, shooterRPM, preShooterRPM }.
-         * Distances are in meters from the hub center to the robot center.
+         * Distances are in meters from the hub edge to the robot center.
          *
-         * *** ALL RPM VALUES ARE PLACEHOLDERS — TUNE ON THE ACTUAL ROBOT ***
+         * Tuned data points:
+         *   3 ft  (0.9144 m) from hub edge → 2600 RPM
+         *   4 ft  (1.2192 m) from hub edge → 2700 RPM
+         *   5 ft  (1.5240 m) from hub edge → 2725 RPM
+         *   7'8"  (2.3368 m) from hub edge → 3150 RPM
          */
         public static final double[][] kShooterTable = {
             // dist (m)  shooterRPM  preShooterRPM
-            {  1.5,       3500.0,     3000.0 },
-            {  2.0,       4000.0,     3500.0 },
-            {  2.5,       4400.0,     4000.0 },
-            {  3.0,       4700.0,     4500.0 },
-            {  3.5,       5000.0,     5000.0 },
-            {  4.5,       5000.0,     5000.0 },
+            {  0.9144,   2600.0,     2600.0 },  //  3 ft from hub edge
+            {  1.2192,   2700.0,     2700.0 },  //  4 ft from hub edge
+            {  1.5240,   2725.0,     2725.0 },  //  5 ft from hub edge
+            {  2.3368,   3150.0,     3150.0 },  //  7 ft 8 in from hub edge
         };
 
         /** Column index for distance in kShooterTable. */
