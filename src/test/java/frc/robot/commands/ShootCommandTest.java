@@ -87,7 +87,11 @@ class ShootCommandTest {
 
         m_command.initialize();
 
-        // With distance 2.5m the interpolated shooter RPM should be 4400.0
-        verify(m_shooter).runShooterAtRPM(4400.0);
+        // With distance 2.5 m the interpolation table yields:
+        //   t = (2.5 - 2.134) / (2.946 - 2.134) ≈ 0.4507
+        //   RPM = 2725 + t * (3150 - 2725) ≈ 2916.56
+        double expectedRPM = 2725.0
+                + (2.5 - 2.134) / (2.946 - 2.134) * (3150.0 - 2725.0);
+        verify(m_shooter).runShooterAtRPM(org.mockito.AdditionalMatchers.eq(expectedRPM, 0.01));
     }
 }
