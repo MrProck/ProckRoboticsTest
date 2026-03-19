@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.SwerveConstants;
@@ -85,10 +86,6 @@ public class TeleopDriveCommand extends Command {
         double rawY = m_ySpeed.getAsDouble();
         double rawRot = m_rotation.getAsDouble();
 
-        SmartDashboard.putNumber("Joystick Raw X", rawX);
-        SmartDashboard.putNumber("Joystick Raw Y", rawY);
-        SmartDashboard.putNumber("Joystick Raw Rot", rawRot);
-
         double xSpeedMPS = m_xLimiter.calculate(
                 blendedCubicInput(MathUtil.applyDeadband(rawX, SwerveConstants.kDeadband)))
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
@@ -102,9 +99,14 @@ public class TeleopDriveCommand extends Command {
             * SwerveConstants.kMaxAngularVelocityRadiansPerSecond * SwerveConstants.kTeleopMaxAngularSpeed
             * speedMultiplier;
 
-        SmartDashboard.putNumber("Cmd xSpeed (m/s)", xSpeedMPS);
-        SmartDashboard.putNumber("Cmd ySpeed (m/s)", ySpeedMPS);
-        SmartDashboard.putNumber("Cmd rot (rad/s)", rotRadPerSec);
+        if (Preferences.getBoolean("Drive/Verbose Telemetry", false)) {
+            SmartDashboard.putNumber("Joystick Raw X", rawX);
+            SmartDashboard.putNumber("Joystick Raw Y", rawY);
+            SmartDashboard.putNumber("Joystick Raw Rot", rawRot);
+            SmartDashboard.putNumber("Cmd xSpeed (m/s)", xSpeedMPS);
+            SmartDashboard.putNumber("Cmd ySpeed (m/s)", ySpeedMPS);
+            SmartDashboard.putNumber("Cmd rot (rad/s)", rotRadPerSec);
+        }
 
         m_driveSubsystem.drive(xSpeedMPS, ySpeedMPS, rotRadPerSec, true);
     }

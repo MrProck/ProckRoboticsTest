@@ -378,6 +378,21 @@ public final class Constants {
          * Prevents the robot from spinning uncontrollably if heading error is large.
          */
         public static final double kOrbitalMaxRotationRadPerSec = Math.PI; // 180 °/s
+
+        // ---- Orbital radius control ----
+
+        /** Default orbit radius when the command first activates (meters). */
+        public static final double kOrbitDefaultRadiusMeters = 2.5;
+        /** Minimum allowed orbit radius (meters). */
+        public static final double kOrbitMinRadiusMeters = 1.5;
+        /** Maximum allowed orbit radius (meters). */
+        public static final double kOrbitMaxRadiusMeters = 4.5;
+        /** How fast the radius changes when the driver pushes the stick in/out (m/s). */
+        public static final double kOrbitRadiusAdjustRate = 1.0;
+        /** Maximum tangential (orbital) speed (m/s). */
+        public static final double kOrbitMaxTangentialSpeedMPS = 2.5;
+        /** P gain for maintaining target orbit radius. */
+        public static final double kOrbitRadialP = 2.0;
     }
 
     /**
