@@ -4,45 +4,82 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.ShooterTableConstants;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.util.ShooterInterpolation;
 
 /**
- * Orchestrates the full shooting sequence:
- *  1. Spins up the pre-shooter and shooter flywheels immediately while running
- *     the kicker slowly in reverse to prevent pre-loading.
- *  2. Once the shooter is at speed (or the spin-up timeout elapses), starts
- *     the agitator and switches the kicker to its normal forward direction to
- *     feed the game piece into the spinning flywheels.
- *  3. Stops everything when the command ends.
+ * Orchestrates the full shooting sequence with distance-based RPM adjustment.
  *
- * Runs until cancelled (e.g., button released).
+ * <ol>
+ *   <li>At {@code initialize()}: reads distance-to-hub from VisionSubsystem and interpolates
+ *       shooter and pre-shooter RPMs from the lookup table in ShooterTableConstants.
+ *       Falls back to the configured default RPMs if vision is unavailable (distance &lt;= 0).
+ *   <li>Spins up flywheels to the interpolated RPM while running the kicker slowly in reverse
+ *       to prevent pre-loading.
+ *   <li>Once both flywheels reach speed (or the spin-up timeout elapses), runs the agitator
+ *       and kicker in the forward direction to feed the ball.
+ *   <li>Stops everything when the command ends.
+ * </ol>
+ *
+ * <p>Runs until cancelled (e.g., button released).
  */
 public class ShootCommand extends Command {
 
     private final ShooterSubsystem m_shooterSubsystem;
-    private boolean m_feedingStarted;
+    private final VisionSubsystem  m_visionSubsystem;
+
     private final Timer m_spinUpTimer = new Timer();
 
-    public ShootCommand(ShooterSubsystem shooterSubsystem) {
+    /** RPMs determined at initialize() and held constant for the duration of the shot. */
+    private double m_targetShooterRPM;
+    private double m_targetPreShooterRPM;
+
+    /**
+     * Creates a ShootCommand that adjusts RPM based on distance from the hub.
+     *
+     * @param shooterSubsystem The shooter subsystem.
+     * @param visionSubsystem  The vision subsystem (used for hub distance via odometry).
+     */
+    public ShootCommand(ShooterSubsystem shooterSubsystem, VisionSubsystem visionSubsystem) {
         m_shooterSubsystem = shooterSubsystem;
+        m_visionSubsystem  = visionSubsystem;
         addRequirements(m_shooterSubsystem);
+        // VisionSubsystem is read-only here — no requirement needed
     }
 
     @Override
     public void initialize() {
-        m_feedingStarted = false;
         m_spinUpTimer.restart();
-        m_shooterSubsystem.runPreShooter();
-        m_shooterSubsystem.runShooter();
+
+        double distanceMeters = m_visionSubsystem.getDistanceToHub();
+        if (distanceMeters > 0) {
+            m_targetShooterRPM    = ShooterInterpolation.getShooterRPM(distanceMeters);
+            m_targetPreShooterRPM = ShooterInterpolation.getPreShooterRPM(distanceMeters);
+        } else {
+            m_targetShooterRPM    = ShooterTableConstants.kFallbackShooterRPM;
+            m_targetPreShooterRPM = ShooterTableConstants.kFallbackPreShooterRPM;
+        }
+
+        SmartDashboard.putNumber("Shooter/Distance At Shot",      distanceMeters);
+        SmartDashboard.putNumber("Shooter/Target Shooter RPM",    m_targetShooterRPM);
+        SmartDashboard.putNumber("Shooter/Target PreShooter RPM", m_targetPreShooterRPM);
+
+        m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
+        m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
         m_shooterSubsystem.runKickerSlowReverse();
     }
 
     @Override
     public void execute() {
-        boolean atSpeed = m_shooterSubsystem.isShooterAtSpeed();
+        m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
+        m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
+
+        boolean atSpeed  = m_shooterSubsystem.isShooterAtSpeed(m_targetShooterRPM);
         boolean timedOut = m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
 
-        SmartDashboard.putBoolean("Shooter/FeedGate AtSpeed", atSpeed);
+        SmartDashboard.putBoolean("Shooter/FeedGate AtSpeed",  atSpeed);
         SmartDashboard.putBoolean("Shooter/FeedGate TimedOut", timedOut);
 
         if (atSpeed || timedOut) {
