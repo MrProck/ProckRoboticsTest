@@ -278,19 +278,18 @@ public final class Constants {
         public static final double kMultiTagStdDevTheta = 999.0;
 
         // Camera mount position relative to robot center (meters and degrees)
-        // TODO: Measure actual camera position on robot
         /** Forward offset of the camera from the robot center (meters, positive = forward). */
-        public static final double kCameraForwardOffsetMeters = 0.0;
+        public static final double kCameraForwardOffsetMeters = -0.1143; // 4.5 inches behind center
         /** Side offset of the camera from the robot center (meters, positive = left). */
-        public static final double kCameraSideOffsetMeters = 0.0;
+        public static final double kCameraSideOffsetMeters    =  0.3175; // 12.5 inches to the left (positive = left)
         /** Height of the camera above the floor (meters). */
-        public static final double kCameraUpOffsetMeters = 0.0;
+        public static final double kCameraUpOffsetMeters      =  0.5207; // 20.5 inches from floor
         /** Camera roll angle (degrees). */
-        public static final double kCameraRollDegrees = 0.0;
+        public static final double kCameraRollDegrees         =  0.0;
         /** Camera pitch angle (degrees, positive = tilted up). */
-        public static final double kCameraPitchDegrees = 0.0;
+        public static final double kCameraPitchDegrees        =  0.0;
         /** Camera yaw angle (degrees, positive = rotated left). */
-        public static final double kCameraYawDegrees = 0.0;
+        public static final double kCameraYawDegrees          =  0.0;
     }
 
     /**
