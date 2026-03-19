@@ -388,33 +388,38 @@ public final class Constants {
      * Values between rows are linearly interpolated.
      * Values outside the range clamp to the nearest endpoint.
      *
-     * <p>Distances are measured from the hub edge to the robot center.
-     *
      * <p>TUNING GUIDE:
-     *   1. Drive the robot to a known distance from the hub edge.
+     *   1. Drive the robot to a known distance from the hub center.
      *   2. Use SmartDashboard "Shooter/Distance To Hub" to confirm the reading.
      *   3. Manually tune RPMs until shots are consistent at that distance.
      *   4. Record those RPMs as a row here.
-     *   5. Repeat at several distances.
+     *   5. Repeat at several distances (e.g. 1.5m, 2.5m, 3.5m, 4.5m).
+     *
+     * <p>NOTE: Distances are from the robot center to the hub CENTER.
+     * Hub radius (center to edge) is approximately 0.6096 m (24 in).
+     * Measured distances from hub EDGE have had 0.6096 m added to convert to hub center.
      */
     public static final class ShooterTableConstants {
 
         /**
          * Interpolation table: each row is { distanceMeters, shooterRPM, preShooterRPM }.
-         * Distances are in meters from the hub edge to the robot center.
+         * Distances are in meters from the hub CENTER to the robot center.
          *
-         * Tuned data points:
-         *   3 ft  (0.9144 m) from hub edge → 2600 RPM
-         *   4 ft  (1.2192 m) from hub edge → 2700 RPM
-         *   5 ft  (1.5240 m) from hub edge → 2725 RPM
-         *   7'8"  (2.3368 m) from hub edge → 3150 RPM
+         * Tuned shooter RPM values (measured from hub edge, converted to hub center distance):
+         *   3 ft from edge  (1.524 m from center) → 2600 RPM
+         *   4 ft from edge  (1.829 m from center) → 2700 RPM
+         *   5 ft from edge  (2.134 m from center) → 2725 RPM
+         *   7'8" from edge  (2.946 m from center) → 3150 RPM
+         *
+         * Pre-shooter RPM values are not yet tuned — set equal to shooter RPM as a starting point.
+         * *** PRE-SHOOTER RPM VALUES ARE PLACEHOLDERS — TUNE ON THE ACTUAL ROBOT ***
          */
         public static final double[][] kShooterTable = {
-            // dist (m)  shooterRPM  preShooterRPM
-            {  0.9144,   2600.0,     2600.0 },  //  3 ft from hub edge
-            {  1.2192,   2700.0,     2700.0 },  //  4 ft from hub edge
-            {  1.5240,   2725.0,     2725.0 },  //  5 ft from hub edge
-            {  2.3368,   3150.0,     3150.0 },  //  7 ft 8 in from hub edge
+            // dist from hub center (m)   shooterRPM  preShooterRPM
+            {  1.524,                      2600.0,     2600.0 },  // 3 ft from hub edge
+            {  1.829,                      2700.0,     2700.0 },  // 4 ft from hub edge
+            {  2.134,                      2725.0,     2725.0 },  // 5 ft from hub edge
+            {  2.946,                      3150.0,     3150.0 },  // 7 ft 8 in from hub edge
         };
 
         /** Column index for distance in kShooterTable. */
