@@ -2,9 +2,11 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.OrbitalConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.LimelightHelpers;
 
@@ -25,6 +27,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     private boolean m_hasTarget = false;
     private int m_tagCount = 0;
+    private double m_distanceToHubMeters = -1.0;  // -1 = unknown
 
     /**
      * Creates a new VisionSubsystem.
@@ -59,6 +62,14 @@ public class VisionSubsystem extends SubsystemBase {
         return m_tagCount;
     }
 
+    /**
+     * Returns the distance (meters) from the robot center to the alliance hub center,
+     * computed from the fused odometry pose. Returns -1.0 if alliance is unknown.
+     */
+    public double getDistanceToHub() {
+        return m_distanceToHubMeters;
+    }
+
     @Override
     public void periodic() {
         // Telemetry state for this cycle
@@ -70,6 +81,9 @@ public class VisionSubsystem extends SubsystemBase {
 
         // Read the target validity from the Limelight
         m_hasTarget = LimelightHelpers.getTV(m_limelightName);
+
+        // Always update hub distance (uses odometry only, independent of vision)
+        updateHubDistance();
 
         if (!m_hasTarget) {
             m_tagCount = 0;
@@ -157,6 +171,22 @@ public class VisionSubsystem extends SubsystemBase {
         rejectionReason = "Accepted";
         publishTelemetry(lastPoseDiffMeters, lastHeadingDiffDegrees,
                          measurementAccepted, rejectionReason, m_tagCount, avgTagDistance);
+    }
+
+    private void updateHubDistance() {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isEmpty()) {
+            m_distanceToHubMeters = -1.0;
+            return;
+        }
+        double hubX = (alliance.get() == DriverStation.Alliance.Red)
+            ? OrbitalConstants.kHubRedX
+            : OrbitalConstants.kHubBlueX;
+        Translation2d hubTranslation = new Translation2d(hubX, OrbitalConstants.kHubY);
+        m_distanceToHubMeters = m_driveSubsystem.getPose()
+            .getTranslation()
+            .getDistance(hubTranslation);
+        SmartDashboard.putNumber("Shooter/Distance To Hub", m_distanceToHubMeters);
     }
 
     private void publishTelemetry(

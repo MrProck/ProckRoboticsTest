@@ -10,10 +10,12 @@ import org.junit.jupiter.api.Test;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
 class ShootCommandTest {
 
     private ShooterSubsystem m_shooter;
+    private VisionSubsystem  m_vision;
     private ShootCommand m_command;
 
     @BeforeAll
@@ -25,7 +27,10 @@ class ShootCommandTest {
     void setUp() {
         CommandScheduler.getInstance().cancelAll();
         m_shooter = mock(ShooterSubsystem.class);
-        m_command = new ShootCommand(m_shooter);
+        m_vision  = mock(VisionSubsystem.class);
+        // Default: no vision target — command uses fallback RPMs
+        when(m_vision.getDistanceToHub()).thenReturn(-1.0);
+        m_command = new ShootCommand(m_shooter, m_vision);
     }
 
     @Test
@@ -41,16 +46,16 @@ class ShootCommandTest {
     }
 
     @Test
-    void initializeCallsRunPreShooterAndRunShooter() {
+    void initializeCallsRunShooterAtRPMAndRunPreShooterAtRPM() {
         m_command.initialize();
 
-        verify(m_shooter).runPreShooter();
-        verify(m_shooter).runShooter();
+        verify(m_shooter).runShooterAtRPM(anyDouble());
+        verify(m_shooter).runPreShooterAtRPM(anyDouble());
     }
 
     @Test
     void executeDoesNotFeedBeforeShooterAtSpeed() {
-        when(m_shooter.isShooterAtSpeed()).thenReturn(false);
+        when(m_shooter.isShooterAtSpeed(anyDouble())).thenReturn(false);
 
         m_command.initialize();
         m_command.execute();
@@ -60,7 +65,7 @@ class ShootCommandTest {
 
     @Test
     void executeStartsFeedingOnceShooterAtSpeed() {
-        when(m_shooter.isShooterAtSpeed()).thenReturn(true);
+        when(m_shooter.isShooterAtSpeed(anyDouble())).thenReturn(true);
 
         m_command.initialize();
         m_command.execute();
@@ -74,5 +79,15 @@ class ShootCommandTest {
         m_command.end(false);
 
         verify(m_shooter).stopAll();
+    }
+
+    @Test
+    void initializeUsesInterpolatedRPMWhenDistanceIsValid() {
+        when(m_vision.getDistanceToHub()).thenReturn(2.5);
+
+        m_command.initialize();
+
+        // With distance 2.5m the interpolated shooter RPM should be 4400.0
+        verify(m_shooter).runShooterAtRPM(4400.0);
     }
 }

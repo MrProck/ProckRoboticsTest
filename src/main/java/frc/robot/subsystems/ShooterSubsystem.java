@@ -188,7 +188,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** Runs the pre-shooter at the dashboard-tunable RPM using high-P onboard PID. */
     public void runPreShooter() {
-        double rpm = Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM);
+        runPreShooterAtRPM(Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM));
+    }
+
+    /** Runs the pre-shooter at the given RPM using the onboard PID controller. */
+    public void runPreShooterAtRPM(double rpm) {
         m_preShooterController.setSetpoint(rpm, ControlType.kVelocity);
     }
 
@@ -203,7 +207,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** Runs both shooter flywheels at the dashboard-tunable RPM using high-P onboard PID. */
     public void runShooter() {
-        double rpm = Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
+        runShooterAtRPM(Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM));
+    }
+
+    /** Runs both shooter flywheels at the given RPM using the onboard PID controller. */
+    public void runShooterAtRPM(double rpm) {
         m_shooterPrimaryController.setSetpoint(rpm, ControlType.kVelocity);
         m_shooterSecondaryController.setSetpoint(rpm, ControlType.kVelocity);
     }
@@ -263,6 +271,18 @@ public class ShooterSubsystem extends SubsystemBase {
         double secondaryVelocity = m_shooterSecondaryMotor.getEncoder().getVelocity();
         return Math.abs(primaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
             && Math.abs(secondaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
+    }
+
+    /**
+     * Returns true if both shooter flywheel motors are within tolerance of the given target RPM.
+     *
+     * @param targetRPM The target RPM to check against.
+     */
+    public boolean isShooterAtSpeed(double targetRPM) {
+        double primary   = m_shooterPrimaryMotor.getEncoder().getVelocity();
+        double secondary = m_shooterSecondaryMotor.getEncoder().getVelocity();
+        return Math.abs(primary   - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
+            && Math.abs(secondary - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
     }
 
     // -------------------------------------------------------------------------

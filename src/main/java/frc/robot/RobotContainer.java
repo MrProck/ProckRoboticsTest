@@ -25,8 +25,6 @@ public class RobotContainer {
     private final DriveSubsystem   m_driveSubsystem   = new DriveSubsystem();
     private final IntakeSubsystem  m_intakeSubsystem  = new IntakeSubsystem();
     private final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
-    // VisionSubsystem runs via its periodic() method — no direct references needed
-    @SuppressWarnings("unused")
     private final VisionSubsystem  m_visionSubsystem  = new VisionSubsystem(m_driveSubsystem);
 
     private final CommandXboxController m_driverController =
@@ -123,7 +121,7 @@ public class RobotContainer {
 
         // A (held) — full shoot sequence (spin up + feed when at speed)
         m_driverController.a()
-            .whileTrue(new ShootCommand(m_shooterSubsystem));
+            .whileTrue(new ShootCommand(m_shooterSubsystem, m_visionSubsystem));
 
         // Right Bumper (held) — reverse all shooter stages to clear jams
         m_driverController.rightBumper()
@@ -166,7 +164,7 @@ public class RobotContainer {
 
         // Left Trigger (>90%) — full shoot sequence (spin up + feed when at speed)
         m_operatorController.leftTrigger(0.9)
-            .whileTrue(new ShootCommand(m_shooterSubsystem));
+            .whileTrue(new ShootCommand(m_shooterSubsystem, m_visionSubsystem));
 
         // Left Bumper (held) — manual reverse all shooter stages to clear jams
         m_operatorController.leftBumper()

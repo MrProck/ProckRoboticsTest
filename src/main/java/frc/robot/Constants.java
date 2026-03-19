@@ -379,4 +379,52 @@ public final class Constants {
          */
         public static final double kOrbitalMaxRotationRadPerSec = Math.PI; // 180 °/s
     }
+
+    /**
+     * Distance-to-RPM interpolation table for vision-assisted shooting.
+     *
+     * <p>Each row is { distanceMeters, shooterRPM, preShooterRPM }.
+     * Rows MUST be sorted by ascending distance.
+     * Values between rows are linearly interpolated.
+     * Values outside the range clamp to the nearest endpoint.
+     *
+     * <p>TUNING GUIDE:
+     *   1. Drive the robot to a known distance from the hub center.
+     *   2. Use SmartDashboard "Shooter/Distance To Hub" to confirm the reading.
+     *   3. Manually tune RPMs until shots are consistent at that distance.
+     *   4. Record those RPMs as a row here.
+     *   5. Repeat at several distances (e.g. 1.5m, 2.5m, 3.5m, 4.5m).
+     */
+    public static final class ShooterTableConstants {
+
+        /**
+         * Interpolation table: each row is { distanceMeters, shooterRPM, preShooterRPM }.
+         * Distances are in meters from the hub center to the robot center.
+         *
+         * *** ALL RPM VALUES ARE PLACEHOLDERS — TUNE ON THE ACTUAL ROBOT ***
+         */
+        public static final double[][] kShooterTable = {
+            // dist (m)  shooterRPM  preShooterRPM
+            {  1.5,       3500.0,     3000.0 },
+            {  2.0,       4000.0,     3500.0 },
+            {  2.5,       4400.0,     4000.0 },
+            {  3.0,       4700.0,     4500.0 },
+            {  3.5,       5000.0,     5000.0 },
+            {  4.5,       5000.0,     5000.0 },
+        };
+
+        /** Column index for distance in kShooterTable. */
+        public static final int kColDistance      = 0;
+        /** Column index for shooter flywheel RPM in kShooterTable. */
+        public static final int kColShooterRPM    = 1;
+        /** Column index for pre-shooter RPM in kShooterTable. */
+        public static final int kColPreShooterRPM = 2;
+
+        /**
+         * Fallback shooter RPM used when no vision target is available.
+         * Should match a mid-range shot — tune to your most common shooting distance.
+         */
+        public static final double kFallbackShooterRPM    = ShooterConstants.kShooterForwardRPM;
+        public static final double kFallbackPreShooterRPM = ShooterConstants.kPreShooterForwardRPM;
+    }
 }
