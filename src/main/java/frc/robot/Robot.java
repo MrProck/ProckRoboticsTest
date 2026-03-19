@@ -5,11 +5,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.DriveSimulation;
+import frc.robot.util.BrownoutProtection;
 
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
     private RobotContainer m_robotContainer;
+    private DriveSimulation m_driveSimulation;
 
     @Override
     public void robotInit() {
@@ -21,6 +24,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+        BrownoutProtection.publishTelemetry();
     }
 
     @Override
@@ -62,12 +66,15 @@ public class Robot extends TimedRobot {
 
     @Override
     public void simulationInit() {
+        m_driveSimulation = new DriveSimulation();
         System.out.println("[Robot] Simulation starting.");
     }
 
     @Override
     public void simulationPeriodic() {
-        // TODO: Update simulated subsystem states here (e.g., swerve module positions,
-        // gyro angle, shooter encoder velocities) to enable closed-loop simulation testing.
+        if (m_driveSimulation != null && m_robotContainer != null) {
+            m_driveSimulation.update(m_robotContainer.getDriveSubsystem().getChassisSpeeds());
+        }
     }
 }
+

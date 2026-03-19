@@ -19,6 +19,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -56,7 +57,10 @@ public class DriveSubsystem extends SubsystemBase {
 
     private final Field2d m_field = new Field2d();
 
+    private static final String kVerboseTelemetryKey = "Drive/Verbose Telemetry";
+
     public DriveSubsystem() {
+        Preferences.initBoolean(kVerboseTelemetryKey, false);
         SmartDashboard.putData("Field", m_field);
         zeroHeading();
         configureAutoBuilder();
@@ -208,31 +212,33 @@ public class DriveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Robot X (m)", getPose().getX());
         SmartDashboard.putNumber("Robot Y (m)", getPose().getY());
 
-        SwerveModuleState[] states = getModuleStates();
-        SmartDashboard.putNumber("FL Speed (m/s)", states[0].speedMetersPerSecond);
-        SmartDashboard.putNumber("FL Angle (deg)", states[0].angle.getDegrees());
-        SmartDashboard.putNumber("FR Speed (m/s)", states[1].speedMetersPerSecond);
-        SmartDashboard.putNumber("FR Angle (deg)", states[1].angle.getDegrees());
-        SmartDashboard.putNumber("BL Speed (m/s)", states[2].speedMetersPerSecond);
-        SmartDashboard.putNumber("BL Angle (deg)", states[2].angle.getDegrees());
-        SmartDashboard.putNumber("BR Speed (m/s)", states[3].speedMetersPerSecond);
-        SmartDashboard.putNumber("BR Angle (deg)", states[3].angle.getDegrees());
+        if (Preferences.getBoolean(kVerboseTelemetryKey, false)) {
+            SwerveModuleState[] states = getModuleStates();
+            SmartDashboard.putNumber("FL Speed (m/s)", states[0].speedMetersPerSecond);
+            SmartDashboard.putNumber("FL Angle (deg)", states[0].angle.getDegrees());
+            SmartDashboard.putNumber("FR Speed (m/s)", states[1].speedMetersPerSecond);
+            SmartDashboard.putNumber("FR Angle (deg)", states[1].angle.getDegrees());
+            SmartDashboard.putNumber("BL Speed (m/s)", states[2].speedMetersPerSecond);
+            SmartDashboard.putNumber("BL Angle (deg)", states[2].angle.getDegrees());
+            SmartDashboard.putNumber("BR Speed (m/s)", states[3].speedMetersPerSecond);
+            SmartDashboard.putNumber("BR Angle (deg)", states[3].angle.getDegrees());
 
-        ChassisSpeeds speeds = SwerveConstants.kSwerveKinematics.toChassisSpeeds(states);
-        SmartDashboard.putNumber("ChassisSpeeds vx (m/s)", speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("ChassisSpeeds vy (m/s)", speeds.vyMetersPerSecond);
-        SmartDashboard.putNumber("ChassisSpeeds omega (rad/s)", speeds.omegaRadiansPerSecond);
+            ChassisSpeeds speeds = SwerveConstants.kSwerveKinematics.toChassisSpeeds(states);
+            SmartDashboard.putNumber("ChassisSpeeds vx (m/s)", speeds.vxMetersPerSecond);
+            SmartDashboard.putNumber("ChassisSpeeds vy (m/s)", speeds.vyMetersPerSecond);
+            SmartDashboard.putNumber("ChassisSpeeds omega (rad/s)", speeds.omegaRadiansPerSecond);
 
-        SmartDashboard.putNumberArray("SwerveModuleStates", new double[] {
-            states[0].speedMetersPerSecond, states[0].angle.getDegrees(),
-            states[1].speedMetersPerSecond, states[1].angle.getDegrees(),
-            states[2].speedMetersPerSecond, states[2].angle.getDegrees(),
-            states[3].speedMetersPerSecond, states[3].angle.getDegrees()
-        });
+            SmartDashboard.putNumberArray("SwerveModuleStates", new double[] {
+                states[0].speedMetersPerSecond, states[0].angle.getDegrees(),
+                states[1].speedMetersPerSecond, states[1].angle.getDegrees(),
+                states[2].speedMetersPerSecond, states[2].angle.getDegrees(),
+                states[3].speedMetersPerSecond, states[3].angle.getDegrees()
+            });
 
-        SmartDashboard.putNumber("FL Drive Output", m_frontLeft.getDriveOutput());
-        SmartDashboard.putNumber("FR Drive Output", m_frontRight.getDriveOutput());
-        SmartDashboard.putNumber("BL Drive Output", m_backLeft.getDriveOutput());
-        SmartDashboard.putNumber("BR Drive Output", m_backRight.getDriveOutput());
+            SmartDashboard.putNumber("FL Drive Output", m_frontLeft.getDriveOutput());
+            SmartDashboard.putNumber("FR Drive Output", m_frontRight.getDriveOutput());
+            SmartDashboard.putNumber("BL Drive Output", m_backLeft.getDriveOutput());
+            SmartDashboard.putNumber("BR Drive Output", m_backRight.getDriveOutput());
+        }
     }
 }

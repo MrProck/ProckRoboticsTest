@@ -45,11 +45,13 @@ public class ShooterSubsystem extends SubsystemBase {
     // Preferences keys for dashboard-tunable RPMs
     private static final String kShooterRPMKey = "Shooter/Target RPM";
     private static final String kPreShooterRPMKey = "Shooter/PreShooter Target RPM";
+    private static final String kVerboseTelemetryKey = "Shooter/Verbose Telemetry";
 
     public ShooterSubsystem() {
         // Initialize Preferences with defaults (only writes if key doesn't already exist)
         Preferences.initDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
         Preferences.initDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM);
+        Preferences.initBoolean(kVerboseTelemetryKey, false);
         // --- Agitator Motor (NEO + SparkMax) ---
         SparkMaxConfig agitatorConfig = new SparkMaxConfig();
         agitatorConfig
@@ -291,18 +293,21 @@ public class ShooterSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Shooter/Agitator RPM",          m_agitatorMotor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Shooter/Kicker RPM",            m_kickerMotor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Shooter/PreShooter RPM",        m_preShooterMotor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Shooter/Shooter Primary RPM",   m_shooterPrimaryMotor.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Shooter/Shooter Secondary RPM", m_shooterSecondaryMotor.getEncoder().getVelocity());
-        SmartDashboard.putBoolean("Shooter/AtSpeed",              isShooterAtSpeed());
-        SmartDashboard.putBoolean("Shooter/PreShooter AtSpeed",
-            m_preShooterMotor.getEncoder().getVelocity()
-                >= Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM));
+        SmartDashboard.putBoolean("Shooter/AtSpeed", isShooterAtSpeed());
         SmartDashboard.putNumber("Shooter/Commanded RPM",
             Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM));
-        SmartDashboard.putNumber("Shooter/Commanded PreShooter RPM",
-            Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM));
+
+        if (Preferences.getBoolean(kVerboseTelemetryKey, false)) {
+            SmartDashboard.putNumber("Shooter/Agitator RPM",          m_agitatorMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Shooter/Kicker RPM",            m_kickerMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Shooter/PreShooter RPM",        m_preShooterMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Shooter/Shooter Primary RPM",   m_shooterPrimaryMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Shooter/Shooter Secondary RPM", m_shooterSecondaryMotor.getEncoder().getVelocity());
+            SmartDashboard.putBoolean("Shooter/PreShooter AtSpeed",
+                m_preShooterMotor.getEncoder().getVelocity()
+                    >= Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM));
+            SmartDashboard.putNumber("Shooter/Commanded PreShooter RPM",
+                Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM));
+        }
     }
 }

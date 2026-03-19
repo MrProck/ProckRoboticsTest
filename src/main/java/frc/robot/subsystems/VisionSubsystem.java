@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OrbitalConstants;
@@ -25,6 +26,8 @@ public class VisionSubsystem extends SubsystemBase {
     private final DriveSubsystem m_driveSubsystem;
     private final String m_limelightName;
 
+    private static final String kVerboseTelemetryKey = "Vision/Verbose Telemetry";
+
     private boolean m_hasTarget = false;
     private int m_tagCount = 0;
     private double m_distanceToHubMeters = -1.0;  // -1 = unknown
@@ -37,6 +40,7 @@ public class VisionSubsystem extends SubsystemBase {
     public VisionSubsystem(DriveSubsystem driveSubsystem) {
         m_driveSubsystem = driveSubsystem;
         m_limelightName = VisionConstants.kLimelightName;
+        Preferences.initBoolean(kVerboseTelemetryKey, false);
 
         // Configure the Limelight pipeline for AprilTag detection
         LimelightHelpers.setPipelineIndex(m_limelightName, 0);
@@ -198,10 +202,13 @@ public class VisionSubsystem extends SubsystemBase {
             double avgTagDistance) {
         SmartDashboard.putBoolean("Vision/HasTarget", m_hasTarget);
         SmartDashboard.putNumber("Vision/TagCount", tagCount);
-        SmartDashboard.putNumber("Vision/LastPoseDiffMeters", poseDiffMeters);
-        SmartDashboard.putNumber("Vision/LastHeadingDiffDegrees", headingDiffDegrees);
-        SmartDashboard.putBoolean("Vision/MeasurementAccepted", accepted);
-        SmartDashboard.putString("Vision/RejectionReason", rejectionReason);
-        SmartDashboard.putNumber("Vision/AvgTagDistance", avgTagDistance);
+
+        if (Preferences.getBoolean(kVerboseTelemetryKey, false)) {
+            SmartDashboard.putNumber("Vision/LastPoseDiffMeters", poseDiffMeters);
+            SmartDashboard.putNumber("Vision/LastHeadingDiffDegrees", headingDiffDegrees);
+            SmartDashboard.putBoolean("Vision/MeasurementAccepted", accepted);
+            SmartDashboard.putString("Vision/RejectionReason", rejectionReason);
+            SmartDashboard.putNumber("Vision/AvgTagDistance", avgTagDistance);
+        }
     }
 }

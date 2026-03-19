@@ -36,6 +36,11 @@ public class IntakeExtensionCommand extends Command {
     }
 
     @Override
+    public void end(boolean interrupted) {
+        m_intakeSubsystem.holdPosition();
+    }
+
+    @Override
     public boolean isFinished() {
         return false;
     }

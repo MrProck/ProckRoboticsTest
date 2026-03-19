@@ -97,7 +97,8 @@ public class RobotContainer {
                 m_driveSubsystem,
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),
-                () ->  m_driverController.getRightTriggerAxis()
+                () ->  m_driverController.getRightTriggerAxis(),
+                () -> -m_driverController.getRightY()
             ));
 
         // Left Trigger (held) — driver intake: run roller + agitator
@@ -192,6 +193,11 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return m_autoChooser.getSelected();
+    }
+
+    /** Returns the drive subsystem for simulation use. */
+    public DriveSubsystem getDriveSubsystem() {
+        return m_driveSubsystem;
     }
 
     /** Returns the intake subsystem for use outside this class (e.g., Robot.java). */
