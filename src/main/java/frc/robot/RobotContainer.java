@@ -264,7 +264,7 @@ public class RobotContainer {
                 m_shooterSubsystem.runShooterAtRPM(m_rpm);
                 // Pre-shooter always runs at full speed to push ball through the tube fast enough
                 m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
-                m_shooterSubsystem.runKickerSlowReverse();
+                m_shooterSubsystem.stopKicker();
                 SmartDashboard.putNumber("Shooter/Manual Shot RPM", m_rpm);
             }
 
@@ -281,7 +281,7 @@ public class RobotContainer {
                     m_shooterSubsystem.runAgitator();
                     m_shooterSubsystem.runKicker();
                 } else {
-                    m_shooterSubsystem.runKickerSlowReverse();
+                    m_shooterSubsystem.stopKicker();
                 }
             }
 

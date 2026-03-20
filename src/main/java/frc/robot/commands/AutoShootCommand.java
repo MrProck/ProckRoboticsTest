@@ -91,7 +91,7 @@ public class AutoShootCommand extends Command {
         // Start spinning up immediately
         m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
         m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
-        m_shooterSubsystem.runKickerSlowReverse();
+        m_shooterSubsystem.stopKicker();
     }
 
     @Override
@@ -147,7 +147,7 @@ public class AutoShootCommand extends Command {
                 m_feeding = true;
             }
         } else {
-            m_shooterSubsystem.runKickerSlowReverse();
+            m_shooterSubsystem.stopKicker();
         }
     }
 

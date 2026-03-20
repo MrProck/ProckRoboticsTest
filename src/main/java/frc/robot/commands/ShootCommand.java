@@ -68,7 +68,7 @@ public class ShootCommand extends Command {
 
         m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
         m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
-        m_shooterSubsystem.runKickerSlowReverse();
+        m_shooterSubsystem.stopKicker();
     }
 
     @Override
@@ -86,7 +86,7 @@ public class ShootCommand extends Command {
             m_shooterSubsystem.runAgitator();
             m_shooterSubsystem.runKicker();
         } else {
-            m_shooterSubsystem.runKickerSlowReverse();
+            m_shooterSubsystem.stopKicker();
         }
     }
 
