@@ -117,8 +117,8 @@ public final class Constants {
      * PID gains, positions, current limits, and color sensor CAN IDs.
      *
      * <p>The extension arm is a spring-loaded hopper controlled by a NEO + gearbox (SparkMax, CAN 14).
-     * Soft limits are set to ±20 rotations: +20 = fully extended (spring let out),
-     * -20 = fully retracted (spring pulled back). Encoder is zeroed at the neutral/home position on boot.
+     * Soft limits are set to ±192 rotations: +192 = fully extended (spring let out),
+     * -192 = fully retracted (spring pulled back). Encoder is zeroed at the neutral/home position on boot.
      */
     public static final class IntakeConstants {
         public static final int     kExtensionMotorID          = 14;
@@ -129,9 +129,9 @@ public final class Constants {
         public static final double kExtensionD  = 0.0;
         public static final double kExtensionFF = 0.0;
         /** Fully retracted position (rotations) — spring pulled back. */
-        public static final double kExtensionRetractedPosition = -20.0;
+        public static final double kExtensionRetractedPosition = -192.0;
         /** Fully extended position (rotations) — spring let out. */
-        public static final double kExtensionExtendedPosition  =  20.0;
+        public static final double kExtensionExtendedPosition  =  192.0;
         /** Gear ratio between motor and extension output. */
         public static final double kExtensionGearRatio = 1.0; // Confirmed 1:1 gear ratio
         /** Conversion factor: output rotations per motor rotation. */
