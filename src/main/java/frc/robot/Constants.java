@@ -242,7 +242,11 @@ public final class Constants {
         public static final double kPreShooterFF         = 1.0 / 6784.0;  // NEO Vortex free speed
 
         // --- Shooter (2x NEO Vortex + SparkFlex) ---
-        public static final double kShooterForwardRPM    = 5000.0;
+        // NOTE: This is the Preferences default and the runShooter() fallback.
+        // Must match ShooterTableConstants.kFallbackShooterRPM (3150 RPM) so that
+        // isShooterAtSpeed() (no-arg) and the manual shoot command use a reachable target.
+        // The NEO Vortex free speed is 6784 RPM — 5000 was unreachable at competition voltages.
+        public static final double kShooterForwardRPM    = 3150.0;
         public static final double kShooterReverseRPM    = 500.0;
         public static final double kReverseAllDutyCycle  = 0.3;  // 30% duty cycle for reverse (bang-bang motors)
         // FUTURE TUNING: To improve shooter spin-up time, consider:

@@ -262,7 +262,8 @@ public class RobotContainer {
                 m_rpm = edu.wpi.first.wpilibj.Preferences.getDouble(
                     "Shooter/Target RPM", ShooterConstants.kShooterForwardRPM);
                 m_shooterSubsystem.runShooterAtRPM(m_rpm);
-                m_shooterSubsystem.runPreShooterAtRPM(m_rpm);
+                // Pre-shooter always runs at full speed to push ball through the tube fast enough
+                m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
                 m_shooterSubsystem.runKickerSlowReverse();
                 SmartDashboard.putNumber("Shooter/Manual Shot RPM", m_rpm);
             }
@@ -270,7 +271,8 @@ public class RobotContainer {
             @Override
             public void execute() {
                 m_shooterSubsystem.runShooterAtRPM(m_rpm);
-                m_shooterSubsystem.runPreShooterAtRPM(m_rpm);
+                // Pre-shooter always runs at full speed regardless of manual flywheel RPM
+                m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
 
                 boolean atSpeed  = m_shooterSubsystem.isShooterAtSpeed(m_rpm);
                 boolean timedOut = m_timer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
