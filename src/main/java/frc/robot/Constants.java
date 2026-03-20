@@ -164,7 +164,7 @@ public final class Constants {
         public static final int kKickerCurrentLimitAmps            = 50;
         public static final int kPreShooterCurrentLimitAmps        = 40;
         /** Current limit for each shooter flywheel motor (amps). */
-        public static final int kShooterCurrentLimitAmps = 90;
+        public static final int kShooterCurrentLimitAmps = 70;
 
         // Motor inversion
         public static final boolean kAgitatorInverted          = true;
@@ -231,6 +231,9 @@ public final class Constants {
 
         /** The maximum time (seconds) to wait for shooter spin-up before feeding anyway. */
         public static final double kShooterSpinUpTimeoutSeconds = 3.0;
+
+        /** Minimum time (seconds) to keep feeding after the feed gate opens (auto only). */
+        public static final double kAutoFeedDurationSeconds = 0.5;
 
         /** RPM increment/decrement per D-pad press for manual RPM adjustment. */
         public static final double kManualShootRPMStep   = 50.0;
@@ -458,6 +461,6 @@ public final class Constants {
          * Should match a mid-range shot — tune to your most common shooting distance.
          */
         public static final double kFallbackShooterRPM    = 3150.0;
-        public static final double kFallbackPreShooterRPM = 3150.0;
+        public static final double kFallbackPreShooterRPM = ShooterConstants.kPreShooterForwardRPM;
     }
 }

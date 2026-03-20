@@ -50,7 +50,8 @@ class ShootCommandTest {
         m_command.initialize();
 
         verify(m_shooter).runShooterAtRPM(anyDouble());
-        verify(m_shooter).runPreShooterAtRPM(anyDouble());
+        // Pre-shooter always runs at 5000 RPM regardless of distance
+        verify(m_shooter).runPreShooterAtRPM(5000.0);
     }
 
     @Test
@@ -93,5 +94,7 @@ class ShootCommandTest {
         double expectedRPM = 2725.0
                 + (2.5 - 2.134) / (2.946 - 2.134) * (3150.0 - 2725.0);
         verify(m_shooter).runShooterAtRPM(org.mockito.AdditionalMatchers.eq(expectedRPM, 0.01));
+        // Pre-shooter always runs at 5000 RPM regardless of distance
+        verify(m_shooter).runPreShooterAtRPM(5000.0);
     }
 }

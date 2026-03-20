@@ -39,10 +39,11 @@ public class AutoShootCommand extends Command {
 
     private final PIDController m_headingPID;
     private final Timer         m_spinUpTimer = new Timer();
+    private final Timer         m_feedTimer   = new Timer();
 
     private double  m_targetShooterRPM;
     private double  m_targetPreShooterRPM;
-    private boolean m_shotFired = false;
+    private boolean m_feeding = false;
 
     public AutoShootCommand(
             DriveSubsystem driveSubsystem,
@@ -69,17 +70,19 @@ public class AutoShootCommand extends Command {
     public void initialize() {
         m_headingPID.reset();
         m_spinUpTimer.restart();
-        m_shotFired = false;
+        m_feedTimer.stop();
+        m_feedTimer.reset();
+        m_feeding = false;
 
         // Lock in RPM at the moment we start (distance from odometry)
         double distanceMeters = m_visionSubsystem.getDistanceToHub();
         if (distanceMeters > 0) {
             m_targetShooterRPM    = ShooterInterpolation.getShooterRPM(distanceMeters);
-            m_targetPreShooterRPM = ShooterInterpolation.getPreShooterRPM(distanceMeters);
         } else {
             m_targetShooterRPM    = ShooterTableConstants.kFallbackShooterRPM;
-            m_targetPreShooterRPM = ShooterTableConstants.kFallbackPreShooterRPM;
         }
+        // Pre-shooter always runs at full speed regardless of distance
+        m_targetPreShooterRPM = ShooterConstants.kPreShooterForwardRPM;
 
         SmartDashboard.putNumber("AutoShoot/Distance At Shot",      distanceMeters);
         SmartDashboard.putNumber("AutoShoot/Target Shooter RPM",    m_targetShooterRPM);
@@ -139,7 +142,10 @@ public class AutoShootCommand extends Command {
         if ((atHeading || timedOut) && (atSpeed || timedOut)) {
             m_shooterSubsystem.runAgitator();
             m_shooterSubsystem.runKicker();
-            m_shotFired = true;
+            if (!m_feeding) {
+                m_feedTimer.restart();
+                m_feeding = true;
+            }
         } else {
             m_shooterSubsystem.runKickerSlowReverse();
         }
@@ -153,8 +159,8 @@ public class AutoShootCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        // Finish one cycle after the shot is fired so the ball has time to leave
-        return m_shotFired;
+        // Finish after feeding for the minimum feed duration so the ball has time to leave
+        return m_feeding && m_feedTimer.hasElapsed(ShooterConstants.kAutoFeedDurationSeconds);
     }
 
     /** Returns the hub position for the current alliance. Defaults to Blue if unknown. */

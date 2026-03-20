@@ -56,11 +56,11 @@ public class ShootCommand extends Command {
         double distanceMeters = m_visionSubsystem.getDistanceToHub();
         if (distanceMeters > 0) {
             m_targetShooterRPM    = ShooterInterpolation.getShooterRPM(distanceMeters);
-            m_targetPreShooterRPM = ShooterInterpolation.getPreShooterRPM(distanceMeters);
         } else {
             m_targetShooterRPM    = ShooterTableConstants.kFallbackShooterRPM;
-            m_targetPreShooterRPM = ShooterTableConstants.kFallbackPreShooterRPM;
         }
+        // Pre-shooter always runs at full speed regardless of distance
+        m_targetPreShooterRPM = ShooterConstants.kPreShooterForwardRPM;
 
         SmartDashboard.putNumber("Shooter/Distance At Shot",      distanceMeters);
         SmartDashboard.putNumber("Shooter/Target Shooter RPM",    m_targetShooterRPM);

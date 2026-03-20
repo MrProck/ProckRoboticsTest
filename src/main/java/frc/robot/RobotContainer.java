@@ -11,6 +11,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.ShooterTableConstants;
 import frc.robot.commands.AutonomousDriveCommand;
 import frc.robot.commands.IntakeExtensionCommand;
 import frc.robot.commands.OrbitalDriveCommand;
@@ -134,11 +135,12 @@ public class RobotContainer {
             .onFalse(createIntakeStopCommand());
 
         // X (held) — pre-spin shooter flywheels only (no feeding)
+        // Uses fallback RPM for shooter so pre-spin matches what ShootCommand will use
         m_driverController.x()
             .whileTrue(Commands.startEnd(
                 () -> {
-                    m_shooterSubsystem.runPreShooter();
-                    m_shooterSubsystem.runShooter();
+                    m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
+                    m_shooterSubsystem.runShooterAtRPM(ShooterTableConstants.kFallbackShooterRPM);
                 },
                 () -> {
                     m_shooterSubsystem.stopPreShooter();
@@ -176,12 +178,13 @@ public class RobotContainer {
         );
 
         // Left Trigger (>10%) — spin up shooter flywheels only (pre-spin, no feeding)
+        // Uses fallback RPM for shooter so pre-spin matches what ShootCommand will use
         m_operatorController.leftTrigger(0.1)
             .and(m_operatorController.leftTrigger(0.9).negate())
             .whileTrue(Commands.startEnd(
                 () -> {
-                    m_shooterSubsystem.runPreShooter();
-                    m_shooterSubsystem.runShooter();
+                    m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
+                    m_shooterSubsystem.runShooterAtRPM(ShooterTableConstants.kFallbackShooterRPM);
                 },
                 () -> {
                     m_shooterSubsystem.stopPreShooter();
