@@ -53,16 +53,19 @@ public class ShooterSubsystem extends SubsystemBase {
         Preferences.initDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM);
         Preferences.initBoolean(kVerboseTelemetryKey, false);
         // --- Agitator Motor (NEO + SparkMax) ---
+        // outputRange(0,1): prevents active braking when the P-controller overshoots target RPM.
+        // Motor coasts back to target instead of oscillating. Same fix applied to kicker.
         SparkMaxConfig agitatorConfig = new SparkMaxConfig();
         agitatorConfig
             .inverted(ShooterConstants.kAgitatorInverted)
-            .idleMode(IdleMode.kBrake)
+            .idleMode(IdleMode.kCoast)
             .smartCurrentLimit(ShooterConstants.kAgitatorCurrentLimitAmps);
         agitatorConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(ShooterConstants.kAgitatorP)
             .i(ShooterConstants.kAgitatorI)
-            .d(ShooterConstants.kAgitatorD);
+            .d(ShooterConstants.kAgitatorD)
+            .outputRange(0, 1);
         agitatorConfig.closedLoop.feedForward
             .kV(ShooterConstants.kAgitatorFF);
         REVUtil.check(
@@ -71,16 +74,20 @@ public class ShooterSubsystem extends SubsystemBase {
         m_agitatorController = m_agitatorMotor.getClosedLoopController();
 
         // --- Kicker Motor (NEO Vortex + SparkFlex) ---
+        // High-P bang-bang style PID: outputRange(0,1) means it only drives forward.
+        // When above target RPM the output is clamped to 0 so the motor coasts — no active
+        // braking that would cause overshoot/undershoot oscillation.
         SparkFlexConfig kickerConfig = new SparkFlexConfig();
         kickerConfig
             .inverted(ShooterConstants.kKickerInverted)
-            .idleMode(IdleMode.kBrake)
+            .idleMode(IdleMode.kCoast)
             .smartCurrentLimit(ShooterConstants.kKickerCurrentLimitAmps);
         kickerConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(ShooterConstants.kKickerP)
             .i(ShooterConstants.kKickerI)
-            .d(ShooterConstants.kKickerD);
+            .d(ShooterConstants.kKickerD)
+            .outputRange(0, 1);
         kickerConfig.closedLoop.feedForward
             .kV(ShooterConstants.kKickerFF);
         REVUtil.check(
@@ -176,7 +183,9 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** Runs the kicker motor slowly in reverse during shooter spin-up to prevent pre-loading. */
     public void runKickerSlowReverse() {
-        m_kickerController.setSetpoint(-ShooterConstants.kKickerSlowInvertRPM, ControlType.kVelocity);
+        // Use open-loop duty cycle for reverse — closed-loop outputRange is clamped to [0,1]
+        // for forward operation; a fixed slow duty cycle is sufficient for pre-load prevention.
+        m_kickerMotor.set(-0.08);  // ~8% reverse — just enough to resist pre-loading
     }
 
     /** Stops the kicker motor. */
@@ -253,9 +262,10 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** Runs all 4 stages simultaneously in reverse for clearing jams. */
     public void reverseAll() {
-        m_agitatorController.setSetpoint(-ShooterConstants.kAgitatorReverseRPM, ControlType.kVelocity);
-        m_kickerController.setSetpoint(-ShooterConstants.kKickerReverseRPM, ControlType.kVelocity);
-        // Bang-bang motors have outputRange(0,1) so PID can't reverse — use raw duty cycle
+        // All motors with outputRange(0,1) cannot accept negative closed-loop setpoints —
+        // PID output is clamped to 0. Use open-loop duty cycle for all reverse operations.
+        m_agitatorMotor.set(-ShooterConstants.kReverseAllDutyCycle);
+        m_kickerMotor.set(-ShooterConstants.kReverseAllDutyCycle);
         m_preShooterMotor.set(-ShooterConstants.kReverseAllDutyCycle);
         m_shooterPrimaryMotor.set(-ShooterConstants.kReverseAllDutyCycle);
         m_shooterSecondaryMotor.set(-ShooterConstants.kReverseAllDutyCycle);
@@ -310,8 +320,6 @@ public class ShooterSubsystem extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putBoolean("Shooter/AtSpeed", isShooterAtSpeed());
         SmartDashboard.putNumber("Shooter/Commanded RPM",
-            Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM));
-        SmartDashboard.putNumber("Shooter/Manual RPM",
             Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM));
 
         if (Preferences.getBoolean(kVerboseTelemetryKey, false)) {

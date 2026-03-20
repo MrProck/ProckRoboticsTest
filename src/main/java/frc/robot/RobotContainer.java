@@ -48,14 +48,14 @@ public class RobotContainer {
             new RunCommand(() -> {
                 m_intakeSubsystem.runIntake();
                 m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
-            }, m_intakeSubsystem, m_shooterSubsystem)
+            }, m_intakeSubsystem)  // no m_shooterSubsystem requirement — avoids conflicting with Shoot command
                 .withTimeout(2.0));
 
         NamedCommands.registerCommand("IntakeStop",
             new InstantCommand(() -> {
                 m_intakeSubsystem.stopRoller();
                 m_shooterSubsystem.stopAgitator();
-            }, m_intakeSubsystem, m_shooterSubsystem));
+            }, m_intakeSubsystem));  // no m_shooterSubsystem requirement
 
         configureBindings();
         configureAutoChooser();
@@ -227,7 +227,7 @@ public class RobotContainer {
         return new RunCommand(() -> {
             m_intakeSubsystem.runIntake();
             m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
-        }, m_intakeSubsystem, m_shooterSubsystem);
+        }, m_intakeSubsystem);  // intentionally no m_shooterSubsystem requirement — ShootCommand must not be interrupted by intake
     }
 
     /** Stops the intake roller and agitator (used by both driver and operator triggers). */
@@ -235,7 +235,7 @@ public class RobotContainer {
         return new InstantCommand(() -> {
             m_intakeSubsystem.stopRoller();
             m_shooterSubsystem.stopAgitator();
-        }, m_intakeSubsystem, m_shooterSubsystem);
+        }, m_intakeSubsystem);  // intentionally no m_shooterSubsystem requirement
     }
 
     /**

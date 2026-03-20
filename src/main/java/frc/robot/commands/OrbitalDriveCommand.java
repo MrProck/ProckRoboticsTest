@@ -2,7 +2,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -45,11 +44,6 @@ public class OrbitalDriveCommand extends Command {
     private final DoubleSupplier  m_radiusInput;
 
     private final PIDController m_headingPID;
-
-    // Slew rate limiter on the X-axis throttle multiplier only.
-    // Limits forward/backward acceleration to prevent tipping on the narrow 12.5" wheelbase.
-    // Y-axis (strafe) uses the unramped throttle for instant responsiveness.
-    private final SlewRateLimiter m_throttleXLimiter = new SlewRateLimiter(SwerveConstants.kThrottleXSlewRatePerSecond);
 
     // Current target orbit radius, seeded from actual distance on initialize()
     private double m_targetRadiusMeters = OrbitalConstants.kOrbitDefaultRadiusMeters;
@@ -95,7 +89,6 @@ public class OrbitalDriveCommand extends Command {
     @Override
     public void initialize() {
         m_headingPID.reset();
-        m_throttleXLimiter.reset(0.0);
 
         // Seed target radius from actual distance to hub to avoid sudden jumps
         Translation2d hub = getHubPosition();
@@ -161,18 +154,25 @@ public class OrbitalDriveCommand extends Command {
             double unitTangentX = -unitRadialY;
             double unitTangentY =  unitRadialX;
 
-            // ---- Tangential velocity from left stick X ----
+            // ---- Throttle remap: [0,1] → [kThrottleMinFraction, 1.0] ----
             double trigger = MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
+            double min = SwerveConstants.kThrottleMinFraction;
+            double speedMultiplier = min + (1.0 - min) * trigger;
+
+            // ---- Tangential velocity from left stick X ----
             double tangentialInput = MathUtil.applyDeadband(m_xSpeed.getAsDouble(), SwerveConstants.kDeadband);
-            double tangentialSpeed = tangentialInput * OrbitalConstants.kOrbitMaxTangentialSpeedMPS * trigger;
+            double tangentialSpeed = tangentialInput * OrbitalConstants.kOrbitMaxTangentialSpeedMPS * speedMultiplier;
             tangentX = unitTangentX * tangentialSpeed;
             tangentY = unitTangentY * tangentialSpeed;
 
             // ---- Radial correction: P-control to maintain target orbit radius ----
+            // Apply a deadband to avoid tiny pose-estimator drift causing uninstructed movement.
             double radialError = actualDistance - m_targetRadiusMeters;
-            double radialSpeed = -radialError * OrbitalConstants.kOrbitRadialP;
-            radialCorrX = unitRadialX * radialSpeed;
-            radialCorrY = unitRadialY * radialSpeed;
+            if (Math.abs(radialError) > OrbitalConstants.kOrbitRadialDeadband) {
+                double radialSpeed = -radialError * OrbitalConstants.kOrbitRadialP * speedMultiplier;
+                radialCorrX = unitRadialX * radialSpeed;
+                radialCorrY = unitRadialY * radialSpeed;
+            }
         }
 
         // ---- Combine tangential + radial into field-relative vx/vy ----

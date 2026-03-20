@@ -107,16 +107,17 @@ public final class Constants {
          * Slew rate limit (units per second) applied to each drive axis in TeleopDriveCommand.
          * Limits how fast the commanded speed can change per second, smoothing acceleration and
          * preventing wheel slip. Higher values = snappier acceleration; lower = smoother ramp.
+         * At 2.5: full stick takes ~400ms. At 4.0: ~250ms. At 6.0: ~167ms.
          */
-        public static final double kTeleopSlewRatePerSecond = 2.5;
+        public static final double kTeleopSlewRatePerSecond = 4.0;
 
         /**
          * Max rate of change for the X-axis throttle multiplier (units/sec).
          * A value of 1.5 means it takes ~0.67s to go from stopped to full speed on the X axis.
-         * Limits forward/backward acceleration to prevent tipping on the narrow wheelbase (12.5").
+         * A value of 3.0 means ~0.33s — snappier but still protects the narrow wheelbase.
          * Y-axis (strafe) and rotation use the unramped throttle for instant responsiveness.
          */
-        public static final double kThrottleXSlewRatePerSecond = 1.5;
+        public static final double kThrottleXSlewRatePerSecond = 3.0;
 
         /**
          * Linear blend fraction for the input curve in TeleopDriveCommand.
@@ -224,7 +225,8 @@ public final class Constants {
         public static final double kKickerReverseRPM    = 1000.0;
         /** Slow reverse speed (RPM) used during shooter spin-up to prevent pre-loading. */
         public static final double kKickerSlowInvertRPM = 500.0;
-        public static final double kKickerP             = 0.0002;
+        /** High-P bang-bang style: outputRange(0,1) prevents negative output so motor coasts at speed instead of braking. */
+        public static final double kKickerP             = 0.1;
         public static final double kKickerI             = 0.0;
         public static final double kKickerD             = 0.0;
         public static final double kKickerFF            = 1.0 / 6784.0;  // NEO Vortex free speed
@@ -442,6 +444,12 @@ public final class Constants {
         public static final double kOrbitMaxTangentialSpeedMPS = 2.5;
         /** P gain for maintaining target orbit radius. */
         public static final double kOrbitRadialP = 2.0;
+        /**
+         * Minimum radial error (meters) before radial correction activates.
+         * Prevents pose-estimator noise from causing uninstructed movement when
+         * the robot is approximately at the target radius.
+         */
+        public static final double kOrbitRadialDeadband = 0.15;
     }
 
     /**
