@@ -318,16 +318,22 @@ public class ShooterSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Shooter/AtSpeed", isShooterAtSpeed());
-        SmartDashboard.putNumber("Shooter/Commanded RPM",
-            Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM));
+        double targetRPM   = Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
+        double primaryRPM  = m_shooterPrimaryMotor.getEncoder().getVelocity();
+        double secondaryRPM = m_shooterSecondaryMotor.getEncoder().getVelocity();
+
+        // Always-on: the values you need to tune RPM setpoints
+        SmartDashboard.putBoolean("Shooter/AtSpeed",          isShooterAtSpeed());
+        SmartDashboard.putNumber("Shooter/Commanded RPM",     targetRPM);
+        SmartDashboard.putNumber("Shooter/Primary RPM",       primaryRPM);
+        SmartDashboard.putNumber("Shooter/Secondary RPM",     secondaryRPM);
+        SmartDashboard.putNumber("Shooter/Primary RPM Error", targetRPM - primaryRPM);
+        SmartDashboard.putNumber("Shooter/Secondary RPM Error", targetRPM - secondaryRPM);
 
         if (Preferences.getBoolean(kVerboseTelemetryKey, false)) {
-            SmartDashboard.putNumber("Shooter/Agitator RPM",          m_agitatorMotor.getEncoder().getVelocity());
-            SmartDashboard.putNumber("Shooter/Kicker RPM",            m_kickerMotor.getEncoder().getVelocity());
-            SmartDashboard.putNumber("Shooter/PreShooter RPM",        m_preShooterMotor.getEncoder().getVelocity());
-            SmartDashboard.putNumber("Shooter/Shooter Primary RPM",   m_shooterPrimaryMotor.getEncoder().getVelocity());
-            SmartDashboard.putNumber("Shooter/Shooter Secondary RPM", m_shooterSecondaryMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Shooter/Agitator RPM",   m_agitatorMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Shooter/Kicker RPM",     m_kickerMotor.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Shooter/PreShooter RPM", m_preShooterMotor.getEncoder().getVelocity());
             SmartDashboard.putBoolean("Shooter/PreShooter AtSpeed",
                 m_preShooterMotor.getEncoder().getVelocity()
                     >= Preferences.getDouble(kPreShooterRPMKey, ShooterConstants.kPreShooterForwardRPM));
