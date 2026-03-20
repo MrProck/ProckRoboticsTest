@@ -218,6 +218,21 @@ public class ShooterSubsystem extends SubsystemBase {
         m_shooterSecondaryController.setSetpoint(rpm, ControlType.kVelocity);
     }
 
+    /**
+     * Adjusts the Preferences-stored default shooter RPM by {@code delta} RPM,
+     * clamped to [{@link ShooterConstants#kManualShootMinRPM}, {@link ShooterConstants#kManualShootMaxRPM}].
+     *
+     * <p>Called by D-pad Up/Down bindings on the operator controller.
+     *
+     * @param delta Amount to add (positive = faster, negative = slower).
+     */
+    public void adjustDefaultRPM(double delta) {
+        double current = Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
+        double next = Math.max(ShooterConstants.kManualShootMinRPM,
+                      Math.min(ShooterConstants.kManualShootMaxRPM, current + delta));
+        Preferences.setDouble(kShooterRPMKey, next);
+    }
+
     /** Stops both shooter flywheel motors. */
     public void stopShooter() {
         m_shooterPrimaryMotor.stopMotor();
@@ -295,6 +310,8 @@ public class ShooterSubsystem extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putBoolean("Shooter/AtSpeed", isShooterAtSpeed());
         SmartDashboard.putNumber("Shooter/Commanded RPM",
+            Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM));
+        SmartDashboard.putNumber("Shooter/Manual RPM",
             Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM));
 
         if (Preferences.getBoolean(kVerboseTelemetryKey, false)) {

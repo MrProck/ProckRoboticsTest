@@ -231,6 +231,15 @@ public final class Constants {
 
         /** The maximum time (seconds) to wait for shooter spin-up before feeding anyway. */
         public static final double kShooterSpinUpTimeoutSeconds = 3.0;
+
+        /** RPM increment/decrement per D-pad press for manual RPM adjustment. */
+        public static final double kManualShootRPMStep   = 50.0;
+
+        /** Minimum RPM allowed via manual D-pad adjustment. */
+        public static final double kManualShootMinRPM    = 500.0;
+
+        /** Maximum RPM allowed via manual D-pad adjustment (operator cap). */
+        public static final double kManualShootMaxRPM    = 3200.0;
     }
 
     /**

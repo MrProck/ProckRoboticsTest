@@ -194,6 +194,23 @@ public class RobotContainer {
                 m_shooterSubsystem.reverseAll();
             }, m_shooterSubsystem))
             .onFalse(new InstantCommand(m_shooterSubsystem::stopAll, m_shooterSubsystem));
+
+        // A (held) — manual fixed-RPM shoot (bypasses vision/distance interpolation)
+        // Spins up to "Shooter/Target RPM" (set by D-pad), then feeds when at speed.
+        m_operatorController.a()
+            .whileTrue(createManualShootCommand());
+
+        // D-pad Up — increase default shooter RPM by 50 (max 3200 RPM)
+        m_operatorController.povUp().onTrue(
+            new InstantCommand(
+                () -> m_shooterSubsystem.adjustDefaultRPM(ShooterConstants.kManualShootRPMStep),
+                m_shooterSubsystem));
+
+        // D-pad Down — decrease default shooter RPM by 50 (min 500 RPM)
+        m_operatorController.povDown().onTrue(
+            new InstantCommand(
+                () -> m_shooterSubsystem.adjustDefaultRPM(-ShooterConstants.kManualShootRPMStep),
+                m_shooterSubsystem));
     }
 
     /** Runs the intake roller and agitator together (used by both driver and operator triggers). */
@@ -210,6 +227,63 @@ public class RobotContainer {
             m_intakeSubsystem.stopRoller();
             m_shooterSubsystem.stopAgitator();
         }, m_intakeSubsystem, m_shooterSubsystem);
+    }
+
+    /**
+     * Creates a command that shoots at the current Preferences "Shooter/Target RPM",
+     * bypassing distance-based interpolation.
+     *
+     * <p>Spins up both flywheels and the pre-shooter to the stored default RPM,
+     * then feeds (agitator + kicker) once at speed or after the spin-up timeout.
+     * Runs until cancelled (button released).
+     */
+    private Command createManualShootCommand() {
+        return new Command() {
+            private final edu.wpi.first.wpilibj.Timer m_timer = new edu.wpi.first.wpilibj.Timer();
+            private double m_rpm;
+
+            // Declare requirements at construction time (not inside initialize)
+            {
+                addRequirements(m_shooterSubsystem);
+            }
+
+            @Override
+            public void initialize() {
+                m_timer.restart();
+                m_rpm = edu.wpi.first.wpilibj.Preferences.getDouble(
+                    "Shooter/Target RPM", ShooterConstants.kShooterForwardRPM);
+                m_shooterSubsystem.runShooterAtRPM(m_rpm);
+                m_shooterSubsystem.runPreShooterAtRPM(m_rpm);
+                m_shooterSubsystem.runKickerSlowReverse();
+                SmartDashboard.putNumber("Shooter/Manual Shot RPM", m_rpm);
+            }
+
+            @Override
+            public void execute() {
+                m_shooterSubsystem.runShooterAtRPM(m_rpm);
+                m_shooterSubsystem.runPreShooterAtRPM(m_rpm);
+
+                boolean atSpeed  = m_shooterSubsystem.isShooterAtSpeed(m_rpm);
+                boolean timedOut = m_timer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
+
+                if (atSpeed || timedOut) {
+                    m_shooterSubsystem.runAgitator();
+                    m_shooterSubsystem.runKicker();
+                } else {
+                    m_shooterSubsystem.runKickerSlowReverse();
+                }
+            }
+
+            @Override
+            public void end(boolean interrupted) {
+                m_shooterSubsystem.stopAll();
+            }
+
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+        };
     }
 
     public Command getAutonomousCommand() {
