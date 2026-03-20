@@ -28,7 +28,7 @@ public final class Constants {
         public static final int kPigeonID = 13;
         public static final double kFLCANcoderOffset =  0.4736328125;
         public static final double kFRCANcoderOffset = -0.484375;
-        public static final double kBLCANcoderOffset = -0.2744140625;
+        public static final double kBLCANcoderOffset = -0.274169921875;
         public static final double kBRCANcoderOffset =  0.498046875;
         public static final boolean kFLDriveInverted = false;
         public static final boolean kFRDriveInverted = true;
