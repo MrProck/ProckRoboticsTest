@@ -15,6 +15,7 @@ import frc.robot.commands.AutonomousDriveCommand;
 import frc.robot.commands.IntakeExtensionCommand;
 import frc.robot.commands.OrbitalDriveCommand;
 import frc.robot.commands.TeleopDriveCommand;
+import frc.robot.commands.AutoShootCommand;
 import frc.robot.commands.ShootCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -39,8 +40,8 @@ public class RobotContainer {
         // Register named commands for PathPlanner BEFORE configureAutoChooser().
         // These names must exactly match the command names used in PathPlanner auto files.
         NamedCommands.registerCommand("Shoot",
-            new ShootCommand(m_shooterSubsystem, m_visionSubsystem)
-                .withTimeout(ShooterConstants.kShooterSpinUpTimeoutSeconds + 1.0));
+            new AutoShootCommand(m_driveSubsystem, m_shooterSubsystem, m_visionSubsystem)
+                .withTimeout(ShooterConstants.kShooterSpinUpTimeoutSeconds + 2.0));
 
         NamedCommands.registerCommand("IntakeIn",
             new RunCommand(() -> {
