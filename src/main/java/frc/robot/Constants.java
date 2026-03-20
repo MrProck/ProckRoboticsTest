@@ -26,10 +26,10 @@ public final class Constants {
         public static final int kBLCANcoderID = 11;
         public static final int kBRCANcoderID = 12;
         public static final int kPigeonID = 13;
-        public static final double kFLCANcoderOffset =  0.4736328125;
-        public static final double kFRCANcoderOffset = -0.484375;
-        public static final double kBLCANcoderOffset = -0.274169921875;
-        public static final double kBRCANcoderOffset =  0.498046875;
+        public static final double kFLCANcoderOffset =  0.476318359375;   // from Tuner X
+        public static final double kFRCANcoderOffset = -0.484130859375;   // from Tuner X
+        public static final double kBLCANcoderOffset = -0.32177734375;    // from Tuner X
+        public static final double kBRCANcoderOffset =  0.05517578125;    // from Tuner X
         public static final boolean kFLDriveInverted = false;
         public static final boolean kFRDriveInverted = true;
         public static final boolean kBLDriveInverted = false;
@@ -40,30 +40,59 @@ public final class Constants {
         public static final boolean kBRSteerInverted = false;
         public static final double kDriveGearRatio = 6.746031746031747;
         public static final double kSteerGearRatio = 12.8;
-        public static final double kWheelDiameterMeters = 0.1016;
+        public static final double kWheelDiameterMeters = 0.09906;  // 3.9 inches (radius 1.95 in from Tuner X)
         public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
-        public static final double kTrackWidthMeters = 0.6985;  // 27.5 inches
-        public static final double kWheelBaseMeters  = 0.3175;  // 12.5 inches
+        public static final double kTrackWidthMeters = 0.69215;  // 27.25 inches (2 × 13.625 in from Tuner X)
+        public static final double kWheelBaseMeters  = 0.3175;   // 12.5 inches (2 × 6.25 in from Tuner X)
         public static final SwerveDriveKinematics kSwerveKinematics = new SwerveDriveKinematics(
             new Translation2d( kWheelBaseMeters / 2.0,  kTrackWidthMeters / 2.0),
             new Translation2d( kWheelBaseMeters / 2.0, -kTrackWidthMeters / 2.0),
             new Translation2d(-kWheelBaseMeters / 2.0,  kTrackWidthMeters / 2.0),
             new Translation2d(-kWheelBaseMeters / 2.0, -kTrackWidthMeters / 2.0));
-        public static final double kMaxDriveSpeedMetersPerSecond = 4.58;
+        public static final double kMaxDriveSpeedMetersPerSecond = 4.46;  // from Tuner X kSpeedAt12Volts
         public static final double kMaxAngularVelocityRadiansPerSecond = 2.0 * Math.PI;
         public static final double kTeleopMaxDriveSpeed = 1.0;
         public static final double kTeleopMaxAngularSpeed = 0.75;
         public static final int kDriveCurrentLimitAmps = 60;
-        public static final int kSteerCurrentLimitAmps = 40;
+        public static final int kSteerCurrentLimitAmps = 60;  // stator limit from Tuner X
         public static final double kDriveP  = 0.1;
         public static final double kDriveI  = 0.0;
         public static final double kDriveD  = 0.0;
-        public static final double kDriveFF = 0.124 * kDriveGearRatio;   // kV scaled from motor rot/s to wheel rot/s
+        public static final double kDriveFF = 0.124;  // kV from Tuner X (V per motor rot/s); SensorToMechanismRatio handles gear scaling
         public static final double kSteerP  = 100.0;
         public static final double kSteerI  = 0.0;
         public static final double kSteerD  = 0.5;
         public static final double kSteerS  = 0.1;     // static friction feedforward (V)
         public static final double kSteerFF = 1.59;    // kV (V per rot/s)
+
+        // --- Per-module steering PID overrides ---
+        // All default to the shared values above. Change individual values here to
+        // tune a specific module without affecting the others (e.g. different friction,
+        // cable routing, or gear wear on one corner).
+        public static final double kFLSteerP  = kSteerP;
+        public static final double kFLSteerI  = kSteerI;
+        public static final double kFLSteerD  = kSteerD;
+        public static final double kFLSteerS  = kSteerS;
+        public static final double kFLSteerFF = kSteerFF;
+
+        public static final double kFRSteerP  = kSteerP;
+        public static final double kFRSteerI  = kSteerI;
+        public static final double kFRSteerD  = kSteerD;
+        public static final double kFRSteerS  = kSteerS;
+        public static final double kFRSteerFF = kSteerFF;
+
+        public static final double kBLSteerP  = kSteerP;
+        public static final double kBLSteerI  = kSteerI;
+        public static final double kBLSteerD  = kSteerD;
+        public static final double kBLSteerS  = kSteerS;
+        public static final double kBLSteerFF = kSteerFF;
+
+        public static final double kBRSteerP  = kSteerP;
+        public static final double kBRSteerI  = kSteerI;
+        public static final double kBRSteerD  = kSteerD;
+        public static final double kBRSteerS  = kSteerS;
+        public static final double kBRSteerFF = kSteerFF;
+
         public static final double kDeadband = 0.05;  // reduced: blended cubic curve handles near-zero sensitivity
 
         /**
@@ -258,14 +287,14 @@ public final class Constants {
          * current odometry pose. Measurements farther away are rejected to avoid
          * teleporting the robot.
          */
-        public static final double kMaxAcceptableDistanceMeters = 1.5;
+        public static final double kMaxAcceptableDistanceMeters = 0.75;
 
         /**
          * Maximum acceptable rotation error (degrees) between the vision heading
          * and the gyro heading. Measurements with larger heading differences are
          * rejected.
          */
-        public static final double kMaxAcceptableRotationDegrees = 15.0;
+        public static final double kMaxAcceptableRotationDegrees = 10.0;
 
         /**
          * Minimum number of AprilTag targets the Limelight must see for the pose
@@ -277,8 +306,8 @@ public final class Constants {
          * Standard deviations for single-tag vision measurements
          * (x meters, y meters, heading radians).
          */
-        public static final double kSingleTagStdDevX = 0.9;
-        public static final double kSingleTagStdDevY = 0.9;
+        public static final double kSingleTagStdDevX = 2.0;
+        public static final double kSingleTagStdDevY = 2.0;
         public static final double kSingleTagStdDevTheta = 999.0;
 
         /**
@@ -299,7 +328,7 @@ public final class Constants {
         /** Camera roll angle (degrees). */
         public static final double kCameraRollDegrees         =  0.0;
         /** Camera pitch angle (degrees, positive = tilted up). */
-        public static final double kCameraPitchDegrees        =  20.0;  // camera is mounted at 20 degrees
+        public static final double kCameraPitchDegrees        =  32.0;  // camera is mounted at 32 degrees
         /** Camera yaw angle (degrees, positive = rotated left). */
         public static final double kCameraYawDegrees          =  0.0;
     }

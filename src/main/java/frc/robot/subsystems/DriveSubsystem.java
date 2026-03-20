@@ -32,19 +32,27 @@ public class DriveSubsystem extends SubsystemBase {
     private final SwerveModule m_frontLeft = new SwerveModule(
         SwerveConstants.kFLDriveMotorID, SwerveConstants.kFLSteerMotorID,
         SwerveConstants.kFLCANcoderID, SwerveConstants.kFLCANcoderOffset,
-        SwerveConstants.kFLDriveInverted, SwerveConstants.kFLSteerInverted);
+        SwerveConstants.kFLDriveInverted, SwerveConstants.kFLSteerInverted,
+        SwerveConstants.kFLSteerP, SwerveConstants.kFLSteerI, SwerveConstants.kFLSteerD,
+        SwerveConstants.kFLSteerS, SwerveConstants.kFLSteerFF);
     private final SwerveModule m_frontRight = new SwerveModule(
         SwerveConstants.kFRDriveMotorID, SwerveConstants.kFRSteerMotorID,
         SwerveConstants.kFRCANcoderID, SwerveConstants.kFRCANcoderOffset,
-        SwerveConstants.kFRDriveInverted, SwerveConstants.kFRSteerInverted);
+        SwerveConstants.kFRDriveInverted, SwerveConstants.kFRSteerInverted,
+        SwerveConstants.kFRSteerP, SwerveConstants.kFRSteerI, SwerveConstants.kFRSteerD,
+        SwerveConstants.kFRSteerS, SwerveConstants.kFRSteerFF);
     private final SwerveModule m_backLeft = new SwerveModule(
         SwerveConstants.kBLDriveMotorID, SwerveConstants.kBLSteerMotorID,
         SwerveConstants.kBLCANcoderID, SwerveConstants.kBLCANcoderOffset,
-        SwerveConstants.kBLDriveInverted, SwerveConstants.kBLSteerInverted);
+        SwerveConstants.kBLDriveInverted, SwerveConstants.kBLSteerInverted,
+        SwerveConstants.kBLSteerP, SwerveConstants.kBLSteerI, SwerveConstants.kBLSteerD,
+        SwerveConstants.kBLSteerS, SwerveConstants.kBLSteerFF);
     private final SwerveModule m_backRight = new SwerveModule(
         SwerveConstants.kBRDriveMotorID, SwerveConstants.kBRSteerMotorID,
         SwerveConstants.kBRCANcoderID, SwerveConstants.kBRCANcoderOffset,
-        SwerveConstants.kBRDriveInverted, SwerveConstants.kBRSteerInverted);
+        SwerveConstants.kBRDriveInverted, SwerveConstants.kBRSteerInverted,
+        SwerveConstants.kBRSteerP, SwerveConstants.kBRSteerI, SwerveConstants.kBRSteerD,
+        SwerveConstants.kBRSteerS, SwerveConstants.kBRSteerFF);
 
     private final Pigeon2 m_pigeon = new Pigeon2(SwerveConstants.kPigeonID, new CANBus(SwerveConstants.kCANivoreBus));
 

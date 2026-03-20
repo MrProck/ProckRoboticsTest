@@ -38,7 +38,7 @@ public class SwerveModule {
     private final double m_CANcoderOffset;
 
     /**
-     * Constructs a SwerveModule.
+     * Constructs a SwerveModule with per-module steering PID gains.
      *
      * @param driveMotorID   CAN ID of the drive TalonFX
      * @param steerMotorID   CAN ID of the steer TalonFX
@@ -46,6 +46,11 @@ public class SwerveModule {
      * @param CANcoderOffset Absolute offset of the CANcoder (rotations) — tune with Tuner X
      * @param driveInverted  Whether the drive motor is inverted
      * @param steerInverted  Whether the steer motor is inverted
+     * @param steerP         Proportional gain for this module's steer position PID
+     * @param steerI         Integral gain for this module's steer position PID
+     * @param steerD         Derivative gain for this module's steer position PID
+     * @param steerS         Static friction feedforward (V) for this module's steer motor
+     * @param steerFF        Velocity feedforward kV (V per rot/s) for this module's steer motor
      */
     public SwerveModule(
         int driveMotorID,
@@ -53,7 +58,12 @@ public class SwerveModule {
         int CANcoderID,
         double CANcoderOffset,
         boolean driveInverted,
-        boolean steerInverted
+        boolean steerInverted,
+        double steerP,
+        double steerI,
+        double steerD,
+        double steerS,
+        double steerFF
     ) {
         m_CANcoderOffset = CANcoderOffset;
 
@@ -64,7 +74,7 @@ public class SwerveModule {
 
         configureCANcoder();
         configureDriveMotor(driveInverted);
-        configureSteerMotor(steerInverted);
+        configureSteerMotor(steerInverted, steerP, steerI, steerD, steerS, steerFF);
     }
 
     // -------------------------------------------------------------------------
@@ -103,7 +113,8 @@ public class SwerveModule {
         applyWithRetry(() -> m_driveMotor.getConfigurator().apply(config), 5);
     }
 
-    private void configureSteerMotor(boolean inverted) {
+    private void configureSteerMotor(boolean inverted,
+            double steerP, double steerI, double steerD, double steerS, double steerFF) {
         TalonFXConfiguration config = new TalonFXConfiguration();
 
         // Current limit — 40A
@@ -116,12 +127,12 @@ public class SwerveModule {
             : InvertedValue.CounterClockwise_Positive;
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-        // Position PID (slot 0)
-        config.Slot0.kP = SwerveConstants.kSteerP;
-        config.Slot0.kI = SwerveConstants.kSteerI;
-        config.Slot0.kD = SwerveConstants.kSteerD;
-        config.Slot0.kS = SwerveConstants.kSteerS;
-        config.Slot0.kV = SwerveConstants.kSteerFF;
+        // Position PID (slot 0) — per-module gains
+        config.Slot0.kP = steerP;
+        config.Slot0.kI = steerI;
+        config.Slot0.kD = steerD;
+        config.Slot0.kS = steerS;
+        config.Slot0.kV = steerFF;
 
         // Fuse CANcoder as remote feedback sensor
         config.Feedback.FeedbackSensorSource   = FeedbackSensorSourceValue.RemoteCANcoder;
