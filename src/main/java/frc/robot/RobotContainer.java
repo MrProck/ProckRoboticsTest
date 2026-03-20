@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.commands.AutonomousDriveCommand;
@@ -35,6 +36,25 @@ public class RobotContainer {
     private final SendableChooser<Command> m_autoChooser = new SendableChooser<>();
 
     public RobotContainer() {
+        // Register named commands for PathPlanner BEFORE configureAutoChooser().
+        // These names must exactly match the command names used in PathPlanner auto files.
+        NamedCommands.registerCommand("Shoot",
+            new ShootCommand(m_shooterSubsystem, m_visionSubsystem)
+                .withTimeout(ShooterConstants.kShooterSpinUpTimeoutSeconds + 1.0));
+
+        NamedCommands.registerCommand("IntakeIn",
+            new RunCommand(() -> {
+                m_intakeSubsystem.runIntake();
+                m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
+            }, m_intakeSubsystem, m_shooterSubsystem)
+                .withTimeout(2.0));
+
+        NamedCommands.registerCommand("IntakeStop",
+            new InstantCommand(() -> {
+                m_intakeSubsystem.stopRoller();
+                m_shooterSubsystem.stopAgitator();
+            }, m_intakeSubsystem, m_shooterSubsystem));
+
         configureBindings();
         configureAutoChooser();
 
