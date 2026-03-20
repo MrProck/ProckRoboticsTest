@@ -135,9 +135,11 @@ public class OrbitalDriveCommand extends Command {
         double currentHeadingDeg = m_driveSubsystem.getHeading().getDegrees();
 
         // ---- PID output → rotation speed ----
-        double rawRotation = m_headingPID.calculate(currentHeadingDeg, desiredHeadingDeg);
+        // The PID operates in degrees, so its output is proportional to degree-error.
+        // Convert to radians before using as rotationRadPerSec (expected by drive()).
+        double rawRotationDeg = m_headingPID.calculate(currentHeadingDeg, desiredHeadingDeg);
         double rotationRadPerSec = MathUtil.clamp(
-                rawRotation,
+                Math.toRadians(rawRotationDeg),
                 -OrbitalConstants.kOrbitalMaxRotationRadPerSec,
                  OrbitalConstants.kOrbitalMaxRotationRadPerSec);
 
