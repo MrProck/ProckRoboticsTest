@@ -90,15 +90,21 @@ public class RobotContainer {
 
         // PathPlanner-based autos (path files are in deploy/pathplanner/autos/)
         try {
-            m_autoChooser.addOption("Just Leave", AutoBuilder.buildAuto("Just Leave"));
+            m_autoChooser.addOption("Depot Shoot N Scoot", AutoBuilder.buildAuto("DepotShootNScoot"));
         } catch (Exception e) {
-            System.err.println("[RobotContainer] Could not load 'Just Leave' auto: " + e.getMessage());
+            System.err.println("[RobotContainer] Could not load 'DepotShootNScoot' auto: " + e.getMessage());
         }
 
         try {
-            m_autoChooser.addOption("Score And Leave", AutoBuilder.buildAuto("Score And Leave"));
+            m_autoChooser.addOption("Human Shoot N Scoot", AutoBuilder.buildAuto("HumanShootNScoot"));
         } catch (Exception e) {
-            System.err.println("[RobotContainer] Could not load 'Score And Leave' auto: " + e.getMessage());
+            System.err.println("[RobotContainer] Could not load 'HumanShootNScoot' auto: " + e.getMessage());
+        }
+
+        try {
+            m_autoChooser.addOption("Tower Shoot N Scoot", AutoBuilder.buildAuto("TowerShootNScoot"));
+        } catch (Exception e) {
+            System.err.println("[RobotContainer] Could not load 'TowerShootNScoot' auto: " + e.getMessage());
         }
 
         SmartDashboard.putData("Auto Chooser", m_autoChooser);
