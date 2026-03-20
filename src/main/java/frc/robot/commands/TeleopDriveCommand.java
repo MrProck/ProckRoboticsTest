@@ -74,10 +74,12 @@ public class TeleopDriveCommand extends Command {
 
     @Override
     public void execute() {
-        // Linear accelerator: trigger value directly becomes the speed multiplier.
-        // 0 = stopped, 1 = full speed.
+        // Throttle remap: trigger [0, 1] → [kThrottleMinFraction, 1.0]
+        // This ensures the robot drives at kThrottleMinFraction of max speed even
+        // with no trigger input, while still allowing full speed at full trigger.
         double trigger = MathUtil.clamp(m_throttle.getAsDouble(), 0.0, 1.0);
-        double speedMultiplier = trigger;
+        double min = SwerveConstants.kThrottleMinFraction;
+        double speedMultiplier = min + (1.0 - min) * trigger;
         // X-axis throttle is ramped to prevent tipping on the narrow 12.5" wheelbase.
         // Y-axis and rotation use the raw speedMultiplier for instant responsiveness.
         double xSpeedMultiplier = m_throttleXLimiter.calculate(speedMultiplier);

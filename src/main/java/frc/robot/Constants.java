@@ -58,7 +58,7 @@ public final class Constants {
         public static final double kDriveP  = 0.1;
         public static final double kDriveI  = 0.0;
         public static final double kDriveD  = 0.0;
-        public static final double kDriveFF = 0.124;  // kV from Tuner X (V per motor rot/s); SensorToMechanismRatio handles gear scaling
+        public static final double kDriveFF = 0.124 * kDriveGearRatio;  // kV scaled to wheel rot/s (Tuner X kV=0.124 is per motor rot/s; SensorToMechanismRatio sets setpoint in wheel rot/s so kV must be multiplied by gear ratio)
         public static final double kSteerP  = 100.0;
         public static final double kSteerI  = 0.0;
         public static final double kSteerD  = 0.5;
@@ -94,6 +94,14 @@ public final class Constants {
         public static final double kBRSteerFF = kSteerFF;
 
         public static final double kDeadband = 0.05;  // reduced: blended cubic curve handles near-zero sensitivity
+
+        /**
+         * Minimum speed fraction when the throttle trigger is fully released (0.0).
+         * The trigger remaps from [0, 1] → [kThrottleMinFraction, 1.0], so the robot
+         * always drives at at least this fraction of max speed when the joystick is moved.
+         * Set to 0.0 to restore the original "trigger = speed multiplier" behaviour.
+         */
+        public static final double kThrottleMinFraction = 0.6;
 
         /**
          * Slew rate limit (units per second) applied to each drive axis in TeleopDriveCommand.
