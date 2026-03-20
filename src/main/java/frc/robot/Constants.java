@@ -287,7 +287,7 @@ public final class Constants {
         /** Camera roll angle (degrees). */
         public static final double kCameraRollDegrees         =  0.0;
         /** Camera pitch angle (degrees, positive = tilted up). */
-        public static final double kCameraPitchDegrees        =  0.0;
+        public static final double kCameraPitchDegrees        =  20.0;  // camera is mounted at 20 degrees
         /** Camera yaw angle (degrees, positive = rotated left). */
         public static final double kCameraYawDegrees          =  0.0;
     }
