@@ -91,7 +91,7 @@ public class AutoShootCommand extends Command {
         // Start spinning up immediately
         m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
         m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
-        m_shooterSubsystem.stopKicker();
+        m_shooterSubsystem.runKicker();
     }
 
     @Override
@@ -131,6 +131,7 @@ public class AutoShootCommand extends Command {
         // --- Shooter spin-up ---
         m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
         m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
+        m_shooterSubsystem.runKicker();
 
         boolean atSpeed  = m_shooterSubsystem.isShooterAtSpeed(m_targetShooterRPM);
         boolean timedOut = m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
@@ -141,13 +142,10 @@ public class AutoShootCommand extends Command {
         // Feed only when aimed at hub AND shooter at speed (or timed out as fallback)
         if ((atHeading || timedOut) && (atSpeed || timedOut)) {
             m_shooterSubsystem.runAgitator();
-            m_shooterSubsystem.runKicker();
             if (!m_feeding) {
                 m_feedTimer.restart();
                 m_feeding = true;
             }
-        } else {
-            m_shooterSubsystem.stopKicker();
         }
     }
 

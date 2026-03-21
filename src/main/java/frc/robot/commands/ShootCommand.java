@@ -68,13 +68,14 @@ public class ShootCommand extends Command {
 
         m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
         m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
-        m_shooterSubsystem.stopKicker();
+        m_shooterSubsystem.runKicker();
     }
 
     @Override
     public void execute() {
         m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
         m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
+        m_shooterSubsystem.runKicker();
 
         boolean atSpeed  = m_shooterSubsystem.isShooterAtSpeed(m_targetShooterRPM);
         boolean timedOut = m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
@@ -84,9 +85,6 @@ public class ShootCommand extends Command {
 
         if (atSpeed || timedOut) {
             m_shooterSubsystem.runAgitator();
-            m_shooterSubsystem.runKicker();
-        } else {
-            m_shooterSubsystem.stopKicker();
         }
     }
 

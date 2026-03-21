@@ -111,6 +111,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .i(0.0)
             .d(0.0)
             .outputRange(0, 1);
+        preShooterConfig.closedLoop.feedForward
+            .kV(ShooterConstants.kPreShooterFF);
         REVUtil.check(
             m_preShooterMotor.configure(preShooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Pre-shooter motor (SparkFlex ID " + ShooterConstants.kPreShooterMotorID + ") configure");
@@ -129,6 +131,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .i(0.0)
             .d(0.0)
             .outputRange(0, 1);
+        shooterPrimaryConfig.closedLoop.feedForward
+            .kV(ShooterConstants.kShooterFF);
         REVUtil.check(
             m_shooterPrimaryMotor.configure(shooterPrimaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Shooter primary motor (SparkFlex ID " + ShooterConstants.kShooterPrimaryMotorID + ") configure");
@@ -147,6 +151,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .i(0.0)
             .d(0.0)
             .outputRange(0, 1);
+        shooterSecondaryConfig.closedLoop.feedForward
+            .kV(ShooterConstants.kShooterFF);
         REVUtil.check(
             m_shooterSecondaryMotor.configure(shooterSecondaryConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters),
             "Shooter secondary motor (SparkFlex ID " + ShooterConstants.kShooterSecondaryMotorID + ") configure");
@@ -162,9 +168,17 @@ public class ShooterSubsystem extends SubsystemBase {
         m_agitatorController.setSetpoint(ShooterConstants.kAgitatorForwardRPM, ControlType.kVelocity);
     }
 
-    /** Runs the agitator motor at a custom RPM using closed-loop velocity control. */
+    /** Runs the agitator motor at a custom RPM.
+     *  Positive RPM uses closed-loop velocity control (outputRange [0,1]).
+     *  Negative RPM uses open-loop duty cycle because outputRange(0,1) clamps closed-loop to zero.
+     */
     public void runAgitatorAtRPM(double rpm) {
-        m_agitatorController.setSetpoint(rpm, ControlType.kVelocity);
+        if (rpm < 0) {
+            // Open-loop reverse: scale by NEO free speed (5676 RPM) to get approximate duty cycle
+            m_agitatorMotor.set(rpm / 5676.0);
+        } else {
+            m_agitatorController.setSetpoint(rpm, ControlType.kVelocity);
+        }
     }
 
     /** Stops the agitator motor. */

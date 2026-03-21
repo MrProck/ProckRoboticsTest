@@ -175,7 +175,7 @@ public final class Constants {
         /** Conversion factor: output rotations per motor rotation. */
         public static final double kExtensionPositionConversionFactor = 1.0 / kExtensionGearRatio;
         public static final int     kRollerMotorID          = 15;
-        public static final int     kRollerCurrentLimitAmps = 25;
+        public static final int     kRollerCurrentLimitAmps = 60;
         public static final boolean kRollerMotorInverted    = false; // reverted: motor runs correct direction uninverted
         public static final double kRollerForwardSpeed  = 1.0;
         public static final double kRollerReverseSpeed  = -0.5;
@@ -198,8 +198,8 @@ public final class Constants {
         public static final int kShooterSecondaryMotorID  = 23;
 
         // Current limits (amps)
-        public static final int kAgitatorCurrentLimitAmps          = 30;
-        public static final int kKickerCurrentLimitAmps            = 50;
+        public static final int kAgitatorCurrentLimitAmps          = 60;
+        public static final int kKickerCurrentLimitAmps            = 120;
         public static final int kPreShooterCurrentLimitAmps        = 40;
         /** Current limit for each shooter flywheel motor (amps). */
         public static final int kShooterCurrentLimitAmps = 70;
@@ -221,7 +221,7 @@ public final class Constants {
         public static final double kAgitatorFF          = 1.0 / 5676.0;  // NEO free speed
 
         // --- Kicker (NEO Vortex + SparkFlex) ---
-        public static final double kKickerForwardRPM    = 3000.0;
+        public static final double kKickerForwardRPM    = 5500.0;
         public static final double kKickerReverseRPM    = 1000.0;
         /** Slow reverse speed (RPM) used during shooter spin-up to prevent pre-loading. */
         public static final double kKickerSlowInvertRPM = 500.0;
@@ -266,7 +266,7 @@ public final class Constants {
         public static final double kShooterFF            = 1.0 / 6784.0;  // NEO Vortex free speed
 
         // Shooter flywheel speed detection (used by ShootCommand to gate feeding)
-        public static final double kShooterSpeedToleranceRPM    = 275.0;
+        public static final double kShooterSpeedToleranceRPM    = 1000.0;
         public static final double kPreShooterSpeedToleranceRPM = 300.0;
 
         /** Pre-shooter RPM threshold at which the kicker begins feeding. */

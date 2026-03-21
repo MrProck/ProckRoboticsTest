@@ -226,7 +226,15 @@ public class RobotContainer {
     private Command createIntakeRunCommand() {
         return new RunCommand(() -> {
             m_intakeSubsystem.runIntake();
-            m_shooterSubsystem.runAgitatorAtRPM(ShooterConstants.kAgitatorForwardRPM);
+            // Agitator runs in reverse during intake to feed game piece toward the intake roller.
+            // During shoot, ShootCommand calls runAgitator() (forward) and owns m_shooterSubsystem,
+            // so it takes over — this reverse call is simply not running when shoot is active.
+            m_shooterSubsystem.runAgitatorAtRPM(-ShooterConstants.kAgitatorReverseRPM);
+            // Run flywheels in reverse during intake to pull the game piece toward the shooter.
+            // ShootCommand has m_shooterSubsystem as a requirement so it will take over the
+            // motor output the moment shoot is pressed — this call is simply ignored/overridden.
+            m_shooterSubsystem.runPreShooterAtRPM(-ShooterConstants.kPreShooterForwardRPM);
+            m_shooterSubsystem.runShooterAtRPM(-ShooterConstants.kShooterForwardRPM);
         }, m_intakeSubsystem);  // intentionally no m_shooterSubsystem requirement — ShootCommand must not be interrupted by intake
     }
 
@@ -235,6 +243,8 @@ public class RobotContainer {
         return new InstantCommand(() -> {
             m_intakeSubsystem.stopRoller();
             m_shooterSubsystem.stopAgitator();
+            m_shooterSubsystem.stopPreShooter();
+            m_shooterSubsystem.stopShooter();
         }, m_intakeSubsystem);  // intentionally no m_shooterSubsystem requirement
     }
 
@@ -264,7 +274,7 @@ public class RobotContainer {
                 m_shooterSubsystem.runShooterAtRPM(m_rpm);
                 // Pre-shooter always runs at full speed to push ball through the tube fast enough
                 m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
-                m_shooterSubsystem.stopKicker();
+                m_shooterSubsystem.runKicker();
                 SmartDashboard.putNumber("Shooter/Manual Shot RPM", m_rpm);
             }
 
@@ -273,15 +283,13 @@ public class RobotContainer {
                 m_shooterSubsystem.runShooterAtRPM(m_rpm);
                 // Pre-shooter always runs at full speed regardless of manual flywheel RPM
                 m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
+                m_shooterSubsystem.runKicker();
 
                 boolean atSpeed  = m_shooterSubsystem.isShooterAtSpeed(m_rpm);
                 boolean timedOut = m_timer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
 
                 if (atSpeed || timedOut) {
                     m_shooterSubsystem.runAgitator();
-                    m_shooterSubsystem.runKicker();
-                } else {
-                    m_shooterSubsystem.stopKicker();
                 }
             }
 
