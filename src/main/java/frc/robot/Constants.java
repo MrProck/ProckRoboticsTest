@@ -160,7 +160,7 @@ public final class Constants {
      */
     public static final class IntakeConstants {
         public static final int     kExtensionMotorID          = 14;
-        public static final int     kExtensionCurrentLimitAmps = 17;
+        public static final int     kExtensionCurrentLimitAmps = 7; // Low limit to avoid bending mount at end stop
         public static final boolean kExtensionMotorInverted    = false;
         public static final double kExtensionP  = 0.1;
         public static final double kExtensionI  = 0.0;
