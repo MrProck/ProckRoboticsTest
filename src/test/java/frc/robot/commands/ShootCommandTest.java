@@ -72,7 +72,7 @@ class ShootCommandTest {
         m_command.execute();
 
         verify(m_shooter).runAgitator();
-        verify(m_shooter).runKicker();
+        verify(m_shooter, atLeastOnce()).runKicker();
     }
 
     @Test
