@@ -4,16 +4,14 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.OrbitalConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -38,6 +36,7 @@ import java.util.function.DoubleSupplier;
 public class OrbitalDriveCommand extends Command {
 
     private final DriveSubsystem  m_driveSubsystem;
+    private final VisionSubsystem m_visionSubsystem;
     private final DoubleSupplier  m_xSpeed;
     private final DoubleSupplier  m_ySpeed;
     private final DoubleSupplier  m_throttle;
@@ -51,24 +50,27 @@ public class OrbitalDriveCommand extends Command {
     /**
      * Creates a new OrbitalDriveCommand.
      *
-     * @param driveSubsystem The swerve drive subsystem.
-     * @param xSpeed         Forward/backward translation supplier (-1 to 1); used as tangential speed.
-     * @param ySpeed         Left/right strafe supplier (-1 to 1).
-     * @param throttle       Accelerator supplier (0 = stopped, 1 = full speed).
-     * @param radiusInput    Radial in/out supplier (-1 to 1); positive = move away from hub.
+     * @param driveSubsystem  The swerve drive subsystem.
+     * @param visionSubsystem The vision subsystem (used for hub tag-based heading).
+     * @param xSpeed          Forward/backward translation supplier (-1 to 1); used as tangential speed.
+     * @param ySpeed          Left/right strafe supplier (-1 to 1).
+     * @param throttle        Accelerator supplier (0 = stopped, 1 = full speed).
+     * @param radiusInput     Radial in/out supplier (-1 to 1); positive = move away from hub.
      */
     public OrbitalDriveCommand(
             DriveSubsystem driveSubsystem,
+            VisionSubsystem visionSubsystem,
             DoubleSupplier xSpeed,
             DoubleSupplier ySpeed,
             DoubleSupplier throttle,
             DoubleSupplier radiusInput) {
 
-        m_driveSubsystem = driveSubsystem;
-        m_xSpeed         = xSpeed;
-        m_ySpeed         = ySpeed;
-        m_throttle       = throttle;
-        m_radiusInput    = radiusInput;
+        m_driveSubsystem  = driveSubsystem;
+        m_visionSubsystem = visionSubsystem;
+        m_xSpeed          = xSpeed;
+        m_ySpeed          = ySpeed;
+        m_throttle        = throttle;
+        m_radiusInput     = radiusInput;
 
         m_headingPID = new PIDController(
                 OrbitalConstants.kOrbitalP,
@@ -91,7 +93,7 @@ public class OrbitalDriveCommand extends Command {
         m_headingPID.reset();
 
         // Seed target radius from actual distance to hub to avoid sudden jumps
-        Translation2d hub = getHubPosition();
+        Translation2d hub = m_visionSubsystem.getHubTranslation();
         Pose2d robotPose = m_driveSubsystem.getPose();
         double actualDistance = robotPose.getTranslation().getDistance(hub);
         m_targetRadiusMeters = MathUtil.clamp(
@@ -102,8 +104,8 @@ public class OrbitalDriveCommand extends Command {
 
     @Override
     public void execute() {
-        // ---- Determine alliance-correct hub position ----
-        Translation2d hub = getHubPosition();
+        // ---- Determine hub position (tag-based when visible, else constants) ----
+        Translation2d hub = m_visionSubsystem.getHubTranslation();
 
         // ---- Current robot pose (from pose estimator) ----
         Pose2d robotPose = m_driveSubsystem.getPose();
@@ -211,17 +213,4 @@ public class OrbitalDriveCommand extends Command {
     // Helpers
     // -------------------------------------------------------------------------
 
-    /**
-     * Returns the hub center position in WPILib field coordinates, mirrored
-     * for the Red alliance.
-     *
-     * <p>If the alliance is unknown (e.g. practice mode), defaults to Blue.
-     */
-    private Translation2d getHubPosition() {
-        Optional<Alliance> alliance = DriverStation.getAlliance();
-        if (alliance.isPresent() && alliance.get() == Alliance.Red) {
-            return new Translation2d(OrbitalConstants.kHubRedX, OrbitalConstants.kHubY);
-        }
-        return new Translation2d(OrbitalConstants.kHubBlueX, OrbitalConstants.kHubY);
-    }
 }

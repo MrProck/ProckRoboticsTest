@@ -124,6 +124,7 @@ public class RobotContainer {
         m_driverController.leftBumper()
             .whileTrue(new OrbitalDriveCommand(
                 m_driveSubsystem,
+                m_visionSubsystem,
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),
                 () ->  m_driverController.getRightTriggerAxis(),

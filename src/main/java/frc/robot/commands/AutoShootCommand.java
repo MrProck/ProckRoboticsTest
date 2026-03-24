@@ -4,8 +4,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,8 +14,6 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.util.ShooterInterpolation;
-
-import java.util.Optional;
 
 /**
  * Autonomous shoot command that rotates the robot to face the alliance hub
@@ -115,7 +111,7 @@ public class AutoShootCommand extends Command {
     @Override
     public void execute() {
         // --- Hub-facing rotation (same logic as OrbitalDriveCommand) ---
-        Translation2d hub = getHubPosition();
+        Translation2d hub = m_visionSubsystem.getHubTranslation();
         Pose2d robotPose = m_driveSubsystem.getPose();
 
         // Vector from hub to robot (same convention as OrbitalDriveCommand)
@@ -179,12 +175,4 @@ public class AutoShootCommand extends Command {
         return m_feeding && m_feedTimer.hasElapsed(ShooterConstants.kAutoFeedDurationSeconds);
     }
 
-    /** Returns the hub position for the current alliance. Defaults to Blue if unknown. */
-    private Translation2d getHubPosition() {
-        Optional<Alliance> alliance = DriverStation.getAlliance();
-        if (alliance.isPresent() && alliance.get() == Alliance.Red) {
-            return new Translation2d(OrbitalConstants.kHubRedX, OrbitalConstants.kHubY);
-        }
-        return new Translation2d(OrbitalConstants.kHubBlueX, OrbitalConstants.kHubY);
-    }
 }

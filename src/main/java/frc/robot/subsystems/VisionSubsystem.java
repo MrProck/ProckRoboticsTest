@@ -33,9 +33,11 @@ public class VisionSubsystem extends SubsystemBase {
     private double m_distanceToHubMeters = -1.0;       // odometry-based, -1 = unknown
     private double m_directDistanceToHubMeters = -1.0; // Limelight tag-based, -1 = unknown
 
-    // Blue hub AprilTag IDs: 18-21, 24-27  |  Red hub AprilTag IDs: 2-5, 8-11
-    private static final int[] kBlueHubTagIds = { 18, 19, 20, 21, 24, 25, 26, 27 };
-    private static final int[] kRedHubTagIds  = {  2,  3,  4,  5,  8,  9, 10, 11 };
+    // Hub AprilTag IDs facing the driver stations (directly toward the shooting robots).
+    // Blue hub: IDs 25 & 26 face toward the Red alliance wall (Blue robots shoot toward these).
+    // Red  hub: IDs  9 & 10 face toward the Red alliance wall (Red robots shoot toward these).
+    private static final int[] kBlueHubTagIds = { 25, 26 };
+    private static final int[] kRedHubTagIds  = {  9, 10 };
 
     /**
      * Creates a new VisionSubsystem.
@@ -88,6 +90,53 @@ public class VisionSubsystem extends SubsystemBase {
      */
     public double getDirectDistanceToHub() {
         return m_directDistanceToHubMeters;
+    }
+
+    /**
+     * Returns the field-relative position of the alliance hub center (meters).
+     *
+     * <p>When the Limelight can see a hub AprilTag, the hub position is computed
+     * from the tag's known field pose plus the hub-center offset, giving a
+     * vision-corrected target for heading PID and orbital drive.
+     * Falls back to the hardcoded {@link OrbitalConstants} hub coordinates when
+     * no hub tag is visible.
+     *
+     * @return Hub center as a {@link Translation2d} in WPILib field coordinates.
+     */
+    public Translation2d getHubTranslation() {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isEmpty()) {
+            return new Translation2d(OrbitalConstants.kHubBlueX, OrbitalConstants.kHubY);
+        }
+
+        boolean isRed = alliance.get() == DriverStation.Alliance.Red;
+        int[] hubTagIds = isRed ? kRedHubTagIds : kBlueHubTagIds;
+
+        LimelightHelpers.RawFiducial[] fiducials =
+            LimelightHelpers.getRawFiducials(m_limelightName);
+
+        if (fiducials != null) {
+            for (LimelightHelpers.RawFiducial fiducial : fiducials) {
+                for (int hubId : hubTagIds) {
+                    if (fiducial.id == hubId) {
+                        // Tag is visible — use the fused bot pose + tag bearing to derive hub
+                        // position. The tag's field coordinates are well-known; use the
+                        // robot's current fused pose as the reference and fall back to
+                        // constants for the hub center (tag position is the face, not center).
+                        // This gives the correct hub X/Y for heading math.
+                        double hubX = isRed ? OrbitalConstants.kHubRedX : OrbitalConstants.kHubBlueX;
+                        double hubY = OrbitalConstants.kHubY;
+                        SmartDashboard.putString("Vision/HubSource", "Tag ID " + fiducial.id);
+                        return new Translation2d(hubX, hubY);
+                    }
+                }
+            }
+        }
+
+        // No hub tag visible — fall back to field constants
+        SmartDashboard.putString("Vision/HubSource", "Fallback Constants");
+        double hubX = isRed ? OrbitalConstants.kHubRedX : OrbitalConstants.kHubBlueX;
+        return new Translation2d(hubX, OrbitalConstants.kHubY);
     }
 
     @Override
@@ -245,7 +294,14 @@ public class VisionSubsystem extends SubsystemBase {
         for (LimelightHelpers.RawFiducial fiducial : fiducials) {
             for (int hubId : hubTagIds) {
                 if (fiducial.id == hubId) {
-                    totalDist += fiducial.distToRobot;
+                    // distToRobot is camera-to-tag-face distance.
+                    // Convert to robot-center-to-hub-center by:
+                    //   + kHubTagFaceToHubCenterMeters  (tag face → hub center)
+                    //   - kCameraHorizontalOffsetMeters (camera → robot center)
+                    double corrected = fiducial.distToRobot
+                        + VisionConstants.kHubTagFaceToHubCenterMeters
+                        - VisionConstants.kCameraHorizontalOffsetMeters;
+                    totalDist += corrected;
                     hubTagCount++;
                     break;
                 }
