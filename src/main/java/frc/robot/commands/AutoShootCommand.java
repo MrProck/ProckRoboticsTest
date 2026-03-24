@@ -74,17 +74,35 @@ public class AutoShootCommand extends Command {
         m_feedTimer.reset();
         m_feeding = false;
 
-        // Lock in RPM at the moment we start (distance from odometry)
-        double distanceMeters = m_visionSubsystem.getDistanceToHub();
-        if (distanceMeters > 0) {
-            m_targetShooterRPM    = ShooterInterpolation.getShooterRPM(distanceMeters);
+        // Lock in RPM at the moment we start.
+        // Prefer the direct Limelight tag distance (more accurate for shooting).
+        // Fall back to odometry-based distance if no hub tags are visible.
+        double directDistance = m_visionSubsystem.getDirectDistanceToHub();
+        double odometryDistance = m_visionSubsystem.getDistanceToHub();
+        double distanceMeters;
+
+        if (directDistance > 0) {
+            distanceMeters = directDistance;
+            SmartDashboard.putString("AutoShoot/Distance Source", "Direct Tag");
+        } else if (odometryDistance > 0) {
+            distanceMeters = odometryDistance;
+            SmartDashboard.putString("AutoShoot/Distance Source", "Odometry");
         } else {
-            m_targetShooterRPM    = ShooterTableConstants.kFallbackShooterRPM;
+            distanceMeters = -1.0;
+            SmartDashboard.putString("AutoShoot/Distance Source", "Fallback");
+        }
+
+        if (distanceMeters > 0) {
+            m_targetShooterRPM = ShooterInterpolation.getShooterRPM(distanceMeters);
+        } else {
+            m_targetShooterRPM = ShooterTableConstants.kFallbackShooterRPM;
         }
         // Pre-shooter always runs at full speed regardless of distance
         m_targetPreShooterRPM = ShooterConstants.kPreShooterForwardRPM;
 
         SmartDashboard.putNumber("AutoShoot/Distance At Shot",      distanceMeters);
+        SmartDashboard.putNumber("AutoShoot/Direct Distance",        directDistance);
+        SmartDashboard.putNumber("AutoShoot/Odometry Distance",      odometryDistance);
         SmartDashboard.putNumber("AutoShoot/Target Shooter RPM",    m_targetShooterRPM);
         SmartDashboard.putNumber("AutoShoot/Target PreShooter RPM", m_targetPreShooterRPM);
 

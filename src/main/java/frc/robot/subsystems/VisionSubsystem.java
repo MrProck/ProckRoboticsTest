@@ -30,7 +30,12 @@ public class VisionSubsystem extends SubsystemBase {
 
     private boolean m_hasTarget = false;
     private int m_tagCount = 0;
-    private double m_distanceToHubMeters = -1.0;  // -1 = unknown
+    private double m_distanceToHubMeters = -1.0;       // odometry-based, -1 = unknown
+    private double m_directDistanceToHubMeters = -1.0; // Limelight tag-based, -1 = unknown
+
+    // Blue hub AprilTag IDs: 18-21, 24-27  |  Red hub AprilTag IDs: 2-5, 8-11
+    private static final int[] kBlueHubTagIds = { 18, 19, 20, 21, 24, 25, 26, 27 };
+    private static final int[] kRedHubTagIds  = {  2,  3,  4,  5,  8,  9, 10, 11 };
 
     /**
      * Creates a new VisionSubsystem.
@@ -74,6 +79,17 @@ public class VisionSubsystem extends SubsystemBase {
         return m_distanceToHubMeters;
     }
 
+    /**
+     * Returns the direct distance (meters) to the nearest visible hub AprilTag,
+     * measured by the Limelight camera. Returns -1.0 if no hub tag is currently visible.
+     *
+     * <p>This is more accurate than the odometry-based distance for shooting because
+     * it uses the raw camera measurement rather than the fused pose estimate.
+     */
+    public double getDirectDistanceToHub() {
+        return m_directDistanceToHubMeters;
+    }
+
     @Override
     public void periodic() {
         // Telemetry state for this cycle
@@ -86,8 +102,9 @@ public class VisionSubsystem extends SubsystemBase {
         // Read the target validity from the Limelight
         m_hasTarget = LimelightHelpers.getTV(m_limelightName);
 
-        // Always update hub distance (uses odometry only, independent of vision)
+        // Always update hub distances (odometry-based and direct tag-based)
         updateHubDistance();
+        updateDirectDistanceToHub();
 
         if (!m_hasTarget) {
             m_tagCount = 0;
@@ -191,6 +208,58 @@ public class VisionSubsystem extends SubsystemBase {
             .getTranslation()
             .getDistance(hubTranslation);
         SmartDashboard.putNumber("Shooter/Distance To Hub", m_distanceToHubMeters);
+    }
+
+    /**
+     * Updates {@code m_directDistanceToHubMeters} by scanning the raw fiducials
+     * from the latest Limelight frame and averaging the distances of any hub
+     * AprilTags that are currently visible.
+     *
+     * <p>Uses only tags belonging to the current alliance's hub cluster
+     * (Blue: IDs 18–21, 24–27 | Red: IDs 2–5, 8–11).
+     * Falls back to -1.0 if no hub tags are visible or alliance is unknown.
+     */
+    private void updateDirectDistanceToHub() {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isEmpty()) {
+            m_directDistanceToHubMeters = -1.0;
+            SmartDashboard.putNumber("Shooter/Direct Distance To Hub", -1.0);
+            return;
+        }
+
+        int[] hubTagIds = (alliance.get() == DriverStation.Alliance.Red)
+            ? kRedHubTagIds
+            : kBlueHubTagIds;
+
+        LimelightHelpers.RawFiducial[] fiducials =
+            LimelightHelpers.getRawFiducials(m_limelightName);
+
+        if (fiducials == null || fiducials.length == 0) {
+            m_directDistanceToHubMeters = -1.0;
+            SmartDashboard.putNumber("Shooter/Direct Distance To Hub", -1.0);
+            return;
+        }
+
+        double totalDist = 0.0;
+        int hubTagCount = 0;
+        for (LimelightHelpers.RawFiducial fiducial : fiducials) {
+            for (int hubId : hubTagIds) {
+                if (fiducial.id == hubId) {
+                    totalDist += fiducial.distToRobot;
+                    hubTagCount++;
+                    break;
+                }
+            }
+        }
+
+        if (hubTagCount == 0) {
+            m_directDistanceToHubMeters = -1.0;
+        } else {
+            m_directDistanceToHubMeters = totalDist / hubTagCount;
+        }
+
+        SmartDashboard.putNumber("Shooter/Direct Distance To Hub", m_directDistanceToHubMeters);
+        SmartDashboard.putNumber("Shooter/Direct Distance Hub Tag Count", hubTagCount);
     }
 
     private void publishTelemetry(
