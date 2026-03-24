@@ -14,6 +14,7 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.ShooterTableConstants;
 import frc.robot.commands.AutonomousDriveCommand;
 import frc.robot.commands.IntakeExtensionCommand;
+import frc.robot.commands.HerdDriveCommand;
 import frc.robot.commands.OrbitalDriveCommand;
 import frc.robot.commands.TeleopDriveCommand;
 import frc.robot.commands.AutoShootCommand;
@@ -152,6 +153,26 @@ public class RobotContainer {
         // A (held) — full shoot sequence (spin up + feed when at speed)
         m_driverController.a()
             .whileTrue(new ShootCommand(m_shooterSubsystem, m_visionSubsystem));
+
+        // B (held) — wide herd mode: wide side faces direction of travel
+        m_driverController.b()
+            .whileTrue(new HerdDriveCommand(
+                m_driveSubsystem,
+                () -> -m_driverController.getLeftY(),
+                () -> -m_driverController.getLeftX(),
+                () ->  m_driverController.getRightTriggerAxis(),
+                HerdDriveCommand.Mode.WIDE
+            ));
+
+        // Y (held) — narrow herd mode: corner faces direction of travel
+        m_driverController.y()
+            .whileTrue(new HerdDriveCommand(
+                m_driveSubsystem,
+                () -> -m_driverController.getLeftY(),
+                () -> -m_driverController.getLeftX(),
+                () ->  m_driverController.getRightTriggerAxis(),
+                HerdDriveCommand.Mode.NARROW
+            ));
 
         // Right Bumper (held) — reverse all shooter stages to clear jams
         m_driverController.rightBumper()
