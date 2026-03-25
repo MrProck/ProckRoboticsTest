@@ -71,21 +71,19 @@ public class AutoShootCommand extends Command {
         m_feeding = false;
 
         // Lock in RPM at the moment we start.
-        // Prefer the direct Limelight tag distance (more accurate for shooting).
-        // Fall back to odometry-based distance if no hub tags are visible.
+        // Use ONLY the direct Limelight tag distance (tags 9/10 for Red, 25/26 for Blue).
+        // The odometry-based distance is intentionally NOT used as a fallback because
+        // pose-estimator drift can make it read far when the robot is actually close.
+        // If no hub tags are visible, fall back to the table's fallback RPM.
         double directDistance = m_visionSubsystem.getDirectDistanceToHub();
-        double odometryDistance = m_visionSubsystem.getDistanceToHub();
         double distanceMeters;
 
         if (directDistance > 0) {
             distanceMeters = directDistance;
             SmartDashboard.putString("AutoShoot/Distance Source", "Direct Tag");
-        } else if (odometryDistance > 0) {
-            distanceMeters = odometryDistance;
-            SmartDashboard.putString("AutoShoot/Distance Source", "Odometry");
         } else {
             distanceMeters = -1.0;
-            SmartDashboard.putString("AutoShoot/Distance Source", "Fallback");
+            SmartDashboard.putString("AutoShoot/Distance Source", "No Tag – Fallback RPM");
         }
 
         if (distanceMeters > 0) {
@@ -98,7 +96,6 @@ public class AutoShootCommand extends Command {
 
         SmartDashboard.putNumber("AutoShoot/Distance At Shot",      distanceMeters);
         SmartDashboard.putNumber("AutoShoot/Direct Distance",        directDistance);
-        SmartDashboard.putNumber("AutoShoot/Odometry Distance",      odometryDistance);
         SmartDashboard.putNumber("AutoShoot/Target Shooter RPM",    m_targetShooterRPM);
         SmartDashboard.putNumber("AutoShoot/Target PreShooter RPM", m_targetPreShooterRPM);
 

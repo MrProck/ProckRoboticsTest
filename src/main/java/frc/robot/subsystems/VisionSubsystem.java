@@ -8,8 +8,10 @@ import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.OrbitalConstants;
+import frc.robot.Constants.ShooterTableConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.LimelightHelpers;
+import frc.robot.util.ShooterInterpolation;
 
 import java.util.Optional;
 
@@ -155,6 +157,10 @@ public class VisionSubsystem extends SubsystemBase {
         updateHubDistance();
         updateDirectDistanceToHub();
 
+        // Publish a live preview of what RPM AutoShoot would use right now,
+        // so drivers can verify the table is correct before pulling the trigger.
+        publishShooterPreview();
+
         if (!m_hasTarget) {
             m_tagCount = 0;
             publishTelemetry(lastPoseDiffMeters, lastHeadingDiffDegrees,
@@ -260,19 +266,28 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     /**
-     * Updates {@code m_directDistanceToHubMeters} by scanning the raw fiducials
-     * from the latest Limelight frame and averaging the distances of any hub
-     * AprilTags that are currently visible.
+     * Updates {@code m_directDistanceToHubMeters} using the classic trig distance formula
+     * applied to any visible hub AprilTag (IDs 9 or 10 for Red; 25 or 26 for Blue).
      *
-     * <p>Uses only tags belonging to the current alliance's hub cluster
-     * (Blue: IDs 18–21, 24–27 | Red: IDs 2–5, 8–11).
-     * Falls back to -1.0 if no hub tags are visible or alliance is unknown.
+     * <p>Formula (horizontal ground distance from camera to tag):
+     * <pre>
+     *   d = (h_tag - h_camera) / tan(mountAngle + ty)
+     * </pre>
+     * where {@code ty} ({@code tync}) is the Limelight's vertical angle to the tag center,
+     * {@code mountAngle} is {@link VisionConstants#kCameraPitchDegrees} (24°),
+     * {@code h_tag} is {@link VisionConstants#kHubTagHeightMeters}, and
+     * {@code h_camera} is {@link VisionConstants#kCameraUpOffsetMeters}.
+     *
+     * <p>If multiple hub tags are visible the results are averaged.
+     * Returns -1.0 if no hub tags are visible or alliance is unknown.
      */
     private void updateDirectDistanceToHub() {
         var alliance = DriverStation.getAlliance();
         if (alliance.isEmpty()) {
             m_directDistanceToHubMeters = -1.0;
             SmartDashboard.putNumber("Shooter/Direct Distance To Hub", -1.0);
+            SmartDashboard.putNumber("Shooter/Direct Distance Hub Tag Count", 0);
+            SmartDashboard.putString("Shooter/Hub Tags Seen", "no alliance");
             return;
         }
 
@@ -286,23 +301,34 @@ public class VisionSubsystem extends SubsystemBase {
         if (fiducials == null || fiducials.length == 0) {
             m_directDistanceToHubMeters = -1.0;
             SmartDashboard.putNumber("Shooter/Direct Distance To Hub", -1.0);
+            SmartDashboard.putNumber("Shooter/Direct Distance Hub Tag Count", 0);
+            SmartDashboard.putString("Shooter/Hub Tags Seen", "none");
             return;
         }
 
+        // Trig constants
+        final double mountAngleDeg = VisionConstants.kCameraPitchDegrees; // 24 degrees
+        final double hCamera       = VisionConstants.kCameraUpOffsetMeters;
+        final double hTag          = VisionConstants.kHubTagHeightMeters;
+        final double heightDelta   = hTag - hCamera; // positive = tag is above camera
+
         double totalDist = 0.0;
         int hubTagCount = 0;
+        StringBuilder seenIds = new StringBuilder();
+
         for (LimelightHelpers.RawFiducial fiducial : fiducials) {
             for (int hubId : hubTagIds) {
                 if (fiducial.id == hubId) {
-                    // distToRobot is camera-to-tag-face distance.
-                    // Convert to robot-center-to-hub-center by:
-                    //   + kHubTagFaceToHubCenterMeters  (tag face → hub center)
-                    //   - kCameraHorizontalOffsetMeters (camera → robot center)
-                    double corrected = fiducial.distToRobot
-                        + VisionConstants.kHubTagFaceToHubCenterMeters
-                        - VisionConstants.kCameraHorizontalOffsetMeters;
-                    totalDist += corrected;
-                    hubTagCount++;
+                    double totalAngleDeg = mountAngleDeg + fiducial.tync;
+                    double totalAngleRad = Math.toRadians(totalAngleDeg);
+
+                    if (totalAngleRad > 0.01) { // guard against divide-by-zero / negative angles
+                        double dist = heightDelta / Math.tan(totalAngleRad);
+                        totalDist += dist;
+                        hubTagCount++;
+                        if (seenIds.length() > 0) seenIds.append(",");
+                        seenIds.append(fiducial.id);
+                    }
                     break;
                 }
             }
@@ -316,6 +342,33 @@ public class VisionSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("Shooter/Direct Distance To Hub", m_directDistanceToHubMeters);
         SmartDashboard.putNumber("Shooter/Direct Distance Hub Tag Count", hubTagCount);
+        SmartDashboard.putString("Shooter/Hub Tags Seen", hubTagCount > 0 ? seenIds.toString() : "none");
+    }
+
+    /**
+     * Publishes a live preview of what RPM AutoShoot would use at the current distance.
+     * Updated every periodic cycle so drivers can verify the table before shooting.
+     * Keys:
+     *   "Shooter/Preview RPM"         — flywheel RPM that would be commanded
+     *   "Shooter/Preview Distance (m)" — distance used for the lookup (same as Direct Distance)
+     *   "Shooter/Preview Source"       — "Direct Tag" or "No Tag – Fallback RPM"
+     */
+    private void publishShooterPreview() {
+        double dist = m_directDistanceToHubMeters;
+        double previewRPM;
+        String source;
+
+        if (dist > 0) {
+            previewRPM = ShooterInterpolation.getShooterRPM(dist);
+            source     = "Direct Tag";
+        } else {
+            previewRPM = ShooterTableConstants.kFallbackShooterRPM;
+            source     = "No Tag – Fallback RPM";
+        }
+
+        SmartDashboard.putNumber("Shooter/Preview RPM",          previewRPM);
+        SmartDashboard.putNumber("Shooter/Preview Distance (m)", dist);
+        SmartDashboard.putString("Shooter/Preview Source",       source);
     }
 
     private void publishTelemetry(

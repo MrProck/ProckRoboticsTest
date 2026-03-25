@@ -342,26 +342,18 @@ public final class Constants {
         /** Camera roll angle (degrees). */
         public static final double kCameraRollDegrees         =  0.0;
         /** Camera pitch angle (degrees, positive = tilted up). */
-        public static final double kCameraPitchDegrees        =  32.0;  // camera is mounted at 32 degrees
+        public static final double kCameraPitchDegrees        =  24.0;  // camera is mounted at 24 degrees
         /** Camera yaw angle (degrees, positive = rotated left). */
         public static final double kCameraYawDegrees          =  0.0;
 
         /**
-         * Horizontal distance from the camera lens to the robot center (meters).
-         * Computed from the forward and side offsets:
-         *   sqrt(0.1143^2 + 0.3175^2) ≈ 0.337 m
-         * Used to convert camera-to-tag distance → robot-center-to-tag distance.
+         * Height of the hub AprilTag center above the floor (meters).
+         * From the official 2026 Rebuilt WPILib field layout JSON:
+         *   Tags 9, 10 (Red hub) and 25, 26 (Blue hub) are all at z = 1.12395 m.
+         * Used with the trig distance formula:
+         *   d = (kHubTagHeightMeters - kCameraUpOffsetMeters) / tan(kCameraPitchDegrees + ty)
          */
-        public static final double kCameraHorizontalOffsetMeters =
-            Math.hypot(kCameraForwardOffsetMeters, kCameraSideOffsetMeters); // ≈ 0.337 m
-
-        /**
-         * Distance from the outer face of a hub AprilTag to the hub center (meters).
-         * The 2026 REBUILT hub is a hexagon with ~0.787 m circumradius; tags are
-         * mounted on the outer face, approximately 0.394 m from the hub center.
-         * *** TUNE THIS VALUE ON THE ACTUAL FIELD ***
-         */
-        public static final double kHubTagFaceToHubCenterMeters = 0.394;
+        public static final double kHubTagHeightMeters = 1.12395;
     }
 
     /**
