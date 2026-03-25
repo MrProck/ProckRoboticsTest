@@ -38,6 +38,9 @@ public class RobotContainer {
 
     private final SendableChooser<Command> m_autoChooser = new SendableChooser<>();
 
+    // Toggled by the driver Back button — true = robot-centric, false = field-centric (default)
+    private boolean m_robotCentric = false;
+
     public RobotContainer() {
         // Register named commands for PathPlanner BEFORE configureAutoChooser().
         // These names must exactly match the command names used in PathPlanner auto files.
@@ -62,7 +65,7 @@ public class RobotContainer {
         configureAutoChooser();
 
         // Default drive command — field-centric swerve
-        // Hold Back to switch to robot-centric driving
+        // Press Back to toggle robot-centric driving on/off
         m_driveSubsystem.setDefaultCommand(
             new TeleopDriveCommand(
                 m_driveSubsystem,
@@ -70,7 +73,7 @@ public class RobotContainer {
                 () -> -m_driverController.getLeftX(),
                 () -> -m_driverController.getRightX(),
                 () -> m_driverController.getRightTriggerAxis(),
-                m_driverController.back()
+                () -> m_robotCentric
             )
         );
 
@@ -120,6 +123,11 @@ public class RobotContainer {
         // Start — zero gyro heading
         m_driverController.start().onTrue(
             new InstantCommand(m_driveSubsystem::zeroHeading, m_driveSubsystem)
+        );
+
+        // Back — toggle robot-centric driving on/off
+        m_driverController.back().onTrue(
+            new InstantCommand(() -> m_robotCentric = !m_robotCentric)
         );
 
         // Left Bumper (held) — orbital mode: lock heading toward 2026 REBUILT field hub
