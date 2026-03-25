@@ -62,13 +62,15 @@ public class RobotContainer {
         configureAutoChooser();
 
         // Default drive command — field-centric swerve
+        // Hold Back to switch to robot-centric driving
         m_driveSubsystem.setDefaultCommand(
             new TeleopDriveCommand(
                 m_driveSubsystem,
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),
                 () -> -m_driverController.getRightX(),
-                () -> m_driverController.getRightTriggerAxis()
+                () -> m_driverController.getRightTriggerAxis(),
+                m_driverController.back()
             )
         );
 

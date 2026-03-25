@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.DriveSubsystem;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -24,14 +25,18 @@ import java.util.function.DoubleSupplier;
  * The driver's right trigger acts as a linear accelerator:
  * the robot is stopped when the trigger is not pressed and linearly ramps up
  * to full speed as the trigger is fully pulled.
+ * <p>
+ * Hold the Back button to switch to robot-centric driving. Release to return
+ * to field-centric mode.
  */
 public class TeleopDriveCommand extends Command {
 
     private final DriveSubsystem m_driveSubsystem;
-    private final DoubleSupplier m_xSpeed;
-    private final DoubleSupplier m_ySpeed;
-    private final DoubleSupplier m_rotation;
-    private final DoubleSupplier m_throttle;
+    private final DoubleSupplier  m_xSpeed;
+    private final DoubleSupplier  m_ySpeed;
+    private final DoubleSupplier  m_rotation;
+    private final DoubleSupplier  m_throttle;
+    private final BooleanSupplier m_robotCentric;
 
     // Slew rate limiters smooth acceleration on each axis independently.
     // Rate is in normalized units/second (input is −1 to 1 before scaling).
@@ -51,19 +56,22 @@ public class TeleopDriveCommand extends Command {
      * @param rotation       Rotation input (−1 to 1)
      * @param throttle       Accelerator input (0 = stopped, 1 = full speed); linearly
      *                       scales all drive outputs
+     * @param robotCentric   When {@code true}, drives robot-centric instead of field-centric
      */
     public TeleopDriveCommand(
         DriveSubsystem driveSubsystem,
         DoubleSupplier xSpeed,
         DoubleSupplier ySpeed,
         DoubleSupplier rotation,
-        DoubleSupplier throttle
+        DoubleSupplier throttle,
+        BooleanSupplier robotCentric
     ) {
         m_driveSubsystem = driveSubsystem;
-        m_xSpeed   = xSpeed;
-        m_ySpeed   = ySpeed;
-        m_rotation = rotation;
-        m_throttle = throttle;
+        m_xSpeed       = xSpeed;
+        m_ySpeed       = ySpeed;
+        m_rotation     = rotation;
+        m_throttle     = throttle;
+        m_robotCentric = robotCentric;
         addRequirements(driveSubsystem);
     }
 
@@ -110,7 +118,9 @@ public class TeleopDriveCommand extends Command {
             SmartDashboard.putNumber("Cmd rot (rad/s)", rotRadPerSec);
         }
 
-        m_driveSubsystem.drive(xSpeedMPS, ySpeedMPS, rotRadPerSec, true);
+        boolean fieldRelative = !m_robotCentric.getAsBoolean();
+        SmartDashboard.putBoolean("Drive/Robot Centric", !fieldRelative);
+        m_driveSubsystem.drive(xSpeedMPS, ySpeedMPS, rotRadPerSec, fieldRelative);
     }
 
     /**
