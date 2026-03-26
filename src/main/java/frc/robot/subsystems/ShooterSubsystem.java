@@ -326,6 +326,16 @@ public class ShooterSubsystem extends SubsystemBase {
             && Math.abs(secondary - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
     }
 
+    /**
+     * Returns true when the kicker motor is spinning fast enough forward to be
+     * actively feeding a ball — i.e., it has spun up past the feeding threshold.
+     * Used to gate the agitator so it doesn't push the ball until the kicker
+     * is already moving.
+     */
+    public boolean isKickerFeeding() {
+        return m_kickerMotor.getEncoder().getVelocity() >= ShooterConstants.kKickerFeedingThresholdRPM;
+    }
+
     // -------------------------------------------------------------------------
     // Periodic
     // -------------------------------------------------------------------------

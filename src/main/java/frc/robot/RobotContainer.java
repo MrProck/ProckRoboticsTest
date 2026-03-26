@@ -72,7 +72,7 @@ public class RobotContainer {
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),
                 () -> -m_driverController.getRightX(),
-                () -> m_driverController.getRightTriggerAxis(),
+                () -> 1.0,   // always full speed — trigger no longer used for acceleration
                 () -> m_robotCentric
             )
         );
@@ -137,7 +137,7 @@ public class RobotContainer {
                 m_visionSubsystem,
                 () -> -m_driverController.getLeftY(),
                 () -> -m_driverController.getLeftX(),
-                () ->  m_driverController.getRightTriggerAxis(),
+                () ->  1.0,   // always full speed — trigger no longer used for acceleration
                 () -> -m_driverController.getRightY()
             ));
 
@@ -282,10 +282,15 @@ public class RobotContainer {
 
     /**
      * Creates a command that shoots at the current Preferences "Shooter/Target RPM",
-     * bypassing distance-based interpolation.
+     * bypassing distance-based interpolation. Follows the same kicker/agitator
+     * sequencing as AutoShootCommand but without heading PID — the driver aims manually:
      *
-     * <p>Spins up both flywheels and the pre-shooter to the stored default RPM,
-     * then feeds (agitator + kicker) once at speed or after the spin-up timeout.
+     * <ol>
+     *   <li>Kicker held in slow reverse during spin-up to prevent pre-loading.
+     *   <li>Once at speed (or timeout): kicker runs forward.
+     *   <li>Once kicker is up to feeding speed: agitator engages.
+     * </ol>
+     *
      * Runs until cancelled (button released).
      */
     private Command createManualShootCommand() {
@@ -293,7 +298,6 @@ public class RobotContainer {
             private final edu.wpi.first.wpilibj.Timer m_timer = new edu.wpi.first.wpilibj.Timer();
             private double m_rpm;
 
-            // Declare requirements at construction time (not inside initialize)
             {
                 addRequirements(m_shooterSubsystem);
             }
@@ -303,25 +307,33 @@ public class RobotContainer {
                 m_timer.restart();
                 m_rpm = edu.wpi.first.wpilibj.Preferences.getDouble(
                     "Shooter/Target RPM", ShooterConstants.kShooterForwardRPM);
+                // Start spinning up; hold kicker in slow reverse to prevent pre-loading
                 m_shooterSubsystem.runShooterAtRPM(m_rpm);
-                // Pre-shooter always runs at full speed to push ball through the tube fast enough
                 m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
-                m_shooterSubsystem.runKicker();
+                m_shooterSubsystem.runKickerSlowReverse();
                 SmartDashboard.putNumber("Shooter/Manual Shot RPM", m_rpm);
             }
 
             @Override
             public void execute() {
+                // --- Spin-up ---
                 m_shooterSubsystem.runShooterAtRPM(m_rpm);
-                // Pre-shooter always runs at full speed regardless of manual flywheel RPM
                 m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
-                m_shooterSubsystem.runKicker();
 
                 boolean atSpeed  = m_shooterSubsystem.isShooterAtSpeed(m_rpm);
                 boolean timedOut = m_timer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
 
+                SmartDashboard.putBoolean("Shooter/FeedGate AtSpeed",  atSpeed);
+                SmartDashboard.putBoolean("Shooter/FeedGate TimedOut", timedOut);
+
+                // Feed once at speed (or timed out); wait for kicker before agitator
                 if (atSpeed || timedOut) {
-                    m_shooterSubsystem.runAgitator();
+                    m_shooterSubsystem.runKicker();
+                    if (m_shooterSubsystem.isKickerFeeding()) {
+                        m_shooterSubsystem.runAgitator();
+                    }
+                } else {
+                    m_shooterSubsystem.runKickerSlowReverse();
                 }
             }
 

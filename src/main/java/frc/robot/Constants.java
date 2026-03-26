@@ -93,7 +93,7 @@ public final class Constants {
         public static final double kBRSteerS  = kSteerS;
         public static final double kBRSteerFF = kSteerFF;
 
-        public static final double kDeadband = 0.05;  // reduced: blended cubic curve handles near-zero sensitivity
+        public static final double kDeadband = 0.10;  // covers typical Xbox/PS controller stick drift (~0.05–0.10)
 
         /**
          * Minimum speed fraction when the throttle trigger is fully released (0.0).
@@ -101,7 +101,7 @@ public final class Constants {
          * always drives at at least this fraction of max speed when the joystick is moved.
          * Set to 0.0 to restore the original "trigger = speed multiplier" behaviour.
          */
-        public static final double kThrottleMinFraction = 0.6;
+        public static final double kThrottleMinFraction = 0.0;
 
         /**
          * Slew rate limit (units per second) applied to each drive axis in TeleopDriveCommand.
@@ -225,6 +225,8 @@ public final class Constants {
         public static final double kKickerReverseRPM    = 1000.0;
         /** Slow reverse speed (RPM) used during shooter spin-up to prevent pre-loading. */
         public static final double kKickerSlowInvertRPM = 500.0;
+        /** RPM threshold above which the kicker is considered to be actively feeding. */
+        public static final double kKickerFeedingThresholdRPM = 3000.0;
         /** High-P bang-bang style: outputRange(0,1) prevents negative output so motor coasts at speed instead of braking. */
         public static final double kKickerP             = 0.1;
         public static final double kKickerI             = 0.0;
@@ -279,7 +281,7 @@ public final class Constants {
         public static final double kAutoFeedDurationSeconds = 0.5;
 
         /** RPM increment/decrement per D-pad press for manual RPM adjustment. */
-        public static final double kManualShootRPMStep   = 50.0;
+        public static final double kManualShootRPMStep   = 20.0;
 
         /** Minimum RPM allowed via manual D-pad adjustment. */
         public static final double kManualShootMinRPM    = 500.0;

@@ -13,14 +13,14 @@ import frc.robot.util.ShooterInterpolation;
  * Orchestrates the full shooting sequence with distance-based RPM adjustment.
  *
  * <ol>
- *   <li>At {@code initialize()}: reads distance-to-hub from VisionSubsystem and interpolates
- *       shooter and pre-shooter RPMs from the lookup table in ShooterTableConstants.
- *       Falls back to the configured default RPMs if vision is unavailable (distance &lt;= 0).
- *   <li>Spins up flywheels to the interpolated RPM while running the kicker slowly in reverse
- *       to prevent pre-loading.
+ *   <li>At {@code initialize()}: reads the direct Limelight trig distance to the hub
+ *       (tags 9/10 for Red, 25/26 for Blue) and interpolates shooter RPM from the lookup table.
+ *       Falls back to {@link frc.robot.Constants.ShooterTableConstants#kFallbackShooterRPM}
+ *       if no hub tags are visible.
+ *   <li>Spins up flywheels to the interpolated RPM while running kicker.
  *   <li>Once both flywheels reach speed (or the spin-up timeout elapses), runs the agitator
- *       and kicker in the forward direction to feed the ball.
- *   <li>Stops everything when the command ends.
+ *       to feed the ball.
+ *   <li>Stops everything when the command ends (button released).
  * </ol>
  *
  * <p>Runs until cancelled (e.g., button released).
@@ -37,10 +37,10 @@ public class ShootCommand extends Command {
     private double m_targetPreShooterRPM;
 
     /**
-     * Creates a ShootCommand that adjusts RPM based on distance from the hub.
+     * Creates a ShootCommand that adjusts RPM based on direct Limelight tag distance.
      *
      * @param shooterSubsystem The shooter subsystem.
-     * @param visionSubsystem  The vision subsystem (used for hub distance via odometry).
+     * @param visionSubsystem  The vision subsystem (used for direct tag distance).
      */
     public ShootCommand(ShooterSubsystem shooterSubsystem, VisionSubsystem visionSubsystem) {
         m_shooterSubsystem = shooterSubsystem;
@@ -53,29 +53,37 @@ public class ShootCommand extends Command {
     public void initialize() {
         m_spinUpTimer.restart();
 
-        double distanceMeters = m_visionSubsystem.getDistanceToHub();
-        if (distanceMeters > 0) {
-            m_targetShooterRPM    = ShooterInterpolation.getShooterRPM(distanceMeters);
+        // Use ONLY the direct Limelight trig distance (tags 9/10 for Red, 25/26 for Blue).
+        // The odometry-based distance is intentionally NOT used — pose-estimator drift can
+        // make it read ~13 m when the robot is actually 2–3 m from the hub.
+        double directDistance = m_visionSubsystem.getDirectDistanceToHub();
+        String distanceSource;
+
+        if (directDistance > 0) {
+            m_targetShooterRPM = ShooterInterpolation.getShooterRPM(directDistance);
+            distanceSource     = "Direct Tag";
         } else {
-            m_targetShooterRPM    = ShooterTableConstants.kFallbackShooterRPM;
+            m_targetShooterRPM = ShooterTableConstants.kFallbackShooterRPM;
+            distanceSource     = "No Tag – Fallback RPM";
         }
         // Pre-shooter always runs at full speed regardless of distance
         m_targetPreShooterRPM = ShooterConstants.kPreShooterForwardRPM;
 
-        SmartDashboard.putNumber("Shooter/Distance At Shot",      distanceMeters);
+        SmartDashboard.putNumber("Shooter/Distance At Shot",      directDistance);
+        SmartDashboard.putString("Shooter/Distance Source",       distanceSource);
         SmartDashboard.putNumber("Shooter/Target Shooter RPM",    m_targetShooterRPM);
         SmartDashboard.putNumber("Shooter/Target PreShooter RPM", m_targetPreShooterRPM);
 
         m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
         m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
-        m_shooterSubsystem.runKicker();
+        // Hold kicker in slow reverse during spin-up to prevent pre-loading the ball
+        m_shooterSubsystem.runKickerSlowReverse();
     }
 
     @Override
     public void execute() {
         m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
         m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
-        m_shooterSubsystem.runKicker();
 
         boolean atSpeed  = m_shooterSubsystem.isShooterAtSpeed(m_targetShooterRPM);
         boolean timedOut = m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
@@ -84,7 +92,16 @@ public class ShootCommand extends Command {
         SmartDashboard.putBoolean("Shooter/FeedGate TimedOut", timedOut);
 
         if (atSpeed || timedOut) {
-            m_shooterSubsystem.runAgitator();
+            // Flywheels ready — run kicker forward to feed
+            m_shooterSubsystem.runKicker();
+            // Only run the agitator once the kicker is actually spinning up to feeding speed,
+            // so the ball isn't pushed in before the kicker can grip and carry it
+            if (m_shooterSubsystem.isKickerFeeding()) {
+                m_shooterSubsystem.runAgitator();
+            }
+        } else {
+            // Still spinning up — hold kicker in slow reverse to prevent pre-loading
+            m_shooterSubsystem.runKickerSlowReverse();
         }
     }
 

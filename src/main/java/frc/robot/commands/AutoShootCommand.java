@@ -99,10 +99,10 @@ public class AutoShootCommand extends Command {
         SmartDashboard.putNumber("AutoShoot/Target Shooter RPM",    m_targetShooterRPM);
         SmartDashboard.putNumber("AutoShoot/Target PreShooter RPM", m_targetPreShooterRPM);
 
-        // Start spinning up immediately
+        // Start spinning up immediately; hold kicker in slow reverse to prevent pre-loading
         m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
         m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
-        m_shooterSubsystem.runKicker();
+        m_shooterSubsystem.runKickerSlowReverse();
     }
 
     @Override
@@ -142,7 +142,6 @@ public class AutoShootCommand extends Command {
         // --- Shooter spin-up ---
         m_shooterSubsystem.runShooterAtRPM(m_targetShooterRPM);
         m_shooterSubsystem.runPreShooterAtRPM(m_targetPreShooterRPM);
-        m_shooterSubsystem.runKicker();
 
         boolean atSpeed  = m_shooterSubsystem.isShooterAtSpeed(m_targetShooterRPM);
         boolean timedOut = m_spinUpTimer.hasElapsed(ShooterConstants.kShooterSpinUpTimeoutSeconds);
@@ -152,11 +151,20 @@ public class AutoShootCommand extends Command {
 
         // Feed only when aimed at hub AND shooter at speed (or timed out as fallback)
         if ((atHeading || timedOut) && (atSpeed || timedOut)) {
-            m_shooterSubsystem.runAgitator();
-            if (!m_feeding) {
-                m_feedTimer.restart();
-                m_feeding = true;
+            // Flywheels ready — run kicker forward to feed
+            m_shooterSubsystem.runKicker();
+            // Only run the agitator once the kicker is actually spinning up to feeding speed,
+            // so the ball isn't pushed in before the kicker can grip and carry it
+            if (m_shooterSubsystem.isKickerFeeding()) {
+                m_shooterSubsystem.runAgitator();
+                if (!m_feeding) {
+                    m_feedTimer.restart();
+                    m_feeding = true;
+                }
             }
+        } else {
+            // Still spinning up — hold kicker in slow reverse to prevent pre-loading
+            m_shooterSubsystem.runKickerSlowReverse();
         }
     }
 
