@@ -97,15 +97,15 @@ public class TeleopDriveCommand extends Command {
         double rawRot = m_rotation.getAsDouble();
 
         double xSpeedMPS = m_xLimiter.calculate(
-                blendedCubicInput(MathUtil.applyDeadband(rawX, SwerveConstants.kDeadband)))
+                squaredInput(MathUtil.applyDeadband(rawX, SwerveConstants.kDeadband)))
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
             * xSpeedMultiplier;
         double ySpeedMPS = m_yLimiter.calculate(
-                blendedCubicInput(MathUtil.applyDeadband(rawY, SwerveConstants.kDeadband)))
+                squaredInput(MathUtil.applyDeadband(rawY, SwerveConstants.kDeadband)))
             * SwerveConstants.kMaxDriveSpeedMetersPerSecond * SwerveConstants.kTeleopMaxDriveSpeed
             * speedMultiplier;
         double rotRadPerSec = m_rotLimiter.calculate(
-                blendedCubicInput(MathUtil.applyDeadband(rawRot, SwerveConstants.kDeadband)))
+                squaredInput(MathUtil.applyDeadband(rawRot, SwerveConstants.kDeadband)))
             * SwerveConstants.kMaxAngularVelocityRadiansPerSecond * SwerveConstants.kTeleopMaxAngularSpeed
             * speedMultiplier;
 
@@ -124,25 +124,18 @@ public class TeleopDriveCommand extends Command {
     }
 
     /**
-     * Applies a blended linear + cubic input curve to the joystick value.
+     * Squares the magnitude of the joystick input while preserving sign.
      * <p>
-     * Formula: {@code output = blend * x + (1 - blend) * x³}
+     * Formula: {@code output = input * |input|}
      * <p>
-     * At full deflection (±1.0) the output is always ±1.0 regardless of blend.
-     * Near center, the cubic term reduces sensitivity for finer low-speed control
-     * while still allowing full speed at full stick deflection.
-     * <p>
-     * The blend factor is configured via {@link SwerveConstants#kInputCurveLinearBlend}.
+     * At full deflection (±1.0) the output is always ±1.0.
+     * Near center, sensitivity is reduced for finer low-speed control.
      *
      * @param input Deadband-applied joystick value in [−1, 1]
      * @return Shaped output in [−1, 1]
      */
-    private double blendedCubicInput(double input) {
-        double blend = SwerveConstants.kInputCurveLinearBlend;
-        // NOTE: With kInputCurveLinearBlend = 1.0 this is intentionally a no-op
-        // (reduces to `return input`). The cubic term is kept for future tuning —
-        // lower the blend value toward 0.0 to re-enable sensitivity reduction near center.
-        return blend * input + (1.0 - blend) * (input * input * input);
+    private double squaredInput(double input) {
+        return input * Math.abs(input);
     }
 
     @Override

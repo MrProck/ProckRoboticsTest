@@ -291,9 +291,15 @@ public class VisionSubsystem extends SubsystemBase {
             return;
         }
 
-        int[] hubTagIds = (alliance.get() == DriverStation.Alliance.Red)
-            ? kRedHubTagIds
-            : kBlueHubTagIds;
+        boolean isRed = alliance.get() == DriverStation.Alliance.Red;
+        int[] hubTagIds = isRed ? kRedHubTagIds : kBlueHubTagIds;
+
+        // Distance from the visible tag face to the hub center.
+        // The trig formula measures distance to the tag, but the shooter table is
+        // calibrated to hub-center distance, so we add this offset to the raw result.
+        double tagToCenterOffset = isRed
+            ? VisionConstants.kRedHubTagToCenterMeters
+            : VisionConstants.kBlueHubTagToCenterMeters;
 
         LimelightHelpers.RawFiducial[] fiducials =
             LimelightHelpers.getRawFiducials(m_limelightName);
@@ -323,7 +329,9 @@ public class VisionSubsystem extends SubsystemBase {
                     double totalAngleRad = Math.toRadians(totalAngleDeg);
 
                     if (totalAngleRad > 0.01) { // guard against divide-by-zero / negative angles
-                        double dist = heightDelta / Math.tan(totalAngleRad);
+                        // Add the tag-to-center offset so the distance is to the hub center,
+                        // matching the distances in the shooter interpolation table.
+                        double dist = (heightDelta / Math.tan(totalAngleRad)) + tagToCenterOffset;
                         totalDist += dist;
                         hubTagCount++;
                         if (seenIds.length() > 0) seenIds.append(",");

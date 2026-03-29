@@ -356,6 +356,19 @@ public final class Constants {
          *   d = (kHubTagHeightMeters - kCameraUpOffsetMeters) / tan(kCameraPitchDegrees + ty)
          */
         public static final double kHubTagHeightMeters = 1.12395;
+
+        /**
+         * Distance from the outward-facing hub AprilTag to the hub center (meters).
+         * The trig formula measures distance to the tag face, but the shooter table is
+         * calibrated to hub-center distance, so this offset is added to the raw trig result.
+         *
+         * From the 2026-rebuilt-welded.json field layout:
+         *   Blue: tags 25/26 at X≈4.022, hub center at X≈4.876  → offset = +0.854 m
+         *   Red:  tags  9/10 at X≈12.519, hub center at X≈11.916 → offset = +0.603 m
+         * (Both are positive because the tag is between the robot and the hub center.)
+         */
+        public static final double kBlueHubTagToCenterMeters = 0.854;
+        public static final double kRedHubTagToCenterMeters  = 0.603;
     }
 
     /**
