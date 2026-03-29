@@ -126,7 +126,7 @@ public final class Constants {
          * 1.0 = pure linear (no curve)
          * 0.15 is a good starting point: smooth near zero, full speed at full stick.
          */
-        public static final double kInputCurveLinearBlend = 1.0;  // fully linear: joystick doesn't reach 1.0 so cubic hurts top speed
+        public static final double kInputCurveLinearBlend = 0.0;  // pure cubic (x³): gentle near center, full speed at full deflection
 
         /**
          * When true, the Pigeon 2 yaw is negated before being used as the robot heading.

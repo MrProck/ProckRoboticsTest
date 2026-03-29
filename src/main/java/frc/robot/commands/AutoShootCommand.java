@@ -39,7 +39,8 @@ public class AutoShootCommand extends Command {
 
     private double  m_targetShooterRPM;
     private double  m_targetPreShooterRPM;
-    private boolean m_feeding = false;
+    private boolean m_feeding    = false;
+    private boolean m_rpmLocked  = false;  // true once a valid tag distance has been used to set RPM
 
     public AutoShootCommand(
             DriveSubsystem driveSubsystem,
@@ -68,34 +69,17 @@ public class AutoShootCommand extends Command {
         m_spinUpTimer.restart();
         m_feedTimer.stop();
         m_feedTimer.reset();
-        m_feeding = false;
+        m_feeding   = false;
+        m_rpmLocked = false;
 
-        // Lock in RPM at the moment we start.
-        // Use ONLY the direct Limelight tag distance (tags 9/10 for Red, 25/26 for Blue).
-        // The odometry-based distance is intentionally NOT used as a fallback because
-        // pose-estimator drift can make it read far when the robot is actually close.
-        // If no hub tags are visible, fall back to the table's fallback RPM.
-        double directDistance = m_visionSubsystem.getDirectDistanceToHub();
-        double distanceMeters;
-
-        if (directDistance > 0) {
-            distanceMeters = directDistance;
-            SmartDashboard.putString("AutoShoot/Distance Source", "Direct Tag");
-        } else {
-            distanceMeters = -1.0;
-            SmartDashboard.putString("AutoShoot/Distance Source", "No Tag – Fallback RPM");
-        }
-
-        if (distanceMeters > 0) {
-            m_targetShooterRPM = ShooterInterpolation.getShooterRPM(distanceMeters);
-        } else {
-            m_targetShooterRPM = ShooterTableConstants.kFallbackShooterRPM;
-        }
-        // Pre-shooter always runs at full speed regardless of distance
+        // Start with fallback RPM so flywheels begin spinning immediately.
+        // The RPM will be updated in execute() as soon as a valid tag distance is seen.
+        m_targetShooterRPM    = ShooterTableConstants.kFallbackShooterRPM;
         m_targetPreShooterRPM = ShooterConstants.kPreShooterForwardRPM;
 
-        SmartDashboard.putNumber("AutoShoot/Distance At Shot",      distanceMeters);
-        SmartDashboard.putNumber("AutoShoot/Direct Distance",        directDistance);
+        SmartDashboard.putString("AutoShoot/Distance Source",      "Waiting for tag...");
+        SmartDashboard.putNumber("AutoShoot/Distance At Shot",     -1.0);
+        SmartDashboard.putNumber("AutoShoot/Direct Distance",      -1.0);
         SmartDashboard.putNumber("AutoShoot/Target Shooter RPM",    m_targetShooterRPM);
         SmartDashboard.putNumber("AutoShoot/Target PreShooter RPM", m_targetPreShooterRPM);
 
@@ -107,6 +91,26 @@ public class AutoShootCommand extends Command {
 
     @Override
     public void execute() {
+        // --- Distance-based RPM update ---
+        // Keep re-checking for a valid tag distance until one is found and locked in.
+        // This handles the common auto case where the robot arrives at the shoot position
+        // before the Limelight has acquired the hub tag.
+        if (!m_rpmLocked) {
+            double directDistance = m_visionSubsystem.getDirectDistanceToHub();
+            if (directDistance > 0) {
+                m_targetShooterRPM = ShooterInterpolation.getShooterRPM(directDistance);
+                m_rpmLocked = true;
+                m_spinUpTimer.restart();  // reset timeout so motors have a full 3s to reach the correct RPM
+                SmartDashboard.putString("AutoShoot/Distance Source",      "Direct Tag");
+                SmartDashboard.putNumber("AutoShoot/Distance At Shot",     directDistance);
+                SmartDashboard.putNumber("AutoShoot/Direct Distance",      directDistance);
+                SmartDashboard.putNumber("AutoShoot/Target Shooter RPM",   m_targetShooterRPM);
+            } else {
+                SmartDashboard.putString("AutoShoot/Distance Source",      "No Tag – Fallback RPM");
+                SmartDashboard.putNumber("AutoShoot/Direct Distance",      -1.0);
+            }
+        }
+
         // --- Hub-facing rotation (same logic as OrbitalDriveCommand) ---
         Translation2d hub = m_visionSubsystem.getHubTranslation();
         Pose2d robotPose = m_driveSubsystem.getPose();

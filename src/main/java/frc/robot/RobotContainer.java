@@ -241,17 +241,17 @@ public class RobotContainer {
         m_operatorController.a()
             .whileTrue(createManualShootCommand());
 
-        // D-pad Up — increase default shooter RPM by 50 (max 3200 RPM)
+        // D-pad Up — increase default shooter RPM by step (no subsystem requirement so it
+        // doesn't interrupt the running manual shoot command)
         m_operatorController.povUp().onTrue(
             new InstantCommand(
-                () -> m_shooterSubsystem.adjustDefaultRPM(ShooterConstants.kManualShootRPMStep),
-                m_shooterSubsystem));
+                () -> m_shooterSubsystem.adjustDefaultRPM(ShooterConstants.kManualShootRPMStep)));
 
-        // D-pad Down — decrease default shooter RPM by 50 (min 500 RPM)
+        // D-pad Down — decrease default shooter RPM by step (no subsystem requirement so it
+        // doesn't interrupt the running manual shoot command)
         m_operatorController.povDown().onTrue(
             new InstantCommand(
-                () -> m_shooterSubsystem.adjustDefaultRPM(-ShooterConstants.kManualShootRPMStep),
-                m_shooterSubsystem));
+                () -> m_shooterSubsystem.adjustDefaultRPM(-ShooterConstants.kManualShootRPMStep)));
     }
 
     /** Runs the intake roller and agitator together (used by both driver and operator triggers). */
@@ -305,17 +305,21 @@ public class RobotContainer {
             @Override
             public void initialize() {
                 m_timer.restart();
-                m_rpm = edu.wpi.first.wpilibj.Preferences.getDouble(
-                    "Shooter/Target RPM", ShooterConstants.kShooterForwardRPM);
                 // Start spinning up; hold kicker in slow reverse to prevent pre-loading
-                m_shooterSubsystem.runShooterAtRPM(m_rpm);
+                m_shooterSubsystem.runShooterAtRPM(
+                    edu.wpi.first.wpilibj.Preferences.getDouble(
+                        "Shooter/Target RPM", ShooterConstants.kShooterForwardRPM));
                 m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
                 m_shooterSubsystem.runKickerSlowReverse();
-                SmartDashboard.putNumber("Shooter/Manual Shot RPM", m_rpm);
             }
 
             @Override
             public void execute() {
+                // Re-read Preferences every cycle so D-pad adjustments apply immediately
+                m_rpm = edu.wpi.first.wpilibj.Preferences.getDouble(
+                    "Shooter/Target RPM", ShooterConstants.kShooterForwardRPM);
+                SmartDashboard.putNumber("Shooter/Manual Shot RPM", m_rpm);
+
                 // --- Spin-up ---
                 m_shooterSubsystem.runShooterAtRPM(m_rpm);
                 m_shooterSubsystem.runPreShooterAtRPM(ShooterConstants.kPreShooterForwardRPM);
