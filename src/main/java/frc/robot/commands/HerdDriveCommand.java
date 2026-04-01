@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.util.BrownoutProtection;
 
 import java.util.function.DoubleSupplier;
 
@@ -152,10 +153,17 @@ public class HerdDriveCommand extends Command {
             rotationRadPerSec = 0.0;
         }
 
+        // ---- Brownout protection: scale drive outputs when voltage drops ----
+        double brownoutScale = BrownoutProtection.getCurrentLimitScale();
+        xSpeedMPS *= brownoutScale;
+        ySpeedMPS *= brownoutScale;
+        rotationRadPerSec *= brownoutScale;
+
         m_driveSubsystem.drive(xSpeedMPS, ySpeedMPS, rotationRadPerSec, true);
 
         // ---- Telemetry ----
         SmartDashboard.putString("Herd/Mode", m_mode.name());
+        SmartDashboard.putNumber("Herd/BrownoutScale", brownoutScale);
         SmartDashboard.putNumber("Herd/DesiredHeading", desiredHeadingDeg);
         SmartDashboard.putBoolean("Herd/Stationary", stationaryLongEnough);
     }
