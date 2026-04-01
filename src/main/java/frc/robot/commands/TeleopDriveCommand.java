@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.util.AsymmetricSlewRateLimiter;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -40,7 +41,11 @@ public class TeleopDriveCommand extends Command {
 
     // Slew rate limiters smooth acceleration on each axis independently.
     // Rate is in normalized units/second (input is −1 to 1 before scaling).
-    private final SlewRateLimiter m_xLimiter   = new SlewRateLimiter(SwerveConstants.kTeleopSlewRatePerSecond);
+    // X-axis uses asymmetric rates: faster acceleration, slower deceleration
+    // to prevent tipping on the narrow 12.5" front-to-back wheelbase.
+    private final AsymmetricSlewRateLimiter m_xLimiter = new AsymmetricSlewRateLimiter(
+        SwerveConstants.kTeleopSlewRatePerSecond,
+        SwerveConstants.kTeleopXDecelSlewRatePerSecond);
     private final SlewRateLimiter m_yLimiter   = new SlewRateLimiter(SwerveConstants.kTeleopSlewRatePerSecond);
     private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(SwerveConstants.kTeleopSlewRatePerSecond);
 
@@ -78,6 +83,7 @@ public class TeleopDriveCommand extends Command {
     @Override
     public void initialize() {
         m_throttleXLimiter.reset(0.0);
+        m_xLimiter.reset(0.0);
     }
 
     @Override
