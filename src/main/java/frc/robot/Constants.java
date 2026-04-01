@@ -120,6 +120,15 @@ public final class Constants {
         public static final double kThrottleXSlewRatePerSecond = 3.0;
 
         /**
+         * Deceleration slew rate for the X-axis (forward/backward) in TeleopDriveCommand.
+         * Limits how fast the commanded X speed can decrease per second, preventing
+         * tipping on the narrow 12.5" wheelbase during hard braking.
+         * At 2.0: full speed to stop takes ~500ms. At 1.5: ~667ms.
+         * Only affects the X-axis — Y-axis and rotation use the symmetric rate.
+         */
+        public static final double kTeleopXDecelSlewRatePerSecond = 2.0;
+
+        /**
          * Linear blend fraction for the input curve in TeleopDriveCommand.
          * Output = linearBlend * x + (1 - linearBlend) * x³
          * 0.0 = pure cubic (max sensitivity reduction near center)

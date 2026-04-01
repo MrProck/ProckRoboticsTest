@@ -6,6 +6,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.util.AsymmetricSlewRateLimiter;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.util.BrownoutProtection;
@@ -42,7 +43,11 @@ public class HerdDriveCommand extends Command {
     private final Mode m_mode;
 
     private final PIDController m_headingPID;
-    private final SlewRateLimiter m_xLimiter = new SlewRateLimiter(SwerveConstants.kTeleopSlewRatePerSecond);
+    // X-axis uses asymmetric rates: faster acceleration, slower deceleration
+    // to prevent tipping on the narrow 12.5" front-to-back wheelbase.
+    private final AsymmetricSlewRateLimiter m_xLimiter = new AsymmetricSlewRateLimiter(
+        SwerveConstants.kTeleopSlewRatePerSecond,
+        SwerveConstants.kTeleopXDecelSlewRatePerSecond);
     private final SlewRateLimiter m_yLimiter = new SlewRateLimiter(SwerveConstants.kTeleopSlewRatePerSecond);
     private final SlewRateLimiter m_throttleXLimiter = new SlewRateLimiter(SwerveConstants.kThrottleXSlewRatePerSecond);
 
@@ -94,6 +99,7 @@ public class HerdDriveCommand extends Command {
         m_headingPID.reset();
         m_stationaryTimer.restart();
         m_throttleXLimiter.reset(0.0);
+        m_xLimiter.reset(0.0);
     }
 
     @Override
