@@ -287,7 +287,7 @@ public final class Constants {
         public static final double kManualShootMinRPM    = 500.0;
 
         /** Maximum RPM allowed via manual D-pad adjustment (operator cap). */
-        public static final double kManualShootMaxRPM    = 3200.0;
+        public static final double kManualShootMaxRPM    = 3600.0;
     }
 
     /**
@@ -505,21 +505,29 @@ public final class Constants {
          * Interpolation table: each row is { distanceMeters, shooterRPM, preShooterRPM }.
          * Distances are in meters from the hub CENTER to the robot center.
          *
-         * Tuned shooter RPM values (measured from hub edge, converted to hub center distance):
-         *   3 ft from edge  (1.524 m from center) → 2600 RPM
-         *   4 ft from edge  (1.829 m from center) → 2700 RPM
-         *   5 ft from edge  (2.134 m from center) → 2725 RPM
-         *   7'8" from edge  (2.946 m from center) → 3150 RPM
+         * Tuned shooter RPM values (measured on robot, distances are to hub center):
+         *   1.8 m → 2680 RPM
+         *   2.0 m → 2720 RPM
+         *   2.5 m → 2920 RPM
+         *   2.8 m → 2960 RPM
+         *   2.95 m → 3050 RPM
+         *   3.0 m → 3160 RPM
+         *   3.5 m → 3180 RPM
+         *   4.0 m → 3250 RPM
          *
          * Pre-shooter RPM values are not yet tuned — set equal to shooter RPM as a starting point.
          * *** PRE-SHOOTER RPM VALUES ARE PLACEHOLDERS — TUNE ON THE ACTUAL ROBOT ***
          */
         public static final double[][] kShooterTable = {
             // dist from hub center (m)   shooterRPM  preShooterRPM
-            {  1.524,                      2600.0,     2600.0 },  // 3 ft from hub edge
-            {  1.829,                      2700.0,     2700.0 },  // 4 ft from hub edge
-            {  2.134,                      2725.0,     2725.0 },  // 5 ft from hub edge
-            {  2.946,                      3150.0,     3150.0 },  // 7 ft 8 in from hub edge
+            {  1.8,                        2680.0,     2680.0 },
+            {  2.0,                        2720.0,     2720.0 },
+            {  2.5,                        2920.0,     2920.0 },
+            {  2.8,                        2960.0,     2960.0 },
+            {  2.95,                       3050.0,     3050.0 },
+            {  3.0,                        3160.0,     3160.0 },
+            {  3.5,                        3180.0,     3180.0 },
+            {  4.0,                        3250.0,     3250.0 },
         };
 
         /** Column index for distance in kShooterTable. */
@@ -531,9 +539,9 @@ public final class Constants {
 
         /**
          * Fallback shooter RPM used when no vision target is available.
-         * Should match a mid-range shot — tune to your most common shooting distance.
+         * Matches the 3.0 m table entry — a typical mid-field shooting distance.
          */
-        public static final double kFallbackShooterRPM    = 3150.0;
+        public static final double kFallbackShooterRPM    = 3160.0;
         public static final double kFallbackPreShooterRPM = ShooterConstants.kPreShooterForwardRPM;
     }
 }

@@ -67,6 +67,7 @@ class ShootCommandTest {
     @Test
     void executeStartsFeedingOnceShooterAtSpeed() {
         when(m_shooter.isShooterAtSpeed(anyDouble())).thenReturn(true);
+        when(m_shooter.isKickerFeeding()).thenReturn(true);
 
         m_command.initialize();
         m_command.execute();
@@ -84,15 +85,13 @@ class ShootCommandTest {
 
     @Test
     void initializeUsesInterpolatedRPMWhenDistanceIsValid() {
-        when(m_vision.getDistanceToHub()).thenReturn(2.5);
+        when(m_vision.getDirectDistanceToHub()).thenReturn(2.5);
 
         m_command.initialize();
 
-        // With distance 2.5 m the interpolation table yields:
-        //   t = (2.5 - 2.134) / (2.946 - 2.134) ≈ 0.4507
-        //   RPM = 2725 + t * (3150 - 2725) ≈ 2916.56
-        double expectedRPM = 2725.0
-                + (2.5 - 2.134) / (2.946 - 2.134) * (3150.0 - 2725.0);
+        // With distance 2.5 m the new interpolation table yields exactly 2920 RPM
+        // (2.5 m is a direct breakpoint in the table — no interpolation needed).
+        double expectedRPM = 2920.0;
         verify(m_shooter).runShooterAtRPM(org.mockito.AdditionalMatchers.eq(expectedRPM, 0.01));
         // Pre-shooter always runs at 5000 RPM regardless of distance
         verify(m_shooter).runPreShooterAtRPM(5000.0);

@@ -120,6 +120,7 @@ public class TeleopDriveCommand extends Command {
 
         boolean fieldRelative = !m_robotCentric.getAsBoolean();
         SmartDashboard.putBoolean("Drive/Robot Centric", !fieldRelative);
+        SmartDashboard.putString("Drive/Drive Mode", fieldRelative ? "Field Centric" : "Robot Centric");
         m_driveSubsystem.drive(xSpeedMPS, ySpeedMPS, rotRadPerSec, fieldRelative);
     }
 

@@ -121,7 +121,11 @@ public class AutoShootCommand extends Command {
 
         // Negate to get the direction from robot toward hub
         double desiredHeadingDeg = Math.toDegrees(Math.atan2(-dy, -dx));
-        double currentHeadingDeg = m_driveSubsystem.getHeading().getDegrees();
+        // Use the pose-estimated heading (not raw gyro) so the heading is correct
+        // after PathPlanner resets the robot pose at the start of autonomous.
+        // getHeading() returns the raw Pigeon yaw (zeroed at startup) and does NOT
+        // reflect the field-centric rotation set by PathPlanner's odometry reset.
+        double currentHeadingDeg = m_driveSubsystem.getPose().getRotation().getDegrees();
 
         // PID operates in degrees; output is proportional to degree-error
         double rawRotationDeg = m_headingPID.calculate(currentHeadingDeg, desiredHeadingDeg);
