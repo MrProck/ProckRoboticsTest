@@ -305,25 +305,28 @@ public class ShooterSubsystem extends SubsystemBase {
     /**
      * Returns true if both shooter flywheel motors are within the tolerance
      * window of the dashboard-tunable target RPM.
+     * Tolerance is {@link ShooterConstants#kShooterSpeedToleranceFraction} × target RPM (17%).
      */
     public boolean isShooterAtSpeed() {
         double targetRPM = Preferences.getDouble(kShooterRPMKey, ShooterConstants.kShooterForwardRPM);
+        double tolerance = targetRPM * ShooterConstants.kShooterSpeedToleranceFraction;
         double primaryVelocity = m_shooterPrimaryMotor.getEncoder().getVelocity();
         double secondaryVelocity = m_shooterSecondaryMotor.getEncoder().getVelocity();
-        return Math.abs(primaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
-            && Math.abs(secondaryVelocity - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
+        return Math.abs(primaryVelocity - targetRPM) <= tolerance
+            && Math.abs(secondaryVelocity - targetRPM) <= tolerance;
     }
 
     /**
-     * Returns true if both shooter flywheel motors are within tolerance of the given target RPM.
+     * Returns true if both shooter flywheel motors are within 17% of the given target RPM.
      *
      * @param targetRPM The target RPM to check against.
      */
     public boolean isShooterAtSpeed(double targetRPM) {
+        double tolerance = targetRPM * ShooterConstants.kShooterSpeedToleranceFraction;
         double primary   = m_shooterPrimaryMotor.getEncoder().getVelocity();
         double secondary = m_shooterSecondaryMotor.getEncoder().getVelocity();
-        return Math.abs(primary   - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM
-            && Math.abs(secondary - targetRPM) <= ShooterConstants.kShooterSpeedToleranceRPM;
+        return Math.abs(primary   - targetRPM) <= tolerance
+            && Math.abs(secondary - targetRPM) <= tolerance;
     }
 
     /**

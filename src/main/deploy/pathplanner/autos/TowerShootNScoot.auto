@@ -19,6 +19,12 @@
         {
           "type": "named",
           "data": {
+            "name": "HopperExtend"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Shoot"
           }
         }

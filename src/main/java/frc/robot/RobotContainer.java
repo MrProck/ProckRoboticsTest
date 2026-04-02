@@ -46,7 +46,15 @@ public class RobotContainer {
         // These names must exactly match the command names used in PathPlanner auto files.
         NamedCommands.registerCommand("Shoot",
             new AutoShootCommand(m_driveSubsystem, m_shooterSubsystem, m_visionSubsystem)
-                .withTimeout(ShooterConstants.kShooterSpinUpTimeoutSeconds + 2.0));
+                .withTimeout(ShooterConstants.kShooterSpinUpTimeoutSeconds + ShooterConstants.kAutoFeedDurationSeconds + 2.0));
+
+        // Extends the hopper arm to the deployed position (192 motor rotations, capped by
+        // the SparkMax forward soft limit) and waits until isExtended() confirms arrival.
+        // Emergency timeout of 3 s prevents auto from hanging if the arm stalls or jams.
+        NamedCommands.registerCommand("HopperExtend",
+            new InstantCommand(m_intakeSubsystem::extend, m_intakeSubsystem)
+                .andThen(Commands.waitUntil(m_intakeSubsystem::isExtended)
+                    .withTimeout(3.0)));
 
         NamedCommands.registerCommand("IntakeIn",
             new RunCommand(() -> {

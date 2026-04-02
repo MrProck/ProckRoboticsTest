@@ -277,7 +277,9 @@ public final class Constants {
         public static final double kShooterFF            = 1.0 / 6784.0;  // NEO Vortex free speed
 
         // Shooter flywheel speed detection (used by ShootCommand to gate feeding)
-        public static final double kShooterSpeedToleranceRPM    = 1000.0;
+        // Tolerance is expressed as a fraction of target RPM (17% = 0.17).
+        // e.g. at 3000 RPM target the allowed window is ±510 RPM (2490–3510 RPM).
+        public static final double kShooterSpeedToleranceFraction = 0.17;
         public static final double kPreShooterSpeedToleranceRPM = 300.0;
 
         /** Pre-shooter RPM threshold at which the kicker begins feeding. */
@@ -287,7 +289,7 @@ public final class Constants {
         public static final double kShooterSpinUpTimeoutSeconds = 3.0;
 
         /** Minimum time (seconds) to keep feeding after the feed gate opens (auto only). */
-        public static final double kAutoFeedDurationSeconds = 0.5;
+        public static final double kAutoFeedDurationSeconds = 2.0;
 
         /** RPM increment/decrement per D-pad press for manual RPM adjustment. */
         public static final double kManualShootRPMStep   = 20.0;
