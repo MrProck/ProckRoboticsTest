@@ -177,8 +177,8 @@ public final class Constants {
         public static final double kExtensionFF = 0.0;
         /** Fully retracted position (rotations) — spring pulled back. */
         public static final double kExtensionRetractedPosition = -192.0;
-        /** Fully extended position (rotations) — spring let out. */
-        public static final double kExtensionExtendedPosition  =  192.0;
+        /** Fully extended position (rotations) — 80% of mechanical max (192 × 0.8 = 153.6). */
+        public static final double kExtensionExtendedPosition  =  153.6;
         /** Gear ratio between motor and extension output. */
         public static final double kExtensionGearRatio = 1.0; // Confirmed 1:1 gear ratio
         /** Conversion factor: output rotations per motor rotation. */
